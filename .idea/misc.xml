@@ -12,17 +12,20 @@
         <entry key="..\:/Git repos/Smarket/app/src/main/res/drawable/ic_launcher_background.xml" value="0.1703125" />
         <entry key="..\:/Git repos/Smarket/app/src/main/res/drawable/ic_notes_24.xml" value="0.1" />
         <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/activity_main.xml" value="0.264" />
+        <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/activity_settings.xml" value="0.25416666666666665" />
         <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/calendar_day_layout.xml" value="0.29737609329446063" />
         <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/calendar_day_legend.xml" value="0.23731884057971014" />
         <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/calendar_header.xml" value="0.13020833333333334" />
         <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/calendar_month_header_layout.xml" value="0.13020833333333334" />
+        <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/custom_preference_layout.xml" value="0.25416666666666665" />
         <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/example_5_calendar_day.xml" value="0.23731884057971014" />
         <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/example_5_calendar_header.xml" value="0.18885869565217392" />
         <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/example_5_event_item_view.xml" value="0.23731884057971014" />
         <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/example_5_fragment.xml" value="0.23731884057971014" />
         <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/navigation.xml" value="0.25416666666666665" />
         <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/settings_activity.xml" value="0.25416666666666665" />
-        <entry key="..\:/Git repos/Smarket/app/src/main/res/xml/root_preferences.xml" value="0.5449490268767377" />
+        <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/settings_layout.xml" value="0.13020833333333334" />
+        <entry key="..\:/Git repos/Smarket/app/src/main/res/xml/root_preferences.xml" value="0.25416666666666665" />
       </map>
     </option>
   </component>

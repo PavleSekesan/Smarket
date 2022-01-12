@@ -8,7 +8,7 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.children
-import androidx.core.view.size
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.kizitonwose.calendarview.CalendarView
 import com.kizitonwose.calendarview.model.CalendarDay
 import com.kizitonwose.calendarview.model.CalendarMonth
@@ -22,6 +22,10 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.*
+import android.content.Intent
+
+
+
 
 class DayViewContainer(view: View) : ViewContainer(view) {
     val textView = view.findViewById<TextView>(R.id.calendarDayText)
@@ -30,8 +34,6 @@ class DayViewContainer(view: View) : ViewContainer(view) {
     val text2 = view.findViewById<TextView>(R.id.calendarDayText2)
     val text3 = view.findViewById<TextView>(R.id.calendarDayText3)
 
-    // With ViewBinding
-    // val textView = CalendarDayLayoutBinding.bind(view).calendarDayText
 }
 class MonthViewContainer(view: View) : ViewContainer(view) {
     val legendLayout = view.findViewById<LinearLayout>(R.id.legendLayout)
@@ -40,10 +42,20 @@ data class Order(var date: LocalDate, var name: String, var deliveryID: Int)
 data class Delivery(var date: LocalDate, var color: String)
 
 class MainActivity : AppCompatActivity() {
+    private fun setupListeners()
+    {
+        val settingsFab = findViewById<FloatingActionButton>(R.id.fabSettings)
+        settingsFab.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setupListeners()
 
+        // Dummy data
         val orders = mutableListOf<Order>()
         orders.add(Order(LocalDate.of(2022,1,15), "Rižoto",0))
         orders.add(Order(LocalDate.of(2022,1,16), "Kinoa sa piletinom",0))
@@ -56,9 +68,8 @@ class MainActivity : AppCompatActivity() {
         deliveries.add(Delivery(LocalDate.of(2022, 1, 14),"#388E3C"))
         deliveries.add(Delivery(LocalDate.of(2022, 1, 16),"#EF6C00"))
 
-
-
         val calendarView = findViewById<CalendarView>(R.id.calendarView)
+        // Logic for showing calendar cells (days)
         calendarView.dayBinder = object : DayBinder<DayViewContainer> {
             // Called only when a new container is needed.
             override fun create(view: View) = DayViewContainer(view)
@@ -112,6 +123,7 @@ class MainActivity : AppCompatActivity() {
 
         val daysOfWeek = daysOfWeekFromLocale()
 
+        // Logic for showing the month header (MON, TUE, WED ... )
         calendarView.monthHeaderBinder = object :
             MonthHeaderFooterBinder<MonthViewContainer> {
             override fun create(view: View) = MonthViewContainer(view)
@@ -129,15 +141,19 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        // Logic for showing the large month and year header
         calendarView.monthScrollListener = {
             findViewById<TextView>(R.id.calendarYearText).text = it.yearMonth.year.toString()
             val monthTitleFormatter = DateTimeFormatter.ofPattern("MMMM")
             findViewById<TextView>(R.id.calendarMonthText).text = monthTitleFormatter.format(it.yearMonth)
         }
 
+        // Change cell size so cells are longer
         val daySize = calendarView.daySize
         calendarView.daySize = Size(daySize.width,250)
 
+        // Setup and show calendar
         val currentMonth = YearMonth.now()
         val firstMonth = currentMonth.minusMonths(10)
         val lastMonth = currentMonth.plusMonths(10)

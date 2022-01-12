@@ -1,0 +1,63 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <PreferenceCategory app:title="@string/personal_data_header">
+
+        <EditTextPreference
+            app:key="first_name"
+            app:title="@string/first_name"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="last_name"
+            app:title="@string/last_name"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="address"
+            app:title="@string/address"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="phone_number"
+            app:title="@string/phone_number"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/delivery_header">
+
+        <MultiSelectListPreference
+            android:entries="@array/test"
+            android:entryValues="@array/test_values"
+            android:key="time_selection_monday"
+            android:title="@string/monday_delivery_time" />
+
+        <MultiSelectListPreference
+            android:entries="@array/test"
+            android:entryValues="@array/test_values"
+            android:key="time_selection_tuesday"
+            android:title="@string/tuesday_delivery_time" />
+
+        <MultiSelectListPreference
+            android:entries="@array/test"
+            android:entryValues="@array/test_values"
+            android:key="time_selection_wednesday"
+            android:title="@string/wednesday_delivery_time" />
+
+        <MultiSelectListPreference
+            android:entries="@array/test"
+            android:entryValues="@array/test_values"
+            android:key="time_selection_thursday"
+            android:title="@string/thursday_delivery_time" />
+
+        <MultiSelectListPreference
+            android:entries="@array/test"
+            android:entryValues="@array/test_values"
+            android:key="time_selection_friday"
+            android:title="@string/friday_delivery_time" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

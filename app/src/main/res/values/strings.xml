@@ -1,19 +1,22 @@
 <resources>
     <string name="app_name">Smarket</string>
-    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="title_activity_settings">Podešavanja</string>
 
     <!-- Preference Titles -->
-    <string name="messages_header">Messages</string>
-    <string name="sync_header">Sync</string>
+    <string name="delivery_header">Podesavanja dostave</string>
+    <string name="personal_data_header">Licni Podaci</string>
 
-    <!-- Messages Preferences -->
-    <string name="signature_title">Your signature</string>
-    <string name="reply_title">Default reply action</string>
+    <!-- Personal Data Preferences -->
+    <string name="first_name">Ime</string>
+    <string name="last_name">Prezime</string>
+    <string name="address">Adresa</string>
+    <string name="phone_number">Broj telefona</string>
 
-    <!-- Sync Preferences -->
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
-    </string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <!-- Delivery preferences -->
+    <string name="monday_delivery_time">Vreme dostave (ponedeljak)</string>
+    <string name="tuesday_delivery_time">Vreme dostave (utorak)</string>
+    <string name="wednesday_delivery_time">Vreme dostave (sreda)</string>
+    <string name="thursday_delivery_time">Vreme dostave (četvrtak)</string>
+    <string name="friday_delivery_time">Vreme dostave (petak)</string>
+
 </resources>

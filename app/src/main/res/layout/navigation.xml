@@ -8,7 +8,7 @@
     app:layout_constraintStart_toStartOf="parent">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton1"
+        android:id="@+id/fabSettings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -25,7 +25,7 @@
         android:layout_marginBottom="8dp"
         android:clickable="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/floatingActionButton1"
+        app:layout_constraintLeft_toRightOf="@id/fabSettings"
         app:layout_constraintRight_toLeftOf="@id/floatingActionButton3"
         app:srcCompat="@drawable/ic_add_20" />
 
