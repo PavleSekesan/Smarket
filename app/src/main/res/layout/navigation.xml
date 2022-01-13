@@ -26,11 +26,11 @@
         android:clickable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/fabSettings"
-        app:layout_constraintRight_toLeftOf="@id/floatingActionButton3"
+        app:layout_constraintRight_toLeftOf="@id/fabFridge"
         app:srcCompat="@drawable/ic_add_20" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton3"
+        android:id="@+id/fabFridge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -47,7 +47,7 @@
         android:layout_marginBottom="8dp"
         android:clickable="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/floatingActionButton3"
+        app:layout_constraintLeft_toRightOf="@id/fabFridge"
         app:layout_constraintRight_toRightOf="parent"
         app:srcCompat="@drawable/ic_notes_24" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -49,6 +49,12 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
         }
+
+        val fridgeFab = findViewById<FloatingActionButton>(R.id.fabFridge)
+        fridgeFab.setOnClickListener {
+            val intent = Intent(this, FridgeActivity::class.java)
+            startActivity(intent)
+        }
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
