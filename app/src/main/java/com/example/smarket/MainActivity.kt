@@ -23,8 +23,10 @@ import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.*
 import android.content.Intent
-
-
+import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 
 class DayViewContainer(view: View) : ViewContainer(view) {
@@ -56,11 +58,17 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setupListeners()
 
+        val currentUser = Firebase.auth.currentUser
+        if (currentUser == null) {
+            val intent = Intent(this, SignInActivity::class.java)
+            startActivity(intent)
+        }
         // Dummy data
         val orders = mutableListOf<Order>()
         orders.add(Order(LocalDate.of(2022,1,15), "Rižoto",0))
