@@ -10,6 +10,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Smarket">
         <activity
+            android:name=".SignUpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SignInActivity"
+            android:exported="false" />
+        <activity
             android:name=".BundlesListActivity"
             android:exported="false" />
         <activity

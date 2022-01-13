@@ -19,4 +19,20 @@
     <string name="thursday_delivery_time">Vreme dostave (četvrtak)</string>
     <string name="friday_delivery_time">Vreme dostave (petak)</string>
 
+    <!-- Login screen strings -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Prijavite se</string>
+    <string name="action_sign_in_alt">Već imate nalog? Prijavite se.</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="action_sign_up">Napravite nalog</string>
+    <string name="hint_first_name">Ime</string>
+    <string name="hint_last_name">Prezime</string>
+    <string name="hint_address">Adresa</string>
+    <string name="hint_phone_number">Broj telefona</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+
 </resources>
