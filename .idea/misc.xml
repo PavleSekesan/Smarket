@@ -35,11 +35,14 @@
         <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/drawable/ic_launcher_background.xml" value="0.3828125" />
         <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/drawable/ic_notes_24.xml" value="0.3828125" />
         <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/drawable/ic_settings_20.xml" value="0.3828125" />
+        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/activity_bundles_list.xml" value="0.34148550724637683" />
         <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/activity_fridge.xml" value="0.34148550724637683" />
         <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/activity_main.xml" value="0.34148550724637683" />
         <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/activity_settings.xml" value="0.34148550724637683" />
+        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/bundle.xml" value="0.34148550724637683" />
         <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/fridge_item.xml" value="0.34148550724637683" />
         <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/navigation.xml" value="0.34148550724637683" />
+        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/recycler_view_item.xml" value="0.34148550724637683" />
       </map>
     </option>
   </component>
