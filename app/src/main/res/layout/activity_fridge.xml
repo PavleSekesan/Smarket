@@ -6,24 +6,23 @@
     android:layout_height="match_parent"
     tools:context=".FridgeActivity">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/bundlesRecyclerView"
-        android:layout_width="409dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginEnd="1dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchView" />
-
     <SearchView
         android:id="@+id/searchView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        app:layout_constraintBottom_toTopOf="@+id/bundlesRecyclerView"
-        app:layout_constraintEnd_toEndOf="@+id/bundlesRecyclerView"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragment_shoppingitems"
+        android:name="com.example.smarket.ShoppingItemsList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/searchView"
+        tools:layout="@layout/fragment_shopping_items_list" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

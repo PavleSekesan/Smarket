@@ -7,7 +7,7 @@
     tools:context=".SelectedBundleActivity">
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/bundleTitleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -16,4 +16,15 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragment_shoppingitems"
+        android:name="com.example.smarket.ShoppingItemsList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/bundleTitleTextView"
+        tools:layout="@layout/fragment_shopping_items_list" />
 </androidx.constraintlayout.widget.ConstraintLayout>
