@@ -1,5 +1,6 @@
 package com.example.smarket
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,13 +47,17 @@ class BundlesListAdapter(private var bundles: List<ShoppingBundle>) :
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
+        val context = viewHolder.itemView.context
         val bundle = bundles[position]
-        if (bundle != null)
-        {
-            viewHolder.bundleName.text = bundle.name
-            viewHolder.item1.text = bundle.items.getOrNull(0)?.name ?: ""
-            viewHolder.item2.text = bundle.items.getOrNull(1)?.name ?: ""
-            viewHolder.item3.text = bundle.items.getOrNull(2)?.name ?: ""
+        viewHolder.bundleName.text = bundle.name
+        viewHolder.item1.text = bundle.items.getOrNull(0)?.name ?: ""
+        viewHolder.item2.text = bundle.items.getOrNull(1)?.name ?: ""
+        viewHolder.item3.text = bundle.items.getOrNull(2)?.name ?: ""
+        viewHolder.itemView.setOnClickListener {
+            val intent = Intent(context, SelectedBundleActivity::class.java)
+            // Send data from clicked bundle to next screen
+            // todo
+            context.startActivity(intent)
         }
     }
 
