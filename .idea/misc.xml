@@ -26,29 +26,21 @@
         <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/settings_activity.xml" value="0.25416666666666665" />
         <entry key="..\:/Git repos/Smarket/app/src/main/res/layout/settings_layout.xml" value="0.13020833333333334" />
         <entry key="..\:/Git repos/Smarket/app/src/main/res/xml/root_preferences.xml" value="0.25416666666666665" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/drawable-v24/ic_chevron_left.xml" value="0.3828125" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/drawable-v24/ic_chevron_right.xml" value="0.3828125" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.3828125" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/drawable/calendar_day_border.xml" value="0.3828125" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/drawable/ic_add_20.xml" value="0.3828125" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/drawable/ic_kitchen_24.xml" value="0.3828125" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/drawable/ic_launcher_background.xml" value="0.3828125" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/drawable/ic_notes_24.xml" value="0.3828125" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/drawable/ic_settings_20.xml" value="0.3828125" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/activity_bundles_list.xml" value="0.34148550724637683" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/activity_fridge.xml" value="0.34148550724637683" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/activity_main.xml" value="0.34148550724637683" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/activity_settings.xml" value="0.34148550724637683" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/bundle.xml" value="0.34148550724637683" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/fridge_item.xml" value="0.34148550724637683" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/navigation.xml" value="0.34148550724637683" />
-        <entry key="..\:/Users/Pavle/StudioProjects/Smarket/app/src/main/res/layout/recycler_view_item.xml" value="0.34148550724637683" />
+        <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/drawable/ic_add_20.xml" value="0.22135416666666666" />
+        <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/drawable/ic_fire.xml" value="0.22135416666666666" />
+        <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/drawable/ic_qr_code_scanner_24.xml" value="0.22135416666666666" />
+        <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/drawable/outline_qr_code_scanner_24.xml" value="0.2171875" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout-w1240dp/activity_sign_in.xml" value="0.1318607764390897" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout-w936dp/activity_sign_in.xml" value="0.15390625" />
+        <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/activity_add_item.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/activity_barcode_scanner.xml" value="0.5" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/activity_main.xml" value="0.20520833333333333" />
+        <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/activity_quantity_selector.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/activity_settings.xml" value="0.276268115942029" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/activity_sign_in.xml" value="0.34954829742876997" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/activity_sign_up.xml" value="0.5" />
+        <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/navigation.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/search_item.xml" value="0.36666666666666664" />
       </map>
     </option>
   </component>

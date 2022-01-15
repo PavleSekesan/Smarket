@@ -15,11 +15,11 @@
         android:clickable="true"
         android:src="@drawable/ic_settings_20"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/floatingActionButton2"
+        app:layout_constraintEnd_toStartOf="@id/fabAddBundle"
         app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton2"
+        android:id="@+id/fabAddBundle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -36,7 +36,7 @@
         android:layout_marginBottom="8dp"
         android:clickable="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/floatingActionButton2"
+        app:layout_constraintLeft_toRightOf="@id/fabAddBundle"
         app:layout_constraintRight_toLeftOf="@id/fabBundles"
         app:srcCompat="@drawable/ic_kitchen_24" />
 

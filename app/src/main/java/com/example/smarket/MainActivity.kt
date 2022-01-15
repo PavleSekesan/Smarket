@@ -52,6 +52,12 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        val addBundleFab = findViewById<FloatingActionButton>(R.id.fabAddBundle)
+        addBundleFab.setOnClickListener {
+            val intent = Intent(this, AddItemActivity::class.java)
+            startActivity(intent)
+        }
+
         val fridgeFab = findViewById<FloatingActionButton>(R.id.fabFridge)
         fridgeFab.setOnClickListener {
             val intent = Intent(this, FridgeActivity::class.java)
