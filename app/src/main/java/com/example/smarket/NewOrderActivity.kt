@@ -19,7 +19,7 @@ class NewOrderActivity : BundleSelectionInterface, AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_order)
 
-        unselectedBundles = mutableListOf(ShoppingBundle("Rizoto sa pecurkama", listOf(ShoppingItem("Rizoto", 1, "kom."), ShoppingItem("pecurka", 1, "kom."))), ShoppingBundle("kuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuurac", listOf(ShoppingItem("kurac1", 2, "kom."), ShoppingItem("kurac2", 2, "kom."), ShoppingItem("kurac3", 5, "kom."))))
+        unselectedBundles = mutableListOf(ShoppingBundle("Rizoto sa pecurkama", listOf(ShoppingItem("Rizoto", "12345", 1, "kom."), ShoppingItem("pecurka", "12345", 1, "kom."))), ShoppingBundle("kuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuurac", listOf(ShoppingItem("kurac1", "12345", 2, "kom."), ShoppingItem("kurac2","12345", 2, "kom."), ShoppingItem("kurac3","12345", 5, "kom."))))
 
         val selectedBundlesList = findViewById<RecyclerView>(R.id.selectedBundlesRecyclerView)
         val unselectedBundlesList = findViewById<RecyclerView>(R.id.unselectedBundlesRecyclerView)
