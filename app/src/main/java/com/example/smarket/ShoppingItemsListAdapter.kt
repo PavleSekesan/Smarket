@@ -7,13 +7,12 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-
-class FridgeItem(val name: String, var quantity: Int, val measuringUnit: String) {
+class ShoppingItem(val name: String, var quantity: Int, val measuringUnit: String) {
 
 }
 
-class FridgeItemsAdapter(private var fridgeItems: List<FridgeItem>) :
-    RecyclerView.Adapter<FridgeItemsAdapter.ViewHolder>()  {
+class ShoppingItemsListAdapter(private var shoppingItems: List<ShoppingItem>) :
+    RecyclerView.Adapter<ShoppingItemsListAdapter.ViewHolder>()  {
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
@@ -39,7 +38,7 @@ class FridgeItemsAdapter(private var fridgeItems: List<FridgeItem>) :
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.fridge_item, viewGroup, false)
+            .inflate(R.layout.shopping_item, viewGroup, false)
 
         return ViewHolder(view)
     }
@@ -50,22 +49,19 @@ class FridgeItemsAdapter(private var fridgeItems: List<FridgeItem>) :
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         val context = viewHolder.itemView.context
-        val item = fridgeItems[position]
-        if (item != null)
-        {
-            viewHolder.itemName.text = item.name
-            viewHolder.quantity.text = item.quantity.toString()
-            viewHolder.measuringUnit.text = item.measuringUnit
-            /*viewHolder.add.setOnClickListener {
-                increaseItem(position)
-            }
-            viewHolder.subtract.setOnClickListener {
-                decreaseItem(position)
-            }*/
+        val item = shoppingItems[position]
+        viewHolder.itemName.text = item.name
+        viewHolder.quantity.text = item.quantity.toString()
+        viewHolder.measuringUnit.text = item.measuringUnit
+        /*viewHolder.add.setOnClickListener {
+            increaseItem(position)
         }
+        viewHolder.subtract.setOnClickListener {
+            decreaseItem(position)
+        }*/
     }
 
     // Return the size of your dataset (invoked by the layout manager)
-    override fun getItemCount() = fridgeItems.size
+    override fun getItemCount() = shoppingItems.size
 
 }

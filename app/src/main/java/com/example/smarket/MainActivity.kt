@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
         setupListeners()
 
         val currentUser = Firebase.auth.currentUser
-        if (currentUser == null) {
+        if (currentUser == null && false) {
             val intent = Intent(this, SignInActivity::class.java)
             startActivity(intent)
         }

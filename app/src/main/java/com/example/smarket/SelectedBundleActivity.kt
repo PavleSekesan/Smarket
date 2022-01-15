@@ -2,12 +2,10 @@ package com.example.smarket
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 
-class FridgeActivity : AppCompatActivity() {
+class SelectedBundleActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_fridge)
+        setContentView(R.layout.activity_selected_bundle)
     }
 }

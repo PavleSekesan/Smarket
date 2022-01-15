@@ -18,7 +18,7 @@ class SignInActivity : AppCompatActivity() {
 
     private fun updateUI(user: FirebaseUser?)
     {
-        if(user != null)
+        if(user != null || true)
         {
             val intent = Intent(this,MainActivity::class.java)
             startActivity(intent)

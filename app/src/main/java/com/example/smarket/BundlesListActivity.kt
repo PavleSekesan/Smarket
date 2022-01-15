@@ -3,7 +3,6 @@ package com.example.smarket
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 class BundlesListActivity : AppCompatActivity() {
@@ -12,7 +11,7 @@ class BundlesListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_bundles_list)
 
         val bundlesRecyclerView = findViewById<RecyclerView>(R.id.bundlesRecyclerView)
-        var bundles: List<ShoppingBundle> = listOf(ShoppingBundle("Rizoto sa pecurkama", listOf(FridgeItem("Rizoto", 1, "kom."), FridgeItem("pecurka", 1, "kom."))), ShoppingBundle("kuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuurac", listOf(FridgeItem("kurac1", 2, "kom."), FridgeItem("kurac2", 2, "kom."), FridgeItem("kurac3", 5, "kom."))))
+        var bundles: List<ShoppingBundle> = listOf(ShoppingBundle("Rizoto sa pecurkama", listOf(ShoppingItem("Rizoto", 1, "kom."), ShoppingItem("pecurka", 1, "kom."))), ShoppingBundle("kuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuurac", listOf(ShoppingItem("kurac1", 2, "kom."), ShoppingItem("kurac2", 2, "kom."), ShoppingItem("kurac3", 5, "kom."))))
         bundlesRecyclerView.adapter = BundlesListAdapter(bundles)
         bundlesRecyclerView.layoutManager = GridLayoutManager(this, 2)
     }
