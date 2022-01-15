@@ -41,7 +41,7 @@ class ShoppingItemsList : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val itemsRecyclerView : RecyclerView = view.findViewById(R.id.itemsRecyclerView)
-        var fridgeItems : List<ShoppingItem> = listOf(ShoppingItem("Duboko przeni kurac", 3, "kom."), ShoppingItem("Plitko kuvana picka", 2, "kg"))
+        var fridgeItems : MutableList<ShoppingItem> = mutableListOf(ShoppingItem("Duboko przeni kurac", "12345",3, "kom."), ShoppingItem("Plitko kuvana picka","12345", 2, "kg"))
         itemsRecyclerView.adapter = ShoppingItemsListAdapter(fridgeItems)
         itemsRecyclerView.layoutManager = LinearLayoutManager(view.context)
     }

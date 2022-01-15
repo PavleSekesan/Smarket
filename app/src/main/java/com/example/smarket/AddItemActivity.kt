@@ -20,10 +20,25 @@ class AddItemActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        findViewById<Button>(R.id.finishAddingItemsButton).setOnClickListener {
+            val intent = Intent(this, FridgeActivity::class.java)
+            startActivity(intent)
+        }
+
         val searchRecycler : RecyclerView = findViewById(R.id.searchResultList)
         val adapter = SearchItemsAdapter(emptyArray())
         searchRecycler.adapter = adapter
         searchRecycler.layoutManager = LinearLayoutManager(this)
+
+        val addedItemsRecycler = findViewById<RecyclerView>(R.id.addedItemsRecycler)
+        val adapter2 = ShoppingItemsListAdapter(mutableListOf())
+        addedItemsAdapter = adapter2
+        addedItemsRecycler.adapter = adapter2
+        addedItemsRecycler.layoutManager = LinearLayoutManager(this)
+
+        adapter.onSearchClicked = { itemId, itemName ->
+            adapter2.addItem(ShoppingItem(itemName,itemId,1,"kurac"))
+        }
 
         val productSearch: SearchView = findViewById(R.id.productSearchView)
         productSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -51,5 +66,9 @@ class AddItemActivity : AppCompatActivity() {
                 return true
             }
         })
+    }
+    companion object
+    {
+        lateinit var addedItemsAdapter: ShoppingItemsListAdapter
     }
 }

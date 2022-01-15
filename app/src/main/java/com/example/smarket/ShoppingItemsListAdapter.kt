@@ -7,11 +7,9 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ShoppingItem(val name: String, var quantity: Int, val measuringUnit: String) {
+data class ShoppingItem(val name: String, val id: String, var quantity: Int, val measuringUnit: String);
 
-}
-
-class ShoppingItemsListAdapter(private var shoppingItems: List<ShoppingItem>) :
+class ShoppingItemsListAdapter(private var shoppingItems: MutableList<ShoppingItem>) :
     RecyclerView.Adapter<ShoppingItemsListAdapter.ViewHolder>()  {
     /**
      * Provide a reference to the type of views that you are using
@@ -32,6 +30,11 @@ class ShoppingItemsListAdapter(private var shoppingItems: List<ShoppingItem>) :
             add = view.findViewById(R.id.addButton)
             subtract = view.findViewById(R.id.subtractButton)
         }
+    }
+
+    fun addItem(newItem: ShoppingItem ) {
+        shoppingItems.add(newItem)
+        super.notifyItemInserted(shoppingItems.size - 1)
     }
 
     // Create new views (invoked by the layout manager)

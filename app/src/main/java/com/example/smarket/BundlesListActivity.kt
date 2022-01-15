@@ -11,7 +11,7 @@ class BundlesListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_bundles_list)
 
         val bundlesRecyclerView = findViewById<RecyclerView>(R.id.bundlesRecyclerView)
-        var bundles: List<ShoppingBundle> = listOf(ShoppingBundle("Rizoto sa pecurkama", listOf(ShoppingItem("Rizoto", 1, "kom."), ShoppingItem("pecurka", 1, "kom."))), ShoppingBundle("kuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuurac", listOf(ShoppingItem("kurac1", 2, "kom."), ShoppingItem("kurac2", 2, "kom."), ShoppingItem("kurac3", 5, "kom."))))
+        var bundles: List<ShoppingBundle> = listOf(ShoppingBundle("Rizoto sa pecurkama", listOf(ShoppingItem("Rizoto", "12345", 1, "kom."), ShoppingItem("pecurka","12345", 1, "kom."))), ShoppingBundle("kuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuurac", listOf(ShoppingItem("kurac1","12345", 2, "kom."), ShoppingItem("kurac2","12345", 2, "kom."), ShoppingItem("kurac3","12345", 5, "kom."))))
         bundlesRecyclerView.adapter = BundlesListAdapter(bundles)
         bundlesRecyclerView.layoutManager = GridLayoutManager(this, 2)
     }

@@ -16,6 +16,8 @@ import java.util.concurrent.Executors
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -75,6 +77,8 @@ class BarcodeScannerActivity : AppCompatActivity() {
     {
         barcodeCountMap.clear()
         waitingForResponse = false
+
+        AddItemActivity.addedItemsAdapter.addItem(ShoppingItem(chosenItemName.toString(), chosenItemId.toString(),1,"kurac"))
 //        val intent = Intent(this, QuantitySelectorActivity::class.java)
 //        intent.putExtra("itemName", chosenItemName)
 //        intent.putExtra("itemId", chosenItemId)
@@ -100,6 +104,10 @@ class BarcodeScannerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_barcode_scanner)
+
+        val addedItemsRecycler = findViewById<RecyclerView>(R.id.addedItemsRecyclerBarcode)
+        addedItemsRecycler.adapter = AddItemActivity.addedItemsAdapter
+        addedItemsRecycler.layoutManager = LinearLayoutManager(this)
 
         // Request camera permissions
         if (allPermissionsGranted()) {

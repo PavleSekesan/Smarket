@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 class SearchItemsAdapter(private var dataSet: Array<Pair<String,Long>>) :
     RecyclerView.Adapter<SearchItemsAdapter.ViewHolder>() {
 
+    var onSearchClicked: (itemId:String, itemName:String) -> Unit = { s: String, s1: String -> }
+
     fun addItem(nameIdPair: Pair<String,Long>) {
         dataSet = dataSet.plus(nameIdPair)
         super.notifyItemInserted(dataSet.size - 1)
@@ -50,6 +52,9 @@ class SearchItemsAdapter(private var dataSet: Array<Pair<String,Long>>) :
         val context = viewHolder.itemView.context
         viewHolder.textView.text = dataSet[position].first
         viewHolder.itemView.setOnClickListener {
+            val itemName = viewHolder.textView.text.toString()
+            val itemId = dataSet[position].second.toString()
+            onSearchClicked(itemId, itemName)
             //Toast.makeText(viewHolder.itemView.context, viewHolder.textView.text.toString(), Toast.LENGTH_LONG).show()
 //            val intent = Intent(context, QuantitySelectorActivity::class.java)
 //            intent.putExtra("itemName", viewHolder.textView.text.toString())
