@@ -63,6 +63,12 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, BundlesListActivity::class.java)
             startActivity(intent)
         }
+
+        val newOrderFab = findViewById<FloatingActionButton>(R.id.fabNewOrder)
+        newOrderFab.setOnClickListener {
+            val intent = Intent(this, NewOrderActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
