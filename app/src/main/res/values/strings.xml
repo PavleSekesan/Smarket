@@ -37,4 +37,11 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    <!-- Add item strings -->
+    <string name="action_scan_barcode">Skenirajte bar-kod</string>
+    <string name="action_quick_add">Quick add?</string>
+    <string name="prompt_scan_barcode">Skenirajte bar-kod</string>
+    <string name="found_item">Pronađeni artikal: </string>
+    <string name="action_accept_scan">Prihvati</string>
+    <string name="action_decline_scan">Odbaci</string>
 </resources>
