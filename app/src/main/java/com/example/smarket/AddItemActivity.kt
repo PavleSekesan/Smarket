@@ -21,8 +21,8 @@ class AddItemActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.finishAddingItemsButton).setOnClickListener {
-            val intent = Intent(this, FridgeActivity::class.java)
-            startActivity(intent)
+            // TODO Add items to database
+            finish()
         }
 
         val searchRecycler : RecyclerView = findViewById(R.id.searchResultList)

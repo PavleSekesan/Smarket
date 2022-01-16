@@ -1,9 +1,11 @@
 package com.example.smarket
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class BundlesListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -14,5 +16,11 @@ class BundlesListActivity : AppCompatActivity() {
         var bundles: List<ShoppingBundle> = listOf(ShoppingBundle("Rizoto sa pecurkama", listOf(ShoppingItem("Rizoto", "12345", 1, "kom."), ShoppingItem("pecurka","12345", 1, "kom."))), ShoppingBundle("kuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuurac", listOf(ShoppingItem("kurac1","12345", 2, "kom."), ShoppingItem("kurac2","12345", 2, "kom."), ShoppingItem("kurac3","12345", 5, "kom."))))
         bundlesRecyclerView.adapter = BundlesListAdapter(bundles)
         bundlesRecyclerView.layoutManager = GridLayoutManager(this, 2)
+
+        val addBundleFab = findViewById<FloatingActionButton>(R.id.addBundleFab)
+        addBundleFab.setOnClickListener {
+            val intent = Intent(this, EditBundleActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
