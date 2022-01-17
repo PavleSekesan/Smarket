@@ -58,7 +58,6 @@ object UserData {
         }
     }
 
-
     //region Methods that get objects from the database
     private suspend fun productFromDoc(doc: DocumentSnapshot): Product
     {
@@ -254,6 +253,12 @@ object UserData {
         val newBundle = Bundle(bundle.id,bundle.name,bundle.items.plus(newItem))
         databaseItems[newBundle.id] = newBundle
         return newBundle
+    }
+
+    suspend fun addItemToBundle(bundleId: String, newItem: BundleItem) : Bundle
+    {
+        val bundle = databaseItems[bundleId]!! as Bundle
+        return addItemToBundle(bundle, newItem)
     }
 
     suspend fun addNewBundle(name: String): Bundle
