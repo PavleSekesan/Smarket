@@ -60,7 +60,7 @@ object UserData {
 
 
     //region Methods that get objects from the database
-    private suspend fun productFromDoc(doc: DocumentSnapshot): Product
+    fun productFromDoc(doc: DocumentSnapshot): Product
     {
         val id = doc.id
         val data = doc.data
@@ -71,7 +71,7 @@ object UserData {
         return Product(id,name,price,storeGivenId,barcode)
     }
 
-    private suspend fun bundleFromDocument(doc: DocumentSnapshot): Bundle
+    private suspend fun bundleFromDocument(doc: DocumentSnapshot): ShoppingBundle
     {
         val id = doc.id
         val data = doc.data
@@ -91,7 +91,7 @@ object UserData {
             itemsInBundle.add(BundleItem(itemId,measuringUnit,productFromDoc(productDoc),quantity))
         }
 
-        return Bundle(id, bundleName, itemsInBundle)
+        return ShoppingBundle(id, bundleName, itemsInBundle)
     }
 
     private suspend fun userOrderFromDocument(doc: DocumentSnapshot): UserOrder
@@ -103,7 +103,7 @@ object UserData {
         val daysToRepeat = (data["days_to_repeat"] as Double).toInt()
         val recurring = data["recurring"] as Boolean
 
-        val bundles = mutableListOf<Bundle>()
+        val bundles = mutableListOf<ShoppingBundle>()
         for(bundleRef in bundlesRefs)
         {
             bundles.add(bundleFromDocument(bundleRef.get().await()))
@@ -136,7 +136,7 @@ object UserData {
     //endregion
 
     //region Methods that get all objects of certain type from DB
-    suspend fun getAllBundles(): List<Bundle>
+    suspend fun getAllBundles(): List<ShoppingBundle>
     {
         if (!this::bundleIds.isInitialized)
         {
@@ -149,10 +149,10 @@ object UserData {
                 bundleIds.add(bundle.id)
             }
         }
-        val bundles = mutableListOf<Bundle>()
+        val bundles = mutableListOf<ShoppingBundle>()
         for(key in bundleIds)
         {
-            bundles.add(databaseItems[key] as Bundle)
+            bundles.add(databaseItems[key] as ShoppingBundle)
         }
         return bundles
     }
@@ -242,7 +242,7 @@ object UserData {
         return newFridgeItem
     }
 
-    suspend fun addItemToBundle(bundle: Bundle, newItem: BundleItem) : Bundle
+    suspend fun addItemToBundle(bundle: ShoppingBundle, newItem: BundleItem) : ShoppingBundle
     {
         val productRef = db.collection("Products").document(newItem.product.id)
         val data = hashMapOf(
@@ -251,19 +251,19 @@ object UserData {
             "quantity" to newItem.quantity
         )
         db.collection("UserData").document(auth.uid.toString()).collection("Bundles").document(bundle.id).collection("Products").add(data).await()
-        val newBundle = Bundle(bundle.id,bundle.name,bundle.items.plus(newItem))
+        val newBundle = ShoppingBundle(bundle.id,bundle.name,bundle.items.plus(newItem))
         databaseItems[newBundle.id] = newBundle
         return newBundle
     }
 
-    suspend fun addNewBundle(name: String): Bundle
+    suspend fun addNewBundle(name: String): ShoppingBundle
     {
 
         val data = hashMapOf(
             "name" to name
         )
         val id = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").add(data).await().id
-        val newBundle = Bundle(id,name,emptyList())
+        val newBundle = ShoppingBundle(id,name,emptyList())
         databaseItems[id] = newBundle
         return newBundle
     }
@@ -379,6 +379,6 @@ class Product(id: String, val name: String, val price: Double, val storeGivenId:
 abstract class QuantityItem(id: String, val measuringUnit: String, val product: Product, val quantity: Int) : DatabaseItem(id)
 class FridgeItem(id: String, measuringUnit: String, product: Product, quantity: Int) : QuantityItem(id, measuringUnit, product, quantity)
 class BundleItem(id: String, measuringUnit: String, product: Product, quantity: Int) : QuantityItem(id, measuringUnit, product, quantity)
-class Bundle(id: String, val name: String, val items: List<BundleItem>): DatabaseItem(id)
-class UserOrder(id: String, val bundles: List<Bundle>, val date: Date, val daysToRepeat: Int, val recurring: Boolean): DatabaseItem(id)
+class ShoppingBundle(id: String, val name: String, val items: List<BundleItem>): DatabaseItem(id)
+class UserOrder(id: String, val bundles: List<ShoppingBundle>, val date: Date, val daysToRepeat: Int, val recurring: Boolean): DatabaseItem(id)
 class Order(id: String, val date: Date, val userOrder: UserOrder, val status: String): DatabaseItem(id)

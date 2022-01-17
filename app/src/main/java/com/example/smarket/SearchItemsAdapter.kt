@@ -1,5 +1,6 @@
 package com.example.smarket
 
+import Product
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -8,18 +9,18 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 
-class SearchItemsAdapter(private var dataSet: Array<Pair<String,Long>>) :
+class SearchItemsAdapter(private var dataSet: MutableList<Product>) :
     RecyclerView.Adapter<SearchItemsAdapter.ViewHolder>() {
 
-    var onSearchClicked: (itemId:String, itemName:String) -> Unit = { s: String, s1: String -> }
+    var onSearchClicked: (product : Product) -> Unit = { p : Product -> }
 
-    fun addItem(nameIdPair: Pair<String,Long>) {
-        dataSet = dataSet.plus(nameIdPair)
+    fun addItem(product: Product) {
+        dataSet.add(product)
         super.notifyItemInserted(dataSet.size - 1)
     }
 
     fun clearItems() {
-        dataSet = emptyArray()
+        dataSet = mutableListOf()
         super.notifyDataSetChanged()
     }
     /**
@@ -50,16 +51,9 @@ class SearchItemsAdapter(private var dataSet: Array<Pair<String,Long>>) :
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         val context = viewHolder.itemView.context
-        viewHolder.textView.text = dataSet[position].first
+        viewHolder.textView.text = dataSet[position].name
         viewHolder.itemView.setOnClickListener {
-            val itemName = viewHolder.textView.text.toString()
-            val itemId = dataSet[position].second.toString()
-            onSearchClicked(itemId, itemName)
-            //Toast.makeText(viewHolder.itemView.context, viewHolder.textView.text.toString(), Toast.LENGTH_LONG).show()
-//            val intent = Intent(context, QuantitySelectorActivity::class.java)
-//            intent.putExtra("itemName", viewHolder.textView.text.toString())
-//            intent.putExtra("itemId", dataSet[position].second.toString())
-//            context.startActivity(intent)
+            onSearchClicked(dataSet[position])
         }
     }
 

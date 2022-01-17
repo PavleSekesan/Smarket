@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class BundlesListAdapter(private var bundles: List<ShoppingBundle>) :
+class BundlesListAdapter(private var bundles: MutableList<ShoppingBundle>) :
     RecyclerView.Adapter<BundlesListAdapter.ViewHolder>()  {
     /**
      * Provide a reference to the type of views that you are using
@@ -40,15 +40,14 @@ class BundlesListAdapter(private var bundles: List<ShoppingBundle>) :
 
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         val context = viewHolder.itemView.context
         val bundle = bundles[position]
         viewHolder.bundleName.text = bundle.name
-        viewHolder.item1.text = bundle.products.getOrNull(0)?.name ?: ""
-        viewHolder.item2.text = bundle.products.getOrNull(1)?.name ?: ""
-        viewHolder.item3.text = bundle.products.getOrNull(2)?.name ?: ""
+        viewHolder.item1.text = bundle.items.getOrNull(0)?.product?.name ?: ""
+        viewHolder.item2.text = bundle.items.getOrNull(1)?.product?.name ?: ""
+        viewHolder.item3.text = bundle.items.getOrNull(2)?.product?.name ?: ""
         viewHolder.itemView.setOnClickListener {
             val intent = Intent(context, SelectedBundleActivity::class.java)
             intent.putExtra("bundle_id", bundle.id)

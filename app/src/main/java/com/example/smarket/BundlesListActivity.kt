@@ -12,17 +12,17 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class BundlesListActivity : AppCompatActivity() {
-    lateinit var bundles : List<ShoppingBundle>
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bundles_list)
 
+        val bundlesRecyclerView = findViewById<RecyclerView>(R.id.bundlesRecyclerView)
         GlobalScope.launch {
-            bundles = UserData.getAllBundles()
-            val bundlesRecyclerView = findViewById<RecyclerView>(R.id.bundlesRecyclerView)
-            bundlesRecyclerView.adapter = BundlesListAdapter(bundles)
-            bundlesRecyclerView.layoutManager = GridLayoutManager(this@BundlesListActivity, 2)
+            val adapter = BundlesListAdapter(UserData.getAllBundles() as MutableList<ShoppingBundle>)
+            runOnUiThread {
+                bundlesRecyclerView.adapter = adapter
+                bundlesRecyclerView.layoutManager = GridLayoutManager(this@BundlesListActivity, 2)
+            }
         }
 
         val addBundleFab = findViewById<FloatingActionButton>(R.id.addBundleFab)

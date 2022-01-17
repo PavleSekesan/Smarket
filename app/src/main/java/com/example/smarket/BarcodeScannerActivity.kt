@@ -1,10 +1,9 @@
 package com.example.smarket
 
-import Product
+import BundleItem
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
 import android.view.View
@@ -25,7 +24,6 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import kotlinx.android.synthetic.main.activity_barcode_scanner.*
-import java.io.File
 import java.util.concurrent.ExecutorService
 
 typealias BarCodeListener = (barcode: String) -> Unit
@@ -79,7 +77,8 @@ class BarcodeScannerActivity : AppCompatActivity() {
         barcodeCountMap.clear()
         waitingForResponse = false
 
-        AddItemActivity.addedItemsAdapter.addItem(Product(chosenItemName.toString(), 420.00, chosenItemId.toString(),"kurac"))
+        // FIXME Add items
+        //AddItemActivity.addedItemsAdapter.addItem(BundleItem(chosenItemName.toString(), 420.00, chosenItemId.toString(),"kurac"))
 //        val intent = Intent(this, QuantitySelectorActivity::class.java)
 //        intent.putExtra("itemName", chosenItemName)
 //        intent.putExtra("itemId", chosenItemId)

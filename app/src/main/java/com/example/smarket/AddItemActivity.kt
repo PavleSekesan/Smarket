@@ -1,6 +1,6 @@
 package com.example.smarket
 
-import Product
+import BundleItem
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,6 +10,9 @@ import android.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.initialize
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class AddItemActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,13 +25,12 @@ class AddItemActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.finishAddingItemsButton).setOnClickListener {
-            // TODO Add items to database
             finish()
         }
 
         val searchRecycler : RecyclerView = findViewById(R.id.searchResultList)
-        val adapter = SearchItemsAdapter(emptyArray())
-        searchRecycler.adapter = adapter
+        val searchAdapter = SearchItemsAdapter(mutableListOf())
+        searchRecycler.adapter = searchAdapter
         searchRecycler.layoutManager = LinearLayoutManager(this)
 
         val addedItemsRecycler = findViewById<RecyclerView>(R.id.addedItemsRecycler)
@@ -37,8 +39,8 @@ class AddItemActivity : AppCompatActivity() {
         addedItemsRecycler.adapter = adapter2
         addedItemsRecycler.layoutManager = LinearLayoutManager(this)
 
-        adapter.onSearchClicked = { itemId, itemName ->
-            adapter2.addItem(Product(itemName,420.00,itemId,"kurac"))
+        searchAdapter.onSearchClicked = { product ->
+            // TODO Add product to database and recyclerview
         }
 
         val productSearch: SearchView = findViewById(R.id.productSearchView)
@@ -51,10 +53,10 @@ class AddItemActivity : AppCompatActivity() {
 
                 docRef.get()
                     .addOnSuccessListener { documents ->
-                        adapter.clearItems()
+                        searchAdapter.clearItems()
                         for (document in documents) {
-                            val nameIdPair = Pair(document.data["name"] as String, (document.data["id"] as String).toLong())
-                            adapter.addItem(nameIdPair)
+                            val prod = UserData.productFromDoc(document)
+                            searchAdapter.addItem(prod)
                         }
                     }
                     .addOnFailureListener { exception ->

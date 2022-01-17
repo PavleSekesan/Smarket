@@ -1,7 +1,6 @@
 package com.example.smarket
 
-import Product
-import ShoppingBundle
+import BundleItem
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -13,9 +12,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class SelectedBundleActivity : AppCompatActivity() {
-    private lateinit var bundle : ShoppingBundle
-    private var bundleItems = mutableListOf<Product>()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_selected_bundle)
@@ -33,8 +29,8 @@ class SelectedBundleActivity : AppCompatActivity() {
         val bundleTitleTextView = findViewById<TextView>(R.id.bundleTitleTextView)
 
         GlobalScope.launch {
-            bundle = UserData.getAllBundles().find{ it.id == bundleId }!!
-            bundleItems = bundle.products as MutableList<Product>
+            val bundle = UserData.getAllBundles().find{ it.id == bundleId }!!
+            val bundleItems = bundle.items as MutableList<BundleItem>
 
             bundleTitleTextView.text = bundle.name
             bundleItemsRecyclerView.adapter = ShoppingItemsListAdapter(bundleItems)
