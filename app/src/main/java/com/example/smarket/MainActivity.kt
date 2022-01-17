@@ -1,5 +1,6 @@
 package com.example.smarket
 
+import UserData
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -26,7 +27,10 @@ import android.content.Intent
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.auth.User
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 class DayViewContainer(view: View) : ViewContainer(view) {
@@ -71,13 +75,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setupListeners()
+        GlobalScope.launch {
+            val bundles = UserData.getAllBundles()
+            for (bundle in bundles)
+            {
+                Log.d("Bandlovi", bundle.name)
+            }
+        }
+        Log.d("ja","ja")
 
         val currentUser = Firebase.auth.currentUser
-        if (currentUser == null && false) {
+        if (currentUser == null) {
             val intent = Intent(this, SignInActivity::class.java)
             startActivity(intent)
         }
@@ -100,6 +113,34 @@ class MainActivity : AppCompatActivity() {
             // Called only when a new container is needed.
             override fun create(view: View) = DayViewContainer(view)
 
+
+            private fun displayOrdersOnDay(ordersOnCurrentDay: List<Order>, textFields: List<TextView>)
+            {
+                for (textField in textFields)
+                {
+                    textField.text = ""
+                }
+                if (ordersOnCurrentDay.size > textFields.size)
+                {
+                    for(i in 0 .. textFields.size - 2)
+                    {
+                        textFields[i].text = ordersOnCurrentDay[i].name
+                        val deliveryColor = deliveries[ordersOnCurrentDay[i].deliveryID].color
+                        textFields[i].setTextColor(Color.parseColor(deliveryColor))
+                    }
+                    textFields.last().text = "..."
+                }
+                else
+                {
+                    for(i in ordersOnCurrentDay.indices)
+                    {
+                        textFields[i].text = ordersOnCurrentDay[i].name
+                        val deliveryColor = deliveries[ordersOnCurrentDay[i].deliveryID].color
+                        textFields[i].setTextColor(Color.parseColor(deliveryColor))
+                    }
+                }
+            }
+
             // Called every time we need to reuse a container.
             override fun bind(container: DayViewContainer, day: CalendarDay) {
                 container.textView.text = day.date.dayOfMonth.toString()
@@ -111,39 +152,10 @@ class MainActivity : AppCompatActivity() {
                         container.deliveryTag.setBackgroundColor(Color.parseColor(delivery.color))
                     }
                 }
-                val ordersOnCurrentDay = mutableListOf<Order>()
-                for (order in orders)
-                {
-                    if (order.date == day.date)
-                    {
-                        ordersOnCurrentDay.add(order)
-                    }
-                }
-                container.text1.text = ""
-                container.text2.text = ""
-                container.text3.text = ""
+
+                val ordersOnCurrentDay = orders.filter{ it.date == day.date }
                 val textFields = listOf(container.text1, container.text2, container.text3)
-
-                if (ordersOnCurrentDay.size > 3)
-                {
-                    for(i in 0..1)
-                    {
-                        textFields[i].text = ordersOnCurrentDay[i].name
-                        val deliveryColor = deliveries[ordersOnCurrentDay[i].deliveryID].color
-                        textFields[i].setTextColor(Color.parseColor(deliveryColor))
-                    }
-                    container.text3.text = "..."
-                }
-                else
-                {
-                    for(i in 0 until ordersOnCurrentDay.size)
-                    {
-                        textFields[i].text = ordersOnCurrentDay[i].name
-                        val deliveryColor = deliveries[ordersOnCurrentDay[i].deliveryID].color
-                        textFields[i].setTextColor(Color.parseColor(deliveryColor))
-                    }
-                }
-
+                displayOrdersOnDay(ordersOnCurrentDay, textFields)
             }
         }
 

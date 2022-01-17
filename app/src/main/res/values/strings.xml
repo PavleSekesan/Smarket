@@ -21,6 +21,7 @@
 
     <!-- Login screen strings -->
     <string name="prompt_email">Email</string>
+    <string name="prompt_confirm_email">Potvrdite email</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Prijavite se</string>
     <string name="action_sign_in_alt">Već imate nalog? Prijavite se.</string>
@@ -45,4 +46,8 @@
     <string name="action_accept_scan">Prihvati</string>
     <string name="action_decline_scan">Odbaci</string>
     <string name="action_finish_adding">Kraj</string>
+
+    <!-- Errors -->
+    <string name="error_generic">Došlo je do greške</string>
+    <string name="error_personal_info">Greška, proverite lične podatke</string>
 </resources>
