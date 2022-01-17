@@ -7,23 +7,18 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class BundleSelectionAdapter(var context : Context, private var bundles: MutableList<ShoppingBundle>, var clickable : Boolean) :
+class BundleSelectionAdapter(
+    var bundles: MutableList<ShoppingBundle>,
+    var onSelection: (bundle: ShoppingBundle) -> Unit = { b : ShoppingBundle -> }
+) :
     RecyclerView.Adapter<BundleSelectionAdapter.ViewHolder>()  {
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
      */
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val bundleName: TextView
-
-        init {
-            // Define click listener for the ViewHolder's View.
-            bundleName = view.findViewById(R.id.bundleNameTextView)
-        }
+        val bundleName: TextView = view.findViewById(R.id.bundleNameTextView)
     }
-
-    private val callback : BundleSelectionInterface? = context as? BundleSelectionInterface
-
 
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
@@ -39,14 +34,12 @@ class BundleSelectionAdapter(var context : Context, private var bundles: Mutable
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-        val context = viewHolder.itemView.context
-
         val bundle = bundles[position]
         viewHolder.bundleName.text = bundle.name
-        if (clickable) {
-            viewHolder.itemView.setOnClickListener {
-                callback?.selectBundle(bundle, position)
-            }
+        viewHolder.itemView.setOnClickListener {
+            onSelection(bundle)
+            bundles.removeAt(viewHolder.bindingAdapterPosition)
+            notifyItemRemoved(viewHolder.bindingAdapterPosition)
         }
     }
 
