@@ -39,7 +39,6 @@ class DayViewContainer(view: View) : ViewContainer(view) {
     val text1 = view.findViewById<TextView>(R.id.calendarDayText1)
     val text2 = view.findViewById<TextView>(R.id.calendarDayText2)
     val text3 = view.findViewById<TextView>(R.id.calendarDayText3)
-
 }
 class MonthViewContainer(view: View) : ViewContainer(view) {
     val legendLayout = view.findViewById<LinearLayout>(R.id.legendLayout)
@@ -80,20 +79,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setupListeners()
-        GlobalScope.launch {
-            val bundles = UserData.getAllBundles()
-            for (bundle in bundles)
-            {
-                Log.d("Bandlovi", bundle.name)
-            }
-        }
-        Log.d("ja","ja")
 
         val currentUser = Firebase.auth.currentUser
         if (currentUser == null) {
             val intent = Intent(this, SignInActivity::class.java)
             startActivity(intent)
         }
+
         // Dummy data
         val orders = mutableListOf<Order>()
         orders.add(Order(LocalDate.of(2022,1,15), "Rižoto",0))
