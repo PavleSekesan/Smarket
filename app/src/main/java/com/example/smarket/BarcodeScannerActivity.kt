@@ -1,5 +1,6 @@
 package com.example.smarket
 
+import Product
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.Manifest
@@ -78,7 +79,7 @@ class BarcodeScannerActivity : AppCompatActivity() {
         barcodeCountMap.clear()
         waitingForResponse = false
 
-        AddItemActivity.addedItemsAdapter.addItem(ShoppingItem(chosenItemName.toString(), chosenItemId.toString(),1,"kurac"))
+        AddItemActivity.addedItemsAdapter.addItem(Product(chosenItemName.toString(), 420.00, chosenItemId.toString(),"kurac"))
 //        val intent = Intent(this, QuantitySelectorActivity::class.java)
 //        intent.putExtra("itemName", chosenItemName)
 //        intent.putExtra("itemId", chosenItemId)

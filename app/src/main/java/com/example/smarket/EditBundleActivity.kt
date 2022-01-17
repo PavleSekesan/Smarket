@@ -1,22 +1,46 @@
 package com.example.smarket
 
+import Product
+import ShoppingBundle
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class EditBundleActivity : AppCompatActivity() {
-    private val bundleId = "Ya6qhvHEvEUSsU9Bjh0d" // FIXME Get id from database
+    private var bundleItems = mutableListOf<Product>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_bundle)
 
+        val bundleId = intent.getStringExtra("bundle_id")
+
         val bundleItemsRecyclerView = findViewById<RecyclerView>(R.id.bundleItemsRecyclerView)
-        bundleItemsRecyclerView.adapter = ShoppingItemsListAdapter(mutableListOf())
-        bundleItemsRecyclerView.layoutManager = LinearLayoutManager(this)
+        val bundleTitleEditText = findViewById<EditText>(R.id.bundleTitleEditText)
+
+        // Create new bundle
+        if (bundleId == null) {
+            bundleItems = mutableListOf()
+            bundleItemsRecyclerView.adapter = ShoppingItemsListAdapter(bundleItems)
+            bundleItemsRecyclerView.layoutManager = LinearLayoutManager(this)
+        }
+        // Edit existing bundle
+        else {
+            GlobalScope.launch {
+                val bundle = UserData.getAllBundles().find { it.id == bundleId }!!
+                bundleItems = bundle.products as MutableList<Product>
+
+                bundleTitleEditText.setText(bundle.name)
+                bundleItemsRecyclerView.adapter = ShoppingItemsListAdapter(bundleItems)
+                bundleItemsRecyclerView.layoutManager = LinearLayoutManager(this@EditBundleActivity)
+            }
+        }
 
         val addProductButton = findViewById<Button>(R.id.addProductButton)
         addProductButton.setOnClickListener {

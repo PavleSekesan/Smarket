@@ -1,9 +1,13 @@
 package com.example.smarket
 
+import ShoppingBundle
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class NewOrderActivity : AppCompatActivity() {
 
@@ -14,26 +18,27 @@ class NewOrderActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_order)
 
-        unselectedBundles = mutableListOf(ShoppingBundle("Rizoto sa pecurkama", listOf(ShoppingItem("Rizoto", "12345", 1, "kom."), ShoppingItem("pecurka", "12345", 1, "kom."))), ShoppingBundle("kuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuurac", listOf(ShoppingItem("kurac1", "12345", 2, "kom."), ShoppingItem("kurac2","12345", 2, "kom."), ShoppingItem("kurac3","12345", 5, "kom."))))
-
         val selectedBundlesList = findViewById<RecyclerView>(R.id.selectedBundlesRecyclerView)
         val unselectedBundlesList = findViewById<RecyclerView>(R.id.unselectedBundlesRecyclerView)
 
-        var selectedBundlesAdapter = BundleSelectionAdapter(selectedBundles)
-        var unselectedBundlesAdapter = BundleSelectionAdapter(unselectedBundles)
-        selectedBundlesAdapter.onSelection = { bundle ->
-            unselectedBundles.add(bundle)
-            unselectedBundlesAdapter.notifyItemInserted(unselectedBundles.size)
-        }
-        unselectedBundlesAdapter.onSelection = { bundle ->
-            selectedBundles.add(bundle)
-            selectedBundlesAdapter.notifyItemInserted(selectedBundles.size)
-        }
+        GlobalScope.launch {
+            unselectedBundles = UserData.getAllBundles() as MutableList<ShoppingBundle>
 
-        selectedBundlesList.adapter = selectedBundlesAdapter
-        unselectedBundlesList.adapter = unselectedBundlesAdapter
-        selectedBundlesList.layoutManager = LinearLayoutManager(this)
-        unselectedBundlesList.layoutManager = LinearLayoutManager(this)
+            val selectedBundlesAdapter = BundleSelectionAdapter(selectedBundles)
+            val unselectedBundlesAdapter = BundleSelectionAdapter(unselectedBundles)
+            selectedBundlesAdapter.onSelection = { bundle ->
+                unselectedBundles.add(bundle)
+                unselectedBundlesAdapter.notifyItemInserted(unselectedBundles.size)
+            }
+            unselectedBundlesAdapter.onSelection = { bundle ->
+                selectedBundles.add(bundle)
+                selectedBundlesAdapter.notifyItemInserted(selectedBundles.size)
+            }
 
+            selectedBundlesList.adapter = selectedBundlesAdapter
+            unselectedBundlesList.adapter = unselectedBundlesAdapter
+            selectedBundlesList.layoutManager = LinearLayoutManager(this@NewOrderActivity)
+            unselectedBundlesList.layoutManager = LinearLayoutManager(this@NewOrderActivity)
+        }
     }
 }

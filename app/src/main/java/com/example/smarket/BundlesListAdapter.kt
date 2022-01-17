@@ -1,15 +1,12 @@
 package com.example.smarket
 
+import ShoppingBundle
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-
-class ShoppingBundle(val name: String, val items: List<ShoppingItem>) {
-
-}
 
 class BundlesListAdapter(private var bundles: List<ShoppingBundle>) :
     RecyclerView.Adapter<BundlesListAdapter.ViewHolder>()  {
@@ -49,13 +46,12 @@ class BundlesListAdapter(private var bundles: List<ShoppingBundle>) :
         val context = viewHolder.itemView.context
         val bundle = bundles[position]
         viewHolder.bundleName.text = bundle.name
-        viewHolder.item1.text = bundle.items.getOrNull(0)?.name ?: ""
-        viewHolder.item2.text = bundle.items.getOrNull(1)?.name ?: ""
-        viewHolder.item3.text = bundle.items.getOrNull(2)?.name ?: ""
+        viewHolder.item1.text = bundle.products.getOrNull(0)?.name ?: ""
+        viewHolder.item2.text = bundle.products.getOrNull(1)?.name ?: ""
+        viewHolder.item3.text = bundle.products.getOrNull(2)?.name ?: ""
         viewHolder.itemView.setOnClickListener {
             val intent = Intent(context, SelectedBundleActivity::class.java)
-            // Send data from clicked bundle to next screen
-            // todo
+            intent.putExtra("bundle_id", bundle.id)
             context.startActivity(intent)
         }
     }
