@@ -1,5 +1,6 @@
 package com.example.smarket
 
+import Product
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -37,7 +38,7 @@ class AddItemActivity : AppCompatActivity() {
         addedItemsRecycler.layoutManager = LinearLayoutManager(this)
 
         adapter.onSearchClicked = { itemId, itemName ->
-            adapter2.addItem(ShoppingItem(itemName,itemId,1,"kurac"))
+            adapter2.addItem(Product(itemName,420.00,itemId,"kurac"))
         }
 
         val productSearch: SearchView = findViewById(R.id.productSearchView)

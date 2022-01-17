@@ -11,14 +11,15 @@ object UserData {
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = Firebase.auth
-    private lateinit var bundles: MutableList<Bundle>
+    private lateinit var bundles: MutableList<ShoppingBundle>
     private lateinit var fridgeItems: MutableList<FridgeItem>
     private lateinit var userOrders: MutableList<UserOrder>
     private lateinit var orders: MutableList<Order>
 
-    private suspend fun bundleFromDocument(doc: DocumentSnapshot): Bundle
+    private suspend fun bundleFromDocument(doc: DocumentSnapshot): ShoppingBundle
     {
         val data = doc.data
+        val id = doc.id
         val bundleName = data!!["name"].toString()
         val productReferences = data["products"] as ArrayList<DocumentReference>
 
@@ -30,7 +31,7 @@ object UserData {
 
             productsInBundle.add(Product(productData["name"] as String, productData["price"] as Double, productData["id"] as String, barcode))
         }
-        return Bundle(bundleName, productsInBundle)
+        return ShoppingBundle(id, bundleName, productsInBundle)
     }
 
     private suspend fun userOrderFromDocument(doc: DocumentSnapshot): UserOrder
@@ -41,7 +42,7 @@ object UserData {
         val daysToRepeat = (data["days_to_repeat"] as Double).toInt()
         val recurring = data["recurring"] as Boolean
 
-        val bundles = mutableListOf<Bundle>()
+        val bundles = mutableListOf<ShoppingBundle>()
         for(bundleRef in bundlesRefs)
         {
             bundles.add(bundleFromDocument(bundleRef.get().await()))
@@ -49,7 +50,7 @@ object UserData {
         return UserOrder(bundles, date, daysToRepeat, recurring)
     }
 
-    suspend fun getAllBundles(): List<Bundle>
+    suspend fun getAllBundles(): List<ShoppingBundle>
     {
         if (this::bundles.isInitialized)
         {
@@ -58,7 +59,7 @@ object UserData {
         else
         {
             val documents = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").get().await()
-            val tempBundles = mutableListOf<Bundle>()
+            val tempBundles = mutableListOf<ShoppingBundle>()
             for (document in documents)
             {
                 tempBundles.add(bundleFromDocument(document))
@@ -182,6 +183,6 @@ object UserData {
 
 data class Product(val name: String, val price: Double, val id: String, val barcode: String)
 data class FridgeItem(val id: String, val mesuringUnit: String, val product: Product, val quantity: Int)
-data class Bundle(val name: String, val products: List<Product>)
-data class UserOrder(val bundles: List<Bundle>, val date: Date, val daysToRepeat: Int, val recurring: Boolean)
+data class ShoppingBundle(val id: String, val name: String, val products: List<Product>)
+data class UserOrder(val bundles: List<ShoppingBundle>, val date: Date, val daysToRepeat: Int, val recurring: Boolean)
 data class Order(val date: Date, val userOrder: UserOrder, val status: String)

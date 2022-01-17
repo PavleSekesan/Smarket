@@ -1,5 +1,6 @@
 package com.example.smarket
 
+import Product
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,9 +8,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-data class ShoppingItem(val name: String, val id: String, var quantity: Int, val measuringUnit: String);
-
-class ShoppingItemsListAdapter(private var shoppingItems: MutableList<ShoppingItem>) :
+class ShoppingItemsListAdapter(private var shoppingItems: MutableList<Product>) :
     RecyclerView.Adapter<ShoppingItemsListAdapter.ViewHolder>()  {
     /**
      * Provide a reference to the type of views that you are using
@@ -32,7 +31,7 @@ class ShoppingItemsListAdapter(private var shoppingItems: MutableList<ShoppingIt
         }
     }
 
-    fun addItem(newItem: ShoppingItem ) {
+    fun addItem(newItem: Product ) {
         shoppingItems.add(newItem)
         super.notifyItemInserted(shoppingItems.size - 1)
     }
@@ -54,8 +53,9 @@ class ShoppingItemsListAdapter(private var shoppingItems: MutableList<ShoppingIt
         val context = viewHolder.itemView.context
         val item = shoppingItems[position]
         viewHolder.itemName.text = item.name
-        viewHolder.quantity.text = item.quantity.toString()
-        viewHolder.measuringUnit.text = item.measuringUnit
+        viewHolder.quantity.text = "1" // FIXME Database needs to save quantity information for each bundle product
+        viewHolder.measuringUnit.text = "kom" // FIXME Database needs to save measuring unit information for each bundle product
+        // TODO Add and subtract quantities when buttons are clicked
         /*viewHolder.add.setOnClickListener {
             increaseItem(position)
         }

@@ -1,19 +1,27 @@
 package com.example.smarket
 
+import Product
+import ShoppingBundle
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
+import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class SelectedBundleActivity : AppCompatActivity() {
-    private val bundleId = "Ya6qhvHEvEUSsU9Bjh0d" // FIXME Get id from database
+    private lateinit var bundle : ShoppingBundle
+    private var bundleItems = mutableListOf<Product>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_selected_bundle)
+
+        val bundleId = intent.getStringExtra("bundle_id")
 
         val editBundleFab = findViewById<FloatingActionButton>(R.id.editBundleFab)
         editBundleFab.setOnClickListener {
@@ -22,9 +30,16 @@ class SelectedBundleActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        var bundleItems = mutableListOf(ShoppingItem("Duboko przeni kurac", "12345",3, "kom."), ShoppingItem("Plitko kuvana picka","12345", 2, "kg"))
         val bundleItemsRecyclerView = findViewById<RecyclerView>(R.id.bundleItemsRecyclerView)
-        bundleItemsRecyclerView.adapter = ShoppingItemsListAdapter(bundleItems)
-        bundleItemsRecyclerView.layoutManager = LinearLayoutManager(this)
+        val bundleTitleTextView = findViewById<TextView>(R.id.bundleTitleTextView)
+
+        GlobalScope.launch {
+            bundle = UserData.getAllBundles().find{ it.id == bundleId }!!
+            bundleItems = bundle.products as MutableList<Product>
+
+            bundleTitleTextView.text = bundle.name
+            bundleItemsRecyclerView.adapter = ShoppingItemsListAdapter(bundleItems)
+            bundleItemsRecyclerView.layoutManager = LinearLayoutManager(this@SelectedBundleActivity)
+        }
     }
 }
