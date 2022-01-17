@@ -122,7 +122,7 @@ object UserData {
         return FridgeItem(id,measuringUnit,product,quantity.toInt())
     }
 
-    private suspend fun orderFromDocument(doc: DocumentSnapshot): Order
+    private suspend fun deliveryFromDocument(doc: DocumentSnapshot): Delivery
     {
         val id = doc.id
         val data = doc.data!!
@@ -130,7 +130,7 @@ object UserData {
         val status = data["status"] as String
         val ref = data["userOrder"] as DocumentReference
         val userOrder = userOrderFromDocument(ref.get().await())
-        return Order(id,date,userOrder,status)
+        return Delivery(id,date,userOrder,status)
     }
     //endregion
 
@@ -196,22 +196,22 @@ object UserData {
         return fridgeItems
     }
 
-    suspend fun getAllOrders(): List<Order>
+    suspend fun getAllDeliveries(): List<Delivery>
     {
         if(!this::ordersIds.isInitialized)
         {
             ordersIds = mutableListOf()
             val documents = db.collection("Orders").whereEqualTo("userId", auth.uid.toString()).get().await()
             for (document in documents) {
-                val order = orderFromDocument(document)
+                val order = deliveryFromDocument(document)
                 ordersIds.add(order.id)
                 databaseItems[order.id] = order
             }
         }
-        val orders = mutableListOf<Order>()
+        val orders = mutableListOf<Delivery>()
         for(key in ordersIds)
         {
-            orders.add(databaseItems[key] as Order)
+            orders.add(databaseItems[key] as Delivery)
         }
         return orders
     }
@@ -322,10 +322,10 @@ object UserData {
         addOnModifyDatabaseItemListener(wrapper)
     }
 
-    fun addOnOrderModifyListener(listener: (Order?, DatabaseEventType) -> Unit)
+    fun addOnOrderModifyListener(listener: (Delivery?, DatabaseEventType) -> Unit)
     {
         val wrapper: (DatabaseItem?, DatabaseEventType) -> Unit = { databaseItem: DatabaseItem?, databaseEventType: DatabaseEventType ->
-            if(databaseItem is Order)
+            if(databaseItem is Delivery)
             {
                 listener(databaseItem, databaseEventType)
             }
@@ -386,4 +386,4 @@ class FridgeItem(id: String, measuringUnit: String, product: Product, quantity: 
 class BundleItem(id: String, measuringUnit: String, product: Product, quantity: Int) : QuantityItem(id, measuringUnit, product, quantity)
 class ShoppingBundle(id: String, val name: String, val items: List<BundleItem>): DatabaseItem(id)
 class UserOrder(id: String, val bundles: List<ShoppingBundle>, val date: Date, val daysToRepeat: Int, val recurring: Boolean): DatabaseItem(id)
-class Order(id: String, val date: Date, val userOrder: UserOrder, val status: String): DatabaseItem(id)
+class Delivery(id: String, val date: Date, val userOrder: UserOrder, val status: String): DatabaseItem(id)
