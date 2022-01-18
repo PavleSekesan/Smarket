@@ -15,6 +15,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class AddItemActivity : AppCompatActivity() {
+
+    var addedItems = mutableListOf<BundleItem>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_item)
@@ -34,7 +36,7 @@ class AddItemActivity : AppCompatActivity() {
         searchRecycler.layoutManager = LinearLayoutManager(this)
 
         val addedItemsRecycler = findViewById<RecyclerView>(R.id.addedItemsRecycler)
-        val adapter2 = ShoppingItemsListAdapter(mutableListOf())
+        val adapter2 = ShoppingItemsListAdapter(mutableListOf(), true)
         addedItemsAdapter = adapter2
         addedItemsRecycler.adapter = adapter2
         addedItemsRecycler.layoutManager = LinearLayoutManager(this)

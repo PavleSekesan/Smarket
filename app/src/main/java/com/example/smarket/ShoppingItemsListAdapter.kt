@@ -1,25 +1,21 @@
 package com.example.smarket
 
 import BundleItem
-import Product
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
-class ShoppingItemsListAdapter(private var shoppingItems: MutableList<BundleItem>) :
+class ShoppingItemsListAdapter(private var shoppingItems: MutableList<BundleItem>, private val editable : Boolean) :
     RecyclerView.Adapter<ShoppingItemsListAdapter.ViewHolder>()  {
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
      */
-
-    init {
-
-    }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val itemName: TextView
@@ -47,7 +43,6 @@ class ShoppingItemsListAdapter(private var shoppingItems: MutableList<BundleItem
 
     fun addItem(newItem: BundleItem ) {
         shoppingItems.add(newItem)
-        Log.d("dodatItem", this.toString())
         super.notifyItemInserted(shoppingItems.size)
     }
 
@@ -70,13 +65,25 @@ class ShoppingItemsListAdapter(private var shoppingItems: MutableList<BundleItem
         viewHolder.itemName.text = item.product.name
         viewHolder.quantity.text = item.quantity.toString()
         viewHolder.measuringUnit.text = item.measuringUnit
-        // TODO Add and subtract quantities when buttons are clicked
-        /*viewHolder.add.setOnClickListener {
-            increaseItem(position)
+
+        if (editable) {
+            viewHolder.add.setOnClickListener {
+                GlobalScope.launch {
+                    // FIXME Uncomment when updateBundleItemQuantity is implemented
+                    // UserData.updateBundleItemQuantity(shoppingItems[position], 1)
+                }
+            }
+            viewHolder.subtract.setOnClickListener {
+                GlobalScope.launch {
+                    // FIXME Uncomment when updateBundleItemQuantity is implemented
+                    // UserData.updateBundleItemQuantity(shoppingItems[position], -1)
+                }
+            }
         }
-        viewHolder.subtract.setOnClickListener {
-            decreaseItem(position)
-        }*/
+        else {
+            viewHolder.add.visibility = View.INVISIBLE
+            viewHolder.subtract.visibility = View.INVISIBLE
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)

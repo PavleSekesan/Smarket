@@ -2,6 +2,9 @@
     <string name="app_name">Smarket</string>
     <string name="title_activity_settings">Podešavanja</string>
 
+    <!-- Bundles -->
+    <string name="new_bundle_name">Novi spisak</string>
+
     <!-- Preference Titles -->
     <string name="delivery_header">Podesavanja dostave</string>
     <string name="personal_data_header">Licni Podaci</string>
@@ -50,4 +53,5 @@
     <!-- Errors -->
     <string name="error_generic">Došlo je do greške</string>
     <string name="error_personal_info">Greška, proverite lične podatke</string>
+
 </resources>
