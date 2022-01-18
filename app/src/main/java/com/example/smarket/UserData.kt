@@ -10,6 +10,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -27,12 +29,13 @@ object UserData {
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = Firebase.auth
-    private lateinit var bundleIds: MutableList<String>
-    private lateinit var fridgeItemsIds: MutableList<String>
-    private lateinit var userOrdersIds: MutableList<String>
-    private lateinit var ordersIds: MutableList<String>
+    private var bundlesInitialized = false
+    private var fridgeItemsInitialized = false
+    private var userOrdersInitialized = false
+    private var deliveriesInitialized = false
 
     private val databaseItems = ObservableArrayMap<String, DatabaseItem>()
+    private val databaseItemsMutex = Mutex()
 
     // Listeners called when an item is modified (added or removed)
     private val modifyListeners: MutableMap<KType, MutableList<(DatabaseItem?, DatabaseEventType) -> (Unit)>> = mutableMapOf()
@@ -58,7 +61,7 @@ object UserData {
                                 "Fridge" -> fridgeItemFromDocument(doc)
                                 else -> userOrderFromDocument(doc)
                             }
-                            databaseItems[newItem.id] = newItem
+                            updateDatabaseMapThreadSafe(newItem.id,newItem)
                         }
                     }
                 }
@@ -161,94 +164,78 @@ object UserData {
     //region Methods that get all objects of certain type from DB
     suspend fun getAllBundles(): List<ShoppingBundle>
     {
-        if (!this::bundleIds.isInitialized)
+        if (!bundlesInitialized)
         {
             val documents = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").get().await()
-            bundleIds = mutableListOf()
+            bundlesInitialized = true
             for (document in documents)
             {
                 val bundle = bundleFromDocument(document)
-                databaseItems[bundle.id] = bundle
-                bundleIds.add(bundle.id)
+                updateDatabaseMapThreadSafe(bundle.id,bundle)
             }
         }
-        val bundles = mutableListOf<ShoppingBundle>()
-        for(key in bundleIds)
-        {
-            bundles.add(databaseItems[key] as ShoppingBundle)
-        }
-        return bundles
+        return databaseItems.filter { kvp -> kvp.value is ShoppingBundle }.values.map { it as ShoppingBundle }
     }
 
     suspend fun getAllUserOrders(): List<UserOrder>
     {
-        if(!this::userOrdersIds.isInitialized)
+        if(!userOrdersInitialized)
         {
             val documents = db.collection("UserData").document(auth.uid.toString()).collection("Orders").get().await()
-            userOrdersIds = mutableListOf()
+            userOrdersInitialized = true
             for (document in documents) {
                 val userOrder = userOrderFromDocument(document)
-                databaseItems[userOrder.id] = userOrder
-                userOrdersIds.add(userOrder.id)
+                updateDatabaseMapThreadSafe(userOrder.id,userOrder)
             }
         }
-        val userOrders = mutableListOf<UserOrder>()
-        for(key in userOrdersIds)
-        {
-            userOrders.add(databaseItems[key] as UserOrder)
-        }
-        return userOrders
+        return databaseItems.filter { kvp -> kvp.value is UserOrder }.values.map { it as UserOrder }
     }
 
     suspend fun getAllFridgeItems(): List<FridgeItem>
     {
-        if(!this::fridgeItemsIds.isInitialized)
+        if(!fridgeItemsInitialized)
         {
             val documents = db.collection("UserData").document(auth.uid.toString()).collection("Fridge").get().await()
+            fridgeItemsInitialized = true
             for (document in documents)
             {
                 val item = fridgeItemFromDocument(document)
-                databaseItems[item.id] = item
-                fridgeItemsIds.add(item.id)
+                updateDatabaseMapThreadSafe(item.id,item)
             }
         }
-        val fridgeItems = mutableListOf<FridgeItem>()
-        for(key in fridgeItemsIds)
-        {
-            fridgeItems.add(databaseItems[key] as FridgeItem)
-        }
-        return fridgeItems
+        return databaseItems.filter { kvp -> kvp.value is FridgeItem }.values.map { it as FridgeItem }
     }
 
     suspend fun getAllDeliveries(): List<Delivery>
     {
-        if(!this::ordersIds.isInitialized)
+        if(!deliveriesInitialized)
         {
-            ordersIds = mutableListOf()
+            deliveriesInitialized = true
             val documents = db.collection("Orders").whereEqualTo("userId", auth.uid.toString()).get().await()
             for (document in documents) {
                 val order = deliveryFromDocument(document)
-                ordersIds.add(order.id)
-                databaseItems[order.id] = order
+                updateDatabaseMapThreadSafe(order.id,order)
             }
         }
-        val orders = mutableListOf<Delivery>()
-        for(key in ordersIds)
-        {
-            orders.add(databaseItems[key] as Delivery)
-        }
-        return orders
+        return databaseItems.filter { kvp -> kvp.value is Delivery }.values.map { it as Delivery }
     }
     //endregion
 
     //region Methods that edit objects in the database
+    private suspend fun updateDatabaseMapThreadSafe(key: String, newValue: DatabaseItem)
+    {
+        databaseItemsMutex.withLock {
+            databaseItems[key] = newValue
+        }
+    }
+
     suspend fun updateFridgeQuantity(fridgeItem: FridgeItem, delta: Int): FridgeItem {
         val id = fridgeItem.id
 
         db.collection("UserData").document(auth.uid.toString()).collection("Fridge").document(id)
             .update("quantity", fridgeItem.quantity + delta).await()
         val newFridgeItem = FridgeItem(id,fridgeItem.measuringUnit, fridgeItem.product,fridgeItem.quantity + delta, fridgeItem.databaseRef)
-        databaseItems[id] = newFridgeItem
+        updateDatabaseMapThreadSafe(id,newFridgeItem)
         return newFridgeItem
     }
 
@@ -261,7 +248,7 @@ object UserData {
         )
         val newDoc = db.collection("UserData").document(auth.uid.toString()).collection("Fridge").add(data).await()
         val newFridgeItem = FridgeItem(newDoc.id, measuringUnit,product,quantity, newDoc)
-        databaseItems[newFridgeItem.id] = newFridgeItem
+        updateDatabaseMapThreadSafe(newFridgeItem.id,newFridgeItem)
         return newFridgeItem
     }
 
@@ -276,8 +263,8 @@ object UserData {
         val newDoc = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").document(bundle.id).collection("Products").add(data).await()
         val newItem = BundleItem(newDoc.id,measuringUnit,product,quantity, newDoc)
         val newBundle = ShoppingBundle(bundle.id,bundle.name,bundle.items.plus(newItem),bundle.databaseRef)
-        databaseItems[newBundle.id] = newBundle
-        databaseItems[newItem.id] = newItem
+        updateDatabaseMapThreadSafe(newBundle.id,newBundle)
+        updateDatabaseMapThreadSafe(newItem.id,newItem)
         return newItem
     }
 
@@ -291,7 +278,7 @@ object UserData {
     {
         db.collection("UserData").document(auth.uid.toString()).collection("Bundles").document(bundle.id).update("name",newName).await()
         val newBundle = ShoppingBundle(bundle.id,newName,bundle.items,bundle.databaseRef)
-        databaseItems[newBundle.id] = newBundle
+        updateDatabaseMapThreadSafe(newBundle.id,newBundle)
         return newBundle
     }
 
@@ -320,7 +307,7 @@ object UserData {
         )
         val doc = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").add(data).await()
         val newBundle = ShoppingBundle(doc.id,name,emptyList(),doc)
-        databaseItems[doc.id] = newBundle
+        updateDatabaseMapThreadSafe(doc.id,newBundle)
         return newBundle
     }
     //endregion
