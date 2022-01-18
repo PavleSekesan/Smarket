@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.android.synthetic.main.activity_edit_bundle.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -27,14 +28,35 @@ class SelectedBundleActivity : AppCompatActivity() {
 
         val bundleItemsRecyclerView = findViewById<RecyclerView>(R.id.bundleItemsRecyclerView)
         val bundleTitleTextView = findViewById<TextView>(R.id.bundleTitleTextView)
+        bundleItemsRecyclerView.layoutManager = LinearLayoutManager(this)
+        var bundleItemsAdapter = ShoppingItemsListAdapter(mutableListOf())
+        bundleItemsRecyclerView.adapter = bundleItemsAdapter
 
         GlobalScope.launch {
             val bundle = UserData.getAllBundles().find{ it.id == bundleId }!!
             val bundleItems = bundle.items as MutableList<BundleItem>
 
-            bundleTitleTextView.text = bundle.name
-            bundleItemsRecyclerView.adapter = ShoppingItemsListAdapter(bundleItems)
-            bundleItemsRecyclerView.layoutManager = LinearLayoutManager(this@SelectedBundleActivity)
+            runOnUiThread {
+                bundleTitleTextView.text = bundle.name
+                bundleItemsAdapter = ShoppingItemsListAdapter(bundleItems)
+                bundleItemsRecyclerView.adapter = bundleItemsAdapter
+            }
+        }
+
+        UserData.addOnBundleModifyListener { bundleItem, databaseEventType ->
+            if (databaseEventType == DatabaseEventType.MODIFIED) {
+                // TODO Handle modification
+            }
+            else if (databaseEventType == DatabaseEventType.ADDED) {
+                runOnUiThread {
+                    bundleItemsAdapter.addItem(bundleItem!!)
+                    //bundleItemsAdapter.clearItems()
+                    // FIXME double adding to RecyclerView
+                }
+            }
+            else if (databaseEventType == DatabaseEventType.REMOVED) {
+                // TODO Handle removal
+            }
         }
     }
 }

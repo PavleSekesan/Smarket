@@ -2,6 +2,7 @@ package com.example.smarket
 
 import BundleItem
 import Product
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +16,11 @@ class ShoppingItemsListAdapter(private var shoppingItems: MutableList<BundleItem
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
      */
+
+    init {
+
+    }
+
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val itemName: TextView
         val quantity: TextView
@@ -30,11 +36,19 @@ class ShoppingItemsListAdapter(private var shoppingItems: MutableList<BundleItem
             add = view.findViewById(R.id.addButton)
             subtract = view.findViewById(R.id.subtractButton)
         }
+
+
+    }
+
+    fun clearItems() {
+        shoppingItems.clear()
+        super.notifyDataSetChanged()
     }
 
     fun addItem(newItem: BundleItem ) {
         shoppingItems.add(newItem)
-        super.notifyItemInserted(shoppingItems.size - 1)
+        Log.d("dodatItem", this.toString())
+        super.notifyItemInserted(shoppingItems.size)
     }
 
     // Create new views (invoked by the layout manager)

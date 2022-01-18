@@ -116,7 +116,7 @@ object UserData {
         val data: Map<String, Any> = doc.data!!
         val measuringUnit = data["measuring_unit"] as String
         val ref = data["product"] as DocumentReference
-        val quantity = data["quantity"] as Double
+        val quantity = data["quantity"] as Long
         val productDoc = ref.get().await()
         val product = productFromDoc(productDoc)
         return FridgeItem(id,measuringUnit,product,quantity.toInt())
@@ -241,7 +241,7 @@ object UserData {
         return newFridgeItem
     }
 
-    suspend fun addItemToBundle(bundle: ShoppingBundle, measuringUnit: String, product: Product, quantity: Int) : ShoppingBundle
+    suspend fun addItemToBundle(bundle: ShoppingBundle, measuringUnit: String, product: Product, quantity: Int) : BundleItem
     {
         val productRef = db.collection("Products").document(product.id)
         val data = hashMapOf(
@@ -253,10 +253,11 @@ object UserData {
         val newItem = BundleItem(id,measuringUnit,product,quantity)
         val newBundle = ShoppingBundle(bundle.id,bundle.name,bundle.items.plus(newItem))
         databaseItems[newBundle.id] = newBundle
-        return newBundle
+        databaseItems[newItem.id] = newItem
+        return newItem
     }
 
-    suspend fun addItemToBundle(bundleId: String, measuringUnit: String, product: Product, quantity: Int) : ShoppingBundle
+    suspend fun addItemToBundle(bundleId: String, measuringUnit: String, product: Product, quantity: Int) : BundleItem
     {
         val bundle = databaseItems[bundleId]!! as ShoppingBundle
         return addItemToBundle(bundle, measuringUnit, product, quantity)
@@ -275,16 +276,15 @@ object UserData {
     //endregion
 
     //region Listeners and helper methods
-    private fun addOnModifyDatabaseItemListener(listener: (DatabaseItem?, DatabaseEventType) -> Unit)
+    private fun addOnModifyDatabaseItemListener(listener: (DatabaseItem?, DatabaseEventType) -> Unit, itemType : KType)
     {
-        val itemType = listener.reflect()!!.parameters[0]::class.createType()
         if (modifyListeners.containsKey(itemType))
         {
             modifyListeners[itemType]!!.add(listener)
         }
         else
         {
-            modifyListeners[itemType] = mutableListOf()
+            modifyListeners[itemType] = mutableListOf(listener)
         }
 
     }
@@ -297,7 +297,7 @@ object UserData {
                 listener(databaseItem, databaseEventType)
             }
         }
-        addOnModifyDatabaseItemListener(wrapper)
+        addOnModifyDatabaseItemListener(wrapper, FridgeItem::class.createType())
     }
 
     fun addOnBundleModifyListener(listener: (BundleItem?, DatabaseEventType) -> Unit)
@@ -308,7 +308,7 @@ object UserData {
                 listener(databaseItem, databaseEventType)
             }
         }
-        addOnModifyDatabaseItemListener(wrapper)
+        addOnModifyDatabaseItemListener(wrapper, BundleItem::class.createType())
     }
 
     fun addOnUserOrderModifyListener(listener: (UserOrder?, DatabaseEventType) -> Unit)
@@ -319,7 +319,7 @@ object UserData {
                 listener(databaseItem, databaseEventType)
             }
         }
-        addOnModifyDatabaseItemListener(wrapper)
+        addOnModifyDatabaseItemListener(wrapper, UserOrder::class.createType())
     }
 
     fun addOnOrderModifyListener(listener: (Delivery?, DatabaseEventType) -> Unit)
@@ -330,7 +330,7 @@ object UserData {
                 listener(databaseItem, databaseEventType)
             }
         }
-        addOnModifyDatabaseItemListener(wrapper)
+        addOnModifyDatabaseItemListener(wrapper, Delivery::class.createType())
     }
 
     class ObservableMapListener: ObservableMap.OnMapChangedCallback<ObservableArrayMap<String,DatabaseItem>,String,DatabaseItem>()

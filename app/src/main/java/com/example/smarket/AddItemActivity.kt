@@ -39,8 +39,18 @@ class AddItemActivity : AppCompatActivity() {
         addedItemsRecycler.adapter = adapter2
         addedItemsRecycler.layoutManager = LinearLayoutManager(this)
 
+        val bundleId = intent.getStringExtra("bundle_id")
         searchAdapter.onSearchClicked = { product ->
-            // TODO Add product to database and recyclerview
+            GlobalScope.launch {
+                val newItem = if (bundleId != null) {
+                    UserData.addItemToBundle(bundleId, "kom", product, 1)
+                } else {
+                    UserData.addItemToFridge("kom", product, 1)
+                }
+                runOnUiThread {
+                    adapter2.addItem(newItem as BundleItem)
+                }
+            }
         }
 
         val productSearch: SearchView = findViewById(R.id.productSearchView)

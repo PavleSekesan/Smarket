@@ -4,6 +4,7 @@ import BundleItem
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,23 +19,43 @@ class EditBundleActivity : AppCompatActivity() {
 
         val bundleId = intent.getStringExtra("bundle_id")
 
-        val bundleItemsRecyclerView = findViewById<RecyclerView>(R.id.bundleItemsRecyclerView)
+        val editBundleItemsRecyclerView = findViewById<RecyclerView>(R.id.editBundleItemsRecyclerView)
         val bundleTitleEditText = findViewById<EditText>(R.id.bundleTitleEditText)
 
+        var editBundleItemsAdapter = ShoppingItemsListAdapter(mutableListOf())
+        editBundleItemsRecyclerView.layoutManager = LinearLayoutManager(this)
         // Create new bundle
         if (bundleId == null) {
-            var bundleItems : MutableList<BundleItem> = mutableListOf()
-            bundleItemsRecyclerView.adapter = ShoppingItemsListAdapter(bundleItems)
-            bundleItemsRecyclerView.layoutManager = LinearLayoutManager(this)
+            editBundleItemsRecyclerView.adapter = editBundleItemsAdapter
         }
         // Edit existing bundle
         else {
             GlobalScope.launch {
                 val bundle = UserData.getAllBundles().find { it.id == bundleId }!!
                 var bundleItems = bundle.items as MutableList<BundleItem>
-                bundleTitleEditText.setText(bundle.name)
-                bundleItemsRecyclerView.adapter = ShoppingItemsListAdapter(bundleItems)
-                bundleItemsRecyclerView.layoutManager = LinearLayoutManager(this@EditBundleActivity)
+
+                runOnUiThread {
+                    editBundleItemsAdapter = ShoppingItemsListAdapter(bundleItems)
+                    Log.d("velikaKitAAA", bundleItems.size.toString())
+                    bundleTitleEditText.setText(bundle.name)
+                    editBundleItemsRecyclerView.adapter = editBundleItemsAdapter
+                }
+
+//                UserData.addOnBundleModifyListener { bundleItem, databaseEventType ->
+//                    if (databaseEventType == DatabaseEventType.MODIFIED) {
+//                        // TODO Handle modification
+//                    }
+//                    else if (databaseEventType == DatabaseEventType.ADDED) {
+//                        runOnUiThread {
+//                            Log.d("velikaKitAAA", "nesto")
+//                            bundleItemsAdapter.addItem(bundleItem!!)
+//                            // FIXME double adding to RecyclerView
+//                        }
+//                    }
+//                    else if (databaseEventType == DatabaseEventType.REMOVED) {
+//                        // TODO Handle removal
+//                    }
+//                }
             }
         }
 
