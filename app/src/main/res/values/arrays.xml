@@ -28,4 +28,62 @@
         <item>13:00 – 14:00</item>
     </string-array>
 
+    <array name="kelly_colors">
+        <item>@color/kelly_vivid_yellow</item>
+        <item>@color/kelly_strong_purple</item>
+        <item>@color/kelly_vivid_orange</item>
+        <item>@color/kelly_very_light_blue</item>
+        <item>@color/kelly_vivid_red</item>
+        <item>@color/kelly_grayish_yellow</item>
+        <item>@color/kelly_medium_gray</item>
+        <item>@color/kelly_vivid_green</item>
+        <item>@color/kelly_strong_purplish_pink</item>
+        <item>@color/kelly_strong_blue</item>
+        <item>@color/kelly_strong_yellowish_pink</item>
+        <item>@color/kelly_strong_violet</item>
+        <item>@color/kelly_vivid_orange_yellow</item>
+        <item>@color/kelly_strong_purplish_red</item>
+        <item>@color/kelly_vivid_greenish_yellow</item>
+        <item>@color/kelly_strong_reddish_brown</item>
+        <item>@color/kelly_vivid_yellowish_green</item>
+        <item>@color/kelly_deep_yellowish_brown</item>
+        <item>@color/kelly_vivid_reddish_orange</item>
+        <item>@color/kelly_dark_olive_green</item>
+    </array>
+
+    <array name="different_32_colors">
+        <item>@color/different_32_darkgoldenrod</item>
+        <item>@color/different_32_darkolivegreen</item>
+        <item>@color/different_32_saddlebrown</item>
+        <item>@color/different_32_darkslateblue</item>
+        <item>@color/different_32_darkcyan</item>
+        <item>@color/different_32_fuchsia</item>
+        <item>@color/different_32_orangered</item>
+        <item>@color/different_32_navy</item>
+        <item>@color/different_32_limegreen</item>
+        <item>@color/different_32_purple2</item>
+        <item>@color/different_32_darkseagreen</item>
+        <item>@color/different_32_maroon3</item>
+        <item>@color/different_32_darkorange</item>
+        <item>@color/different_32_lime</item>
+        <item>@color/different_32_mediumspringgreen</item>
+        <item>@color/different_32_blueviolet</item>
+        <item>@color/different_32_crimson</item>
+        <item>@color/different_32_aqua</item>
+        <item>@color/different_32_deepskyblue</item>
+        <item>@color/different_32_blue</item>
+        <item>@color/different_32_greenyellow</item>
+        <item>@color/different_32_orchid</item>
+        <item>@color/different_32_lightsteelblue</item>
+        <item>@color/different_32_dodgerblue</item>
+        <item>@color/different_32_khaki</item>
+        <item>@color/different_32_salmon</item>
+        <item>@color/different_32_laserlemon</item>
+        <item>@color/different_32_deeppink</item>
+        <item>@color/different_32_mediumslateblue</item>
+        <item>@color/different_32_pink</item>
+        <item>@color/different_32_dimgray</item>
+        <item>@color/different_32_forestgreen</item>
+    </array>
+
 </resources>

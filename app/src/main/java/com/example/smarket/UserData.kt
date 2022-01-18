@@ -1,6 +1,7 @@
 import android.util.Log
 import androidx.databinding.ObservableArrayMap
 import androidx.databinding.ObservableMap
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -9,6 +10,11 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KType
@@ -98,9 +104,15 @@ object UserData {
         val id = doc.id
         val data = doc.data
         val bundlesRefs = data!!["bundles"] as ArrayList<DocumentReference>
-        val date = data["date"] as Date
-        val daysToRepeat = (data["days_to_repeat"] as Double).toInt()
+
+        // parse date
+        val firebaseTimestamp = data["date"] as Timestamp
+        val javaDate = firebaseTimestamp.toDate()
+        val date = LocalDateTime.ofInstant(Instant.ofEpochMilli(javaDate.time), ZoneId.systemDefault());
+
         val recurring = data["recurring"] as Boolean
+        val daysToRepeat: Int
+        daysToRepeat = if(recurring) (data["days_to_repeat"] as Long).toInt() else 0
 
         val bundles = mutableListOf<ShoppingBundle>()
         for(bundleRef in bundlesRefs)
@@ -126,11 +138,22 @@ object UserData {
     {
         val id = doc.id
         val data = doc.data!!
-        val date = data["date"] as Date
+
+        // parse date
+        val firebaseTimestamp = data["date"] as Timestamp
+        val javaDate = firebaseTimestamp.toDate()
+        val date = LocalDateTime.ofInstant(Instant.ofEpochMilli(javaDate.time), ZoneId.systemDefault());
+
         val status = data["status"] as String
-        val ref = data["userOrder"] as DocumentReference
-        val userOrder = userOrderFromDocument(ref.get().await())
-        return Delivery(id,date,userOrder,status)
+        val userOrdersDocs = doc.reference.collection("UserOrders").get().await()
+        val userOrders = mutableListOf<UserOrder>()
+        for(doc in userOrdersDocs)
+        {
+            val userOrderDoc = (doc.data["order"] as DocumentReference).get().await()
+            userOrders.add(userOrderFromDocument(userOrderDoc))
+        }
+
+        return Delivery(id,date,userOrders,status)
     }
     //endregion
 
@@ -263,6 +286,20 @@ object UserData {
         return addItemToBundle(bundle, measuringUnit, product, quantity)
     }
 
+    suspend fun changeBundleName(bundle: ShoppingBundle, newName: String): ShoppingBundle
+    {
+        db.collection("UserData").document(auth.uid.toString()).collection("Bundles").document(bundle.id).update("name",newName).await()
+        val newBundle = ShoppingBundle(bundle.id,newName,bundle.items)
+        databaseItems[newBundle.id] = newBundle
+        return newBundle
+    }
+
+    suspend fun changeBundleName(bundleId: String, newName: String): ShoppingBundle
+    {
+        val bundle = databaseItems[bundleId]!! as ShoppingBundle
+        return changeBundleName(bundle, newName)
+    }
+
     suspend fun addNewBundle(name: String): ShoppingBundle
     {
         val data = hashMapOf(
@@ -385,5 +422,5 @@ abstract class QuantityItem(id: String, val measuringUnit: String, val product: 
 class FridgeItem(id: String, measuringUnit: String, product: Product, quantity: Int) : QuantityItem(id, measuringUnit, product, quantity)
 class BundleItem(id: String, measuringUnit: String, product: Product, quantity: Int) : QuantityItem(id, measuringUnit, product, quantity)
 class ShoppingBundle(id: String, val name: String, val items: List<BundleItem>): DatabaseItem(id)
-class UserOrder(id: String, val bundles: List<ShoppingBundle>, val date: Date, val daysToRepeat: Int, val recurring: Boolean): DatabaseItem(id)
-class Delivery(id: String, val date: Date, val userOrder: UserOrder, val status: String): DatabaseItem(id)
+class UserOrder(id: String, val bundles: List<ShoppingBundle>, val date: LocalDateTime, val daysToRepeat: Int, val recurring: Boolean): DatabaseItem(id)
+class Delivery(id: String, val date: LocalDateTime, val userOrders: List<UserOrder>, val status: String): DatabaseItem(id)
