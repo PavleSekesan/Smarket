@@ -29,7 +29,7 @@ class SelectedBundleActivity : AppCompatActivity() {
         val bundleItemsRecyclerView = findViewById<RecyclerView>(R.id.bundleItemsRecyclerView)
         val bundleTitleTextView = findViewById<TextView>(R.id.bundleTitleTextView)
         bundleItemsRecyclerView.layoutManager = LinearLayoutManager(this)
-        var bundleItemsAdapter = ShoppingItemsListAdapter(mutableListOf())
+        var bundleItemsAdapter = ShoppingItemsListAdapter(mutableListOf(), false)
         bundleItemsRecyclerView.adapter = bundleItemsAdapter
 
         GlobalScope.launch {
@@ -38,11 +38,13 @@ class SelectedBundleActivity : AppCompatActivity() {
 
             runOnUiThread {
                 bundleTitleTextView.text = bundle.name
-                bundleItemsAdapter = ShoppingItemsListAdapter(bundleItems)
+                bundleItemsAdapter = ShoppingItemsListAdapter(bundleItems, false)
                 bundleItemsRecyclerView.adapter = bundleItemsAdapter
             }
         }
 
+
+        // TODO handle bundle title modification
         UserData.addOnBundleModifyListener { bundleItem, databaseEventType ->
             if (databaseEventType == DatabaseEventType.MODIFIED) {
                 // TODO Handle modification

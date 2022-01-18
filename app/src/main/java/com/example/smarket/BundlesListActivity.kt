@@ -27,8 +27,12 @@ class BundlesListActivity : AppCompatActivity() {
 
         val addBundleFab = findViewById<FloatingActionButton>(R.id.addBundleFab)
         addBundleFab.setOnClickListener {
-            val intent = Intent(this, EditBundleActivity::class.java)
-            startActivity(intent)
+            GlobalScope.launch {
+                val newBundle = UserData.addNewBundle(getString(R.string.new_bundle_name))
+                val intent = Intent(this@BundlesListActivity, EditBundleActivity::class.java)
+                intent.putExtra("bundle_id", newBundle.id)
+                startActivity(intent)
+            }
         }
     }
 }

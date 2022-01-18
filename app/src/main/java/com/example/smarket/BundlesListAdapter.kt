@@ -45,9 +45,12 @@ class BundlesListAdapter(private var bundles: MutableList<ShoppingBundle>) :
         val context = viewHolder.itemView.context
         val bundle = bundles[position]
         viewHolder.bundleName.text = bundle.name
-        viewHolder.item1.text = bundle.items.getOrNull(0)?.product?.name ?: ""
-        viewHolder.item2.text = bundle.items.getOrNull(1)?.product?.name ?: ""
-        viewHolder.item3.text = bundle.items.getOrNull(2)?.product?.name ?: ""
+        val item1 = bundle.items.getOrNull(0)?.product?.name ?: ""
+        val item2 = bundle.items.getOrNull(1)?.product?.name ?: ""
+        val item3 = bundle.items.getOrNull(2)?.product?.name ?: ""
+        viewHolder.item1.text = if(item1 == "") item1 else "  -  " + item1
+        viewHolder.item2.text = if(item2 == "") item2 else "  -  " + item2
+        viewHolder.item3.text = if(item3 == "") item3 else "  -  " + item3
         viewHolder.itemView.setOnClickListener {
             val intent = Intent(context, SelectedBundleActivity::class.java)
             intent.putExtra("bundle_id", bundle.id)
