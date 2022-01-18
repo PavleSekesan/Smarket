@@ -1,3 +1,4 @@
+import android.os.Bundle
 import android.util.Log
 import androidx.databinding.ObservableArrayMap
 import androidx.databinding.ObservableMap
@@ -73,7 +74,7 @@ object UserData {
         val name = data["name"] as String
         val price = data["price"] as Double
         val barcode = if(data.containsKey("barcode")) data["barcode"] as String else ""
-        return Product(id,name,price,storeGivenId,barcode)
+        return Product(id,name,price,storeGivenId,barcode, doc.reference)
     }
 
     private suspend fun bundleFromDocument(doc: DocumentSnapshot): ShoppingBundle
@@ -93,10 +94,10 @@ object UserData {
             val quantity =  (productData["quantity"] as Long).toInt()
             val productRef = productData["product"] as DocumentReference
             val productDoc = productRef.get().await()
-            itemsInBundle.add(BundleItem(itemId,measuringUnit,productFromDoc(productDoc),quantity))
+            itemsInBundle.add(BundleItem(itemId,measuringUnit,productFromDoc(productDoc),quantity, itemDoc.reference))
         }
 
-        return ShoppingBundle(id, bundleName, itemsInBundle)
+        return ShoppingBundle(id, bundleName, itemsInBundle, doc.reference)
     }
 
     private suspend fun userOrderFromDocument(doc: DocumentSnapshot): UserOrder
@@ -119,7 +120,7 @@ object UserData {
         {
             bundles.add(bundleFromDocument(bundleRef.get().await()))
         }
-        return UserOrder(id, bundles, date, daysToRepeat, recurring)
+        return UserOrder(id, bundles, date, daysToRepeat, recurring, doc.reference)
     }
 
     private suspend fun fridgeItemFromDocument(doc: DocumentSnapshot): FridgeItem
@@ -131,7 +132,7 @@ object UserData {
         val quantity = data["quantity"] as Long
         val productDoc = ref.get().await()
         val product = productFromDoc(productDoc)
-        return FridgeItem(id,measuringUnit,product,quantity.toInt())
+        return FridgeItem(id,measuringUnit,product,quantity.toInt(),doc.reference)
     }
 
     private suspend fun deliveryFromDocument(doc: DocumentSnapshot): Delivery
@@ -153,7 +154,7 @@ object UserData {
             userOrders.add(userOrderFromDocument(userOrderDoc))
         }
 
-        return Delivery(id,date,userOrders,status)
+        return Delivery(id,date,userOrders,status,doc.reference)
     }
     //endregion
 
@@ -246,7 +247,7 @@ object UserData {
 
         db.collection("UserData").document(auth.uid.toString()).collection("Fridge").document(id)
             .update("quantity", fridgeItem.quantity + delta).await()
-        val newFridgeItem = FridgeItem(id,fridgeItem.measuringUnit, fridgeItem.product,fridgeItem.quantity + delta)
+        val newFridgeItem = FridgeItem(id,fridgeItem.measuringUnit, fridgeItem.product,fridgeItem.quantity + delta, fridgeItem.databaseRef)
         databaseItems[id] = newFridgeItem
         return newFridgeItem
     }
@@ -259,7 +260,7 @@ object UserData {
             "quantity" to quantity
         )
         val newDoc = db.collection("UserData").document(auth.uid.toString()).collection("Fridge").add(data).await()
-        val newFridgeItem = FridgeItem(newDoc.id, measuringUnit,product,quantity)
+        val newFridgeItem = FridgeItem(newDoc.id, measuringUnit,product,quantity, newDoc)
         databaseItems[newFridgeItem.id] = newFridgeItem
         return newFridgeItem
     }
@@ -272,9 +273,9 @@ object UserData {
             "product" to productRef,
             "quantity" to quantity
         )
-        val id = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").document(bundle.id).collection("Products").add(data).await().id
-        val newItem = BundleItem(id,measuringUnit,product,quantity)
-        val newBundle = ShoppingBundle(bundle.id,bundle.name,bundle.items.plus(newItem))
+        val newDoc = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").document(bundle.id).collection("Products").add(data).await()
+        val newItem = BundleItem(newDoc.id,measuringUnit,product,quantity, newDoc)
+        val newBundle = ShoppingBundle(bundle.id,bundle.name,bundle.items.plus(newItem),bundle.databaseRef)
         databaseItems[newBundle.id] = newBundle
         databaseItems[newItem.id] = newItem
         return newItem
@@ -289,7 +290,7 @@ object UserData {
     suspend fun changeBundleName(bundle: ShoppingBundle, newName: String): ShoppingBundle
     {
         db.collection("UserData").document(auth.uid.toString()).collection("Bundles").document(bundle.id).update("name",newName).await()
-        val newBundle = ShoppingBundle(bundle.id,newName,bundle.items)
+        val newBundle = ShoppingBundle(bundle.id,newName,bundle.items,bundle.databaseRef)
         databaseItems[newBundle.id] = newBundle
         return newBundle
     }
@@ -300,14 +301,26 @@ object UserData {
         return changeBundleName(bundle, newName)
     }
 
+    suspend fun updateBundleItemQuantity(bundleItem: BundleItem, delta: Int) : BundleItem
+    {
+        bundleItem.databaseRef.update("quantity",bundleItem.quantity+delta).await()
+        return BundleItem(bundleItem.id,bundleItem.measuringUnit,bundleItem.product,bundleItem.quantity+delta,bundleItem.databaseRef)
+    }
+
+    suspend fun updateBundleItemQuantity(bundleItemId: String, delta: Int) : BundleItem
+    {
+        val bundleItem = databaseItems[bundleItemId]!! as BundleItem
+        return updateBundleItemQuantity(bundleItem,delta)
+    }
+
     suspend fun addNewBundle(name: String): ShoppingBundle
     {
         val data = hashMapOf(
             "name" to name
         )
-        val id = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").add(data).await().id
-        val newBundle = ShoppingBundle(id,name,emptyList())
-        databaseItems[id] = newBundle
+        val doc = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").add(data).await()
+        val newBundle = ShoppingBundle(doc.id,name,emptyList(),doc)
+        databaseItems[doc.id] = newBundle
         return newBundle
     }
     //endregion
@@ -346,6 +359,17 @@ object UserData {
             }
         }
         addOnModifyDatabaseItemListener(wrapper, BundleItem::class.createType())
+    }
+
+    fun addOnBundleModifyListener2(listener: (ShoppingBundle?, DatabaseEventType) -> Unit)
+    {
+        val wrapper: (DatabaseItem?, DatabaseEventType) -> Unit = { databaseItem: DatabaseItem?, databaseEventType: DatabaseEventType ->
+            if(databaseItem is ShoppingBundle)
+            {
+                listener(databaseItem, databaseEventType)
+            }
+        }
+        addOnModifyDatabaseItemListener(wrapper, ShoppingBundle::class.createType())
     }
 
     fun addOnUserOrderModifyListener(listener: (UserOrder?, DatabaseEventType) -> Unit)
@@ -416,11 +440,11 @@ enum class DatabaseEventType {
     ADDED,
     REMOVED
 }
-abstract class DatabaseItem(val id: String)
-class Product(id: String, val name: String, val price: Double, val storeGivenId: String, val barcode: String) : DatabaseItem(id)
-abstract class QuantityItem(id: String, val measuringUnit: String, val product: Product, val quantity: Int) : DatabaseItem(id)
-class FridgeItem(id: String, measuringUnit: String, product: Product, quantity: Int) : QuantityItem(id, measuringUnit, product, quantity)
-class BundleItem(id: String, measuringUnit: String, product: Product, quantity: Int) : QuantityItem(id, measuringUnit, product, quantity)
-class ShoppingBundle(id: String, val name: String, val items: List<BundleItem>): DatabaseItem(id)
-class UserOrder(id: String, val bundles: List<ShoppingBundle>, val date: LocalDateTime, val daysToRepeat: Int, val recurring: Boolean): DatabaseItem(id)
-class Delivery(id: String, val date: LocalDateTime, val userOrders: List<UserOrder>, val status: String): DatabaseItem(id)
+abstract class DatabaseItem(val id: String, val databaseRef: DocumentReference)
+class Product(id: String, val name: String, val price: Double, val storeGivenId: String, val barcode: String, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
+abstract class QuantityItem(id: String, val measuringUnit: String, val product: Product, val quantity: Int, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
+class FridgeItem(id: String, measuringUnit: String, product: Product, quantity: Int, databaseRef: DocumentReference) : QuantityItem(id, measuringUnit, product, quantity, databaseRef)
+class BundleItem(id: String, measuringUnit: String, product: Product, quantity: Int, databaseRef: DocumentReference) : QuantityItem(id, measuringUnit, product, quantity, databaseRef)
+class ShoppingBundle(id: String, val name: String, val items: List<BundleItem>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
+class UserOrder(id: String, val bundles: List<ShoppingBundle>, val date: LocalDateTime, val daysToRepeat: Int, val recurring: Boolean, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
+class Delivery(id: String, val date: LocalDateTime, val userOrders: List<UserOrder>, val status: String, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
