@@ -204,16 +204,16 @@ object UserData {
         return allUserOrders
     }
 
-    suspend fun getAllFridgeItems(): List<FridgeItem>
+    fun getAllFridgeItems()
     {
-        val documents = db.collection("UserData").document(auth.uid.toString()).collection("Fridge").get().await()
-        val allFridgeItems: MutableList<FridgeItem> = mutableListOf()
-        for (document in documents)
-        {
-            val item = fridgeItemFromDocument(document)
-            allFridgeItems.add(item)
+        db.collection("UserData").document(auth.uid.toString()).collection("Fridge").get().addOnSuccessListener { documents->
+            for (document in documents)
+            {
+                GlobalScope.launch {
+                    fridgeItemFromDocument(document)
+                }
+            }
         }
-        return allFridgeItems
     }
 
     suspend fun getAllDeliveries(): List<Delivery>
@@ -256,6 +256,14 @@ object UserData {
             val id = it.id
             ShoppingBundle(id, DatabaseField("name", name), itemsInBundle, it)
         }
+    }
+    suspend fun suspendAddNewBundle(name: String, itemsInBundle: List<BundleItem>) : ShoppingBundle
+    {
+        val data = hashMapOf(
+            "name" to name
+        )
+        val doc = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").add(data).await()
+        return ShoppingBundle(doc.id, DatabaseField("name", name), itemsInBundle, doc)
     }
 
     //endregion
