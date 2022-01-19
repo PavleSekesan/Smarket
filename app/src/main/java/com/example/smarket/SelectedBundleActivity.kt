@@ -1,6 +1,7 @@
 package com.example.smarket
 
 import BundleItem
+import QuantityItem
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -8,7 +9,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.android.synthetic.main.activity_edit_bundle.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -29,7 +29,7 @@ class SelectedBundleActivity : AppCompatActivity() {
         val bundleItemsRecyclerView = findViewById<RecyclerView>(R.id.bundleItemsRecyclerView)
         val bundleTitleTextView = findViewById<TextView>(R.id.bundleTitleTextView)
         bundleItemsRecyclerView.layoutManager = LinearLayoutManager(this)
-        var bundleItemsAdapter = ShoppingItemsListAdapter(mutableListOf(), false)
+        var bundleItemsAdapter = BundleItemsListAdapter(mutableListOf(), false)
         bundleItemsRecyclerView.adapter = bundleItemsAdapter
 
         GlobalScope.launch {
@@ -38,7 +38,7 @@ class SelectedBundleActivity : AppCompatActivity() {
 
             runOnUiThread {
                 bundleTitleTextView.text = bundle.name
-                bundleItemsAdapter = ShoppingItemsListAdapter(bundleItems, false)
+                bundleItemsAdapter = BundleItemsListAdapter(bundleItems, false)
                 bundleItemsRecyclerView.adapter = bundleItemsAdapter
             }
         }

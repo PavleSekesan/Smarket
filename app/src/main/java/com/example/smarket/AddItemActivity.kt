@@ -1,6 +1,7 @@
 package com.example.smarket
 
 import BundleItem
+import QuantityItem
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,16 +11,17 @@ import android.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.initialize
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class AddItemActivity : AppCompatActivity() {
 
-    var addedItems = mutableListOf<BundleItem>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_item)
+
+        val bundleId = intent.getStringExtra("bundle_id")
+        val isFridge = bundleId == null
 
         findViewById<Button>(R.id.scan_barcode_button).setOnClickListener {
             val intent = Intent(this, BarcodeScannerActivity::class.java)
@@ -36,21 +38,21 @@ class AddItemActivity : AppCompatActivity() {
         searchRecycler.layoutManager = LinearLayoutManager(this)
 
         val addedItemsRecycler = findViewById<RecyclerView>(R.id.addedItemsRecycler)
-        val adapter2 = ShoppingItemsListAdapter(mutableListOf(), true)
+        val adapter2 = if (!isFridge) BundleItemsListAdapter(mutableListOf(), true) else FridgeItemsListAdapter(mutableListOf())
         addedItemsAdapter = adapter2
         addedItemsRecycler.adapter = adapter2
         addedItemsRecycler.layoutManager = LinearLayoutManager(this)
 
-        val bundleId = intent.getStringExtra("bundle_id")
+
         searchAdapter.onSearchClicked = { product ->
             GlobalScope.launch {
-                val newItem = if (bundleId != null) {
-                    UserData.addItemToBundle(bundleId, "kom", product, 1)
+                val newItem = if (!isFridge) {
+                    UserData.addItemToBundle(bundleId!!, "kom", product, 1)
                 } else {
                     UserData.addItemToFridge("kom", product, 1)
                 }
                 runOnUiThread {
-                    adapter2.addItem(newItem as BundleItem)
+                    adapter2.addItem(newItem)
                 }
             }
         }
@@ -84,6 +86,6 @@ class AddItemActivity : AppCompatActivity() {
     }
     companion object
     {
-        lateinit var addedItemsAdapter: ShoppingItemsListAdapter
+        lateinit var addedItemsAdapter: QuantityItemsListAdapter
     }
 }

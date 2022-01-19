@@ -1,10 +1,10 @@
 package com.example.smarket
 
 import BundleItem
+import QuantityItem
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,7 +25,7 @@ class EditBundleActivity : AppCompatActivity() {
         val confirmEditFab = findViewById<FloatingActionButton>(R.id.confirmEditFab)
         val addProductButton = findViewById<Button>(R.id.addProductButton)
 
-        var editBundleItemsAdapter = ShoppingItemsListAdapter(mutableListOf(), true)
+        var editBundleItemsAdapter: BundleItemsListAdapter
         editBundleItemsRecyclerView.layoutManager = LinearLayoutManager(this)
 
         GlobalScope.launch {
@@ -33,7 +33,7 @@ class EditBundleActivity : AppCompatActivity() {
             var bundleItems = bundle.items as MutableList<BundleItem>
 
             runOnUiThread {
-                editBundleItemsAdapter = ShoppingItemsListAdapter(bundleItems, true)
+                editBundleItemsAdapter = BundleItemsListAdapter(bundleItems, true)
                 bundleTitleEditText.setText(bundle.name)
                 editBundleItemsRecyclerView.adapter = editBundleItemsAdapter
             }

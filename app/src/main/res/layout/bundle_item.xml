@@ -6,7 +6,7 @@
     android:layout_height="wrap_content">
 
     <TextView
-        android:id="@+id/nameTextView"
+        android:id="@+id/bundleItemNameTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -39,7 +39,7 @@
         android:text="+"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/quantityTextView"
-        app:layout_constraintTop_toBottomOf="@id/nameTextView" />
+        app:layout_constraintTop_toBottomOf="@id/bundleItemNameTextView" />
 
     <TextView
         android:id="@+id/quantityTextView"
@@ -51,7 +51,7 @@
         android:text="4"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/measuringUnitTextView"
-        app:layout_constraintTop_toBottomOf="@id/nameTextView" />
+        app:layout_constraintTop_toBottomOf="@id/bundleItemNameTextView" />
 
     <TextView
         android:id="@+id/measuringUnitTextView"
@@ -63,7 +63,7 @@
         android:text="kom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/subtractButton"
-        app:layout_constraintTop_toBottomOf="@id/nameTextView" />
+        app:layout_constraintTop_toBottomOf="@id/bundleItemNameTextView" />
 
     <Button
         android:id="@+id/subtractButton"
@@ -76,6 +76,6 @@
         android:text="-"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/nameTextView" />
+        app:layout_constraintTop_toBottomOf="@id/bundleItemNameTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -20,6 +20,8 @@ class NewOrderActivity : AppCompatActivity() {
 
         val selectedBundlesList = findViewById<RecyclerView>(R.id.selectedBundlesRecyclerView)
         val unselectedBundlesList = findViewById<RecyclerView>(R.id.unselectedBundlesRecyclerView)
+        selectedBundlesList.layoutManager = LinearLayoutManager(this@NewOrderActivity)
+        unselectedBundlesList.layoutManager = LinearLayoutManager(this@NewOrderActivity)
 
         GlobalScope.launch {
             unselectedBundles = UserData.getAllBundles() as MutableList<ShoppingBundle>
@@ -35,10 +37,10 @@ class NewOrderActivity : AppCompatActivity() {
                 selectedBundlesAdapter.notifyItemInserted(selectedBundles.size)
             }
 
-            selectedBundlesList.adapter = selectedBundlesAdapter
-            unselectedBundlesList.adapter = unselectedBundlesAdapter
-            selectedBundlesList.layoutManager = LinearLayoutManager(this@NewOrderActivity)
-            unselectedBundlesList.layoutManager = LinearLayoutManager(this@NewOrderActivity)
+            runOnUiThread {
+                selectedBundlesList.adapter = selectedBundlesAdapter
+                unselectedBundlesList.adapter = unselectedBundlesAdapter
+            }
         }
     }
 }
