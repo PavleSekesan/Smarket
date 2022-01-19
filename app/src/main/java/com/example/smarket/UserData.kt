@@ -80,6 +80,25 @@ object UserData {
         return Product(id,name,price,storeGivenId,barcode, doc.reference)
     }
 
+    private suspend fun bundleItemFromDocument(doc: DocumentSnapshot): BundleItem {
+        val productData = doc.data!!
+        val itemId = doc.id
+        val measuringUnit = productData["measuring_unit"] as String
+        val quantity = (productData["quantity"] as Long).toInt()
+        val productRef = productData["product"] as DocumentReference
+        val productDoc = productRef.get().await()
+        val newBundleItem = BundleItem(
+            itemId,
+            measuringUnit,
+            productFromDoc(productDoc),
+            quantity,
+            doc.reference
+        )
+        updateDatabaseMapThreadSafe(itemId, newBundleItem)
+        return newBundleItem
+    }
+
+
     private suspend fun bundleFromDocument(doc: DocumentSnapshot): ShoppingBundle
     {
         val id = doc.id
@@ -91,13 +110,7 @@ object UserData {
         Log.d(TAG, itemDocuments.count().toString())
         for(itemDoc in itemDocuments)
         {
-            val productData = itemDoc.data
-            val itemId = itemDoc.id
-            val measuringUnit = productData["measuring_unit"] as String
-            val quantity =  (productData["quantity"] as Long).toInt()
-            val productRef = productData["product"] as DocumentReference
-            val productDoc = productRef.get().await()
-            itemsInBundle.add(BundleItem(itemId,measuringUnit,productFromDoc(productDoc),quantity, itemDoc.reference))
+            itemsInBundle.add(bundleItemFromDocument(itemDoc))
         }
 
         return ShoppingBundle(id, bundleName, itemsInBundle, doc.reference)
@@ -229,9 +242,9 @@ object UserData {
         }
     }
 
-    suspend fun updateFridgeQuantity(fridgeItem: FridgeItem, delta: Int): FridgeItem {
+    suspend fun updateFridgeQuantity(itemToUpdate: FridgeItem, delta: Int): FridgeItem {
+        val fridgeItem = databaseItems[itemToUpdate.id] as FridgeItem
         val id = fridgeItem.id
-
         db.collection("UserData").document(auth.uid.toString()).collection("Fridge").document(id)
             .update("quantity", fridgeItem.quantity + delta).await()
         val newFridgeItem = FridgeItem(id,fridgeItem.measuringUnit, fridgeItem.product,fridgeItem.quantity + delta, fridgeItem.databaseRef)
@@ -252,8 +265,9 @@ object UserData {
         return newFridgeItem
     }
 
-    suspend fun addItemToBundle(bundle: ShoppingBundle, measuringUnit: String, product: Product, quantity: Int) : BundleItem
+    suspend fun addItemToBundle(bundleToUpdate: ShoppingBundle, measuringUnit: String, product: Product, quantity: Int) : BundleItem
     {
+        val bundle = databaseItems[bundleToUpdate.id] as ShoppingBundle
         val productRef = db.collection("Products").document(product.id)
         val data = hashMapOf(
             "measuring_unit" to measuringUnit,
@@ -274,8 +288,9 @@ object UserData {
         return addItemToBundle(bundle, measuringUnit, product, quantity)
     }
 
-    suspend fun changeBundleName(bundle: ShoppingBundle, newName: String): ShoppingBundle
+    suspend fun changeBundleName(bundleToUpdate: ShoppingBundle, newName: String): ShoppingBundle
     {
+        val bundle = databaseItems[bundleToUpdate.id] as ShoppingBundle
         db.collection("UserData").document(auth.uid.toString()).collection("Bundles").document(bundle.id).update("name",newName).await()
         val newBundle = ShoppingBundle(bundle.id,newName,bundle.items,bundle.databaseRef)
         updateDatabaseMapThreadSafe(newBundle.id,newBundle)
@@ -288,10 +303,13 @@ object UserData {
         return changeBundleName(bundle, newName)
     }
 
-    suspend fun updateBundleItemQuantity(bundleItem: BundleItem, delta: Int) : BundleItem
+    suspend fun updateBundleItemQuantity(itemToUpdate: BundleItem, delta: Int) : BundleItem
     {
+        val bundleItem = databaseItems[itemToUpdate.id] as BundleItem
         bundleItem.databaseRef.update("quantity",bundleItem.quantity+delta).await()
-        return BundleItem(bundleItem.id,bundleItem.measuringUnit,bundleItem.product,bundleItem.quantity+delta,bundleItem.databaseRef)
+        val newBundleItem = BundleItem(bundleItem.id,bundleItem.measuringUnit,bundleItem.product,bundleItem.quantity+delta,bundleItem.databaseRef)
+        updateDatabaseMapThreadSafe(bundleItem.id, newBundleItem)
+        return newBundleItem
     }
 
     suspend fun updateBundleItemQuantity(bundleItemId: String, delta: Int) : BundleItem
