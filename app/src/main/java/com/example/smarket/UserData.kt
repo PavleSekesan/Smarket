@@ -1,4 +1,3 @@
-import android.os.Bundle
 import android.util.Log
 import androidx.databinding.ObservableArrayMap
 import androidx.databinding.ObservableMap
@@ -7,13 +6,13 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.auth.User
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
-import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -22,20 +21,15 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
-import kotlin.reflect.jvm.reflect
+import kotlin.reflect.full.memberProperties
 
 object UserData {
     private val TAG = "UserData"
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = Firebase.auth
-    private var bundlesInitialized = false
-    private var fridgeItemsInitialized = false
-    private var userOrdersInitialized = false
-    private var deliveriesInitialized = false
 
     private val databaseItems = ObservableArrayMap<String, DatabaseItem>()
-    private val databaseItemsMutex = Mutex()
 
     // Listeners called when an item is modified (added or removed)
     private val modifyListeners: MutableMap<KType, MutableList<(DatabaseItem?, DatabaseEventType) -> (Unit)>> = mutableMapOf()
@@ -61,7 +55,6 @@ object UserData {
                                 "Fridge" -> fridgeItemFromDocument(doc)
                                 else -> userOrderFromDocument(doc)
                             }
-                            updateDatabaseMapThreadSafe(newItem.id,newItem)
                         }
                     }
                 }
@@ -69,6 +62,54 @@ object UserData {
     }
 
     //region Methods that get objects from the database
+    fun updateFromDatabase(item: DatabaseItem)
+    {
+        item.databaseRef.get().addOnSuccessListener {
+            val data = it.data!!
+            val props = item::class.memberProperties
+            for(prop in props)
+            {
+                val res = prop.getter.call()
+                if(res is DatabaseField<*>)
+                {
+                    val fieldType = res.databaseValue
+                    if (fieldType is Int)
+                    {
+                        val dbFieldCast = res as DatabaseField<Int>
+                        dbFieldCast.databaseValue = data[dbFieldCast.dbName] as Int
+                    }
+                    else if(fieldType is String)
+                    {
+                        val dbFieldCast = res as DatabaseField<String>
+                        dbFieldCast.databaseValue = data[dbFieldCast.dbName] as String
+                    }
+                    else if(fieldType is Boolean)
+                    {
+                        val dbFieldCast = res as DatabaseField<Boolean>
+                        dbFieldCast.databaseValue = data[dbFieldCast.dbName] as Boolean
+                    }
+                    else if(fieldType is LocalDateTime)
+                    {
+                        val dbFieldCast = res as DatabaseField<LocalDateTime>
+                        dbFieldCast.databaseValue = data[dbFieldCast.dbName] as LocalDateTime
+                    }
+                }
+                else if(res is DatabaseItem)
+                {
+
+                }
+                else if(res is List<*>)
+                {
+
+                }
+                else
+                {
+
+                }
+            }
+        }
+    }
+
     fun productFromDoc(doc: DocumentSnapshot): Product
     {
         val id = doc.id
@@ -77,7 +118,12 @@ object UserData {
         val name = data["name"] as String
         val price = data["price"] as Double
         val barcode = if(data.containsKey("barcode")) data["barcode"] as String else ""
-        return Product(id,name,price,storeGivenId,barcode, doc.reference)
+        return Product(id,
+            DatabaseField("name",name),
+            DatabaseField("price",price),
+            DatabaseField("id", storeGivenId),
+            DatabaseField("barcode", barcode),
+            doc.reference)
     }
 
     private suspend fun bundleItemFromDocument(doc: DocumentSnapshot): BundleItem {
@@ -89,12 +135,12 @@ object UserData {
         val productDoc = productRef.get().await()
         val newBundleItem = BundleItem(
             itemId,
-            measuringUnit,
+            DatabaseField("measuring_unit",measuringUnit),
             productFromDoc(productDoc),
-            quantity,
+            DatabaseField("quantity",quantity),
             doc.reference
         )
-        updateDatabaseMapThreadSafe(itemId, newBundleItem)
+        //updateDatabaseMapThreadSafe(itemId, newBundleItem)
         return newBundleItem
     }
 
@@ -113,7 +159,7 @@ object UserData {
             itemsInBundle.add(bundleItemFromDocument(itemDoc))
         }
 
-        return ShoppingBundle(id, bundleName, itemsInBundle, doc.reference)
+        return ShoppingBundle(id, DatabaseField("name",bundleName), itemsInBundle, doc.reference)
     }
 
     private suspend fun userOrderFromDocument(doc: DocumentSnapshot): UserOrder
@@ -136,7 +182,11 @@ object UserData {
         {
             bundles.add(bundleFromDocument(bundleRef.get().await()))
         }
-        return UserOrder(id, bundles, date, daysToRepeat, recurring, doc.reference)
+        return UserOrder(id, bundles,
+            DatabaseField("date",date),
+            DatabaseField("days_to_repeat",daysToRepeat),
+            DatabaseField("recurring",recurring),
+            doc.reference)
     }
 
     private suspend fun fridgeItemFromDocument(doc: DocumentSnapshot): FridgeItem
@@ -148,7 +198,11 @@ object UserData {
         val quantity = data["quantity"] as Long
         val productDoc = ref.get().await()
         val product = productFromDoc(productDoc)
-        return FridgeItem(id,measuringUnit,product,quantity.toInt(),doc.reference)
+        return FridgeItem(id,
+            DatabaseField("measuring_unit",measuringUnit),
+            product,
+            DatabaseField("quantity",quantity.toInt()),
+            doc.reference)
     }
 
     private suspend fun deliveryFromDocument(doc: DocumentSnapshot): Delivery
@@ -170,165 +224,63 @@ object UserData {
             userOrders.add(userOrderFromDocument(userOrderDoc))
         }
 
-        return Delivery(id,date,userOrders,status,doc.reference)
+        return Delivery(id,
+            DatabaseField("date",date),
+            userOrders,
+            DatabaseField("status",status),
+            doc.reference)
     }
     //endregion
 
     //region Methods that get all objects of certain type from DB
-    suspend fun getAllBundles(): List<ShoppingBundle>
+    fun getAllBundles()
     {
-        if (!bundlesInitialized)
-        {
-            val documents = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").get().await()
-            bundlesInitialized = true
-            for (document in documents)
+        val documents = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").get().addOnSuccessListener {
+            for (document in it)
             {
-                val bundle = bundleFromDocument(document)
-                updateDatabaseMapThreadSafe(bundle.id,bundle)
+                GlobalScope.launch {
+                    bundleFromDocument(document)
+                }
             }
         }
-        return databaseItems.filter { kvp -> kvp.value is ShoppingBundle }.values.map { it as ShoppingBundle }
     }
 
     suspend fun getAllUserOrders(): List<UserOrder>
     {
-        if(!userOrdersInitialized)
-        {
-            val documents = db.collection("UserData").document(auth.uid.toString()).collection("Orders").get().await()
-            userOrdersInitialized = true
-            for (document in documents) {
-                val userOrder = userOrderFromDocument(document)
-                updateDatabaseMapThreadSafe(userOrder.id,userOrder)
-            }
+        val documents = db.collection("UserData").document(auth.uid.toString()).collection("Orders").get().await()
+        val allUserOrders: MutableList<UserOrder> = mutableListOf()
+        for (document in documents) {
+            val userOrder = userOrderFromDocument(document)
+            allUserOrders.add(userOrder)
         }
-        return databaseItems.filter { kvp -> kvp.value is UserOrder }.values.map { it as UserOrder }
+        return allUserOrders
     }
 
     suspend fun getAllFridgeItems(): List<FridgeItem>
     {
-        if(!fridgeItemsInitialized)
+        val documents = db.collection("UserData").document(auth.uid.toString()).collection("Fridge").get().await()
+        val allFridgeItems: MutableList<FridgeItem> = mutableListOf()
+        for (document in documents)
         {
-            val documents = db.collection("UserData").document(auth.uid.toString()).collection("Fridge").get().await()
-            fridgeItemsInitialized = true
-            for (document in documents)
-            {
-                val item = fridgeItemFromDocument(document)
-                updateDatabaseMapThreadSafe(item.id,item)
-            }
+            val item = fridgeItemFromDocument(document)
+            allFridgeItems.add(item)
         }
-        return databaseItems.filter { kvp -> kvp.value is FridgeItem }.values.map { it as FridgeItem }
+        return allFridgeItems
     }
 
     suspend fun getAllDeliveries(): List<Delivery>
     {
-        if(!deliveriesInitialized)
-        {
-            deliveriesInitialized = true
-            val documents = db.collection("Orders").whereEqualTo("userId", auth.uid.toString()).get().await()
-            for (document in documents) {
-                val order = deliveryFromDocument(document)
-                updateDatabaseMapThreadSafe(order.id,order)
-            }
+        val documents = db.collection("Orders").whereEqualTo("userId", auth.uid.toString()).get().await()
+        val allDeliveries: MutableList<Delivery> = mutableListOf()
+        for (document in documents) {
+            val delivery = deliveryFromDocument(document)
+            allDeliveries.add(delivery)
         }
-        return databaseItems.filter { kvp -> kvp.value is Delivery }.values.map { it as Delivery }
+
+        return allDeliveries
     }
     //endregion
 
-    //region Methods that edit objects in the database
-    private suspend fun updateDatabaseMapThreadSafe(key: String, newValue: DatabaseItem)
-    {
-        databaseItemsMutex.withLock {
-            databaseItems[key] = newValue
-        }
-    }
-
-    suspend fun updateFridgeQuantity(itemToUpdate: FridgeItem, delta: Int): FridgeItem {
-        val fridgeItem = databaseItems[itemToUpdate.id] as FridgeItem
-        val id = fridgeItem.id
-        db.collection("UserData").document(auth.uid.toString()).collection("Fridge").document(id)
-            .update("quantity", fridgeItem.quantity + delta).await()
-        val newFridgeItem = FridgeItem(id,fridgeItem.measuringUnit, fridgeItem.product,fridgeItem.quantity + delta, fridgeItem.databaseRef)
-        updateDatabaseMapThreadSafe(id,newFridgeItem)
-        return newFridgeItem
-    }
-
-    suspend fun addItemToFridge(measuringUnit: String, product: Product, quantity: Int) : FridgeItem
-    {
-        val data = hashMapOf(
-            "measuring_unit" to measuringUnit,
-            "product" to db.collection("Products").document(product.id),
-            "quantity" to quantity
-        )
-        val newDoc = db.collection("UserData").document(auth.uid.toString()).collection("Fridge").add(data).await()
-        val newFridgeItem = FridgeItem(newDoc.id, measuringUnit,product,quantity, newDoc)
-        updateDatabaseMapThreadSafe(newFridgeItem.id,newFridgeItem)
-        return newFridgeItem
-    }
-
-    suspend fun addItemToBundle(bundleToUpdate: ShoppingBundle, measuringUnit: String, product: Product, quantity: Int) : BundleItem
-    {
-        val bundle = databaseItems[bundleToUpdate.id] as ShoppingBundle
-        val productRef = db.collection("Products").document(product.id)
-        val data = hashMapOf(
-            "measuring_unit" to measuringUnit,
-            "product" to productRef,
-            "quantity" to quantity
-        )
-        val newDoc = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").document(bundle.id).collection("Products").add(data).await()
-        val newItem = BundleItem(newDoc.id,measuringUnit,product,quantity, newDoc)
-        val newBundle = ShoppingBundle(bundle.id,bundle.name,bundle.items.plus(newItem),bundle.databaseRef)
-        updateDatabaseMapThreadSafe(newBundle.id,newBundle)
-        updateDatabaseMapThreadSafe(newItem.id,newItem)
-        return newItem
-    }
-
-    suspend fun addItemToBundle(bundleId: String, measuringUnit: String, product: Product, quantity: Int) : BundleItem
-    {
-        val bundle = databaseItems[bundleId]!! as ShoppingBundle
-        return addItemToBundle(bundle, measuringUnit, product, quantity)
-    }
-
-    suspend fun changeBundleName(bundleToUpdate: ShoppingBundle, newName: String): ShoppingBundle
-    {
-        val bundle = databaseItems[bundleToUpdate.id] as ShoppingBundle
-        db.collection("UserData").document(auth.uid.toString()).collection("Bundles").document(bundle.id).update("name",newName).await()
-        val newBundle = ShoppingBundle(bundle.id,newName,bundle.items,bundle.databaseRef)
-        updateDatabaseMapThreadSafe(newBundle.id,newBundle)
-        return newBundle
-    }
-
-    suspend fun changeBundleName(bundleId: String, newName: String): ShoppingBundle
-    {
-        val bundle = databaseItems[bundleId]!! as ShoppingBundle
-        return changeBundleName(bundle, newName)
-    }
-
-    suspend fun updateBundleItemQuantity(itemToUpdate: BundleItem, delta: Int) : BundleItem
-    {
-        val bundleItem = databaseItems[itemToUpdate.id] as BundleItem
-        bundleItem.databaseRef.update("quantity",bundleItem.quantity+delta).await()
-        val newBundleItem = BundleItem(bundleItem.id,bundleItem.measuringUnit,bundleItem.product,bundleItem.quantity+delta,bundleItem.databaseRef)
-        updateDatabaseMapThreadSafe(bundleItem.id, newBundleItem)
-        return newBundleItem
-    }
-
-    suspend fun updateBundleItemQuantity(bundleItemId: String, delta: Int) : BundleItem
-    {
-        val bundleItem = databaseItems[bundleItemId]!! as BundleItem
-        return updateBundleItemQuantity(bundleItem,delta)
-    }
-
-    suspend fun addNewBundle(name: String): ShoppingBundle
-    {
-        val data = hashMapOf(
-            "name" to name
-        )
-        val doc = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").add(data).await()
-        val newBundle = ShoppingBundle(doc.id,name,emptyList(),doc)
-        updateDatabaseMapThreadSafe(doc.id,newBundle)
-        return newBundle
-    }
-    //endregion
 
     //region Listeners and helper methods
     private fun addOnModifyDatabaseItemListener(listener: (DatabaseItem?, DatabaseEventType) -> Unit, itemType : KType)
@@ -405,51 +357,181 @@ object UserData {
         override fun onMapChanged(sender: ObservableArrayMap<String, DatabaseItem>?, key: String?) {
             if(sender != null && key != null)
             {
-                val dataType: KType
-                val dbItem: DatabaseItem
-                val eventType: DatabaseEventType
-                if(sender.containsKey(key) && copyMap.containsKey(key)) // Item modified
-                {
-                    dataType = sender[key]!!::class.createType()
-                    dbItem = sender[key]!!
-                    eventType = DatabaseEventType.MODIFIED
-                    copyMap[key] = dbItem
-                }
-                else if(sender.containsKey(key) && !copyMap.containsKey(key)) // Item added
-                {
-                    dataType = sender[key]!!::class.createType()
-                    dbItem = sender[key]!!
-                    eventType = DatabaseEventType.ADDED
-                    copyMap[key] = dbItem
-                }
-                else // Item removed
-                {
-                    dataType = copyMap[key]!!::class.createType()
-                    dbItem = copyMap[key]!!
-                    eventType = DatabaseEventType.REMOVED
-                    copyMap.remove(key)
-                }
-                if (modifyListeners.containsKey(dataType)) {
-                    for (listener in modifyListeners[dataType]!!) {
-                        listener(dbItem,eventType)
-                    }
-                }
+
             }
         }
     }
     //endregion
+
+    enum class DatabaseEventType {
+        MODIFIED,
+        ADDED,
+        REMOVED
+    }
+    class DatabaseField<T>(val dbName: String, dbVal: T)
+    {
+        private val mutex = Mutex()
+        private val onChangeListeners: MutableList<(T) -> Unit> = mutableListOf()
+        var databaseValue = dbVal
+            set(value){
+                field=value
+                for(listener in onChangeListeners)
+                {
+                    listener(value)
+                }
+            }
+        fun addOnChangeListener(listener: (T) -> Unit)
+        {
+            GlobalScope.launch {
+                mutex.withLock {
+                    onChangeListeners.add(listener)
+                }
+            }
+        }
+        fun eraseType() : DatabaseField<Any>
+        {
+            return DatabaseField(dbName, this.databaseValue as Any)
+        }
+    }
+    abstract class DatabaseItem(val id: String, val databaseRef: DocumentReference)
+    {
+        private val onFieldChangeListeners: MutableList<(DatabaseField<Any>)->Unit> = mutableListOf()
+        private val onSubitemChangeListeners: MutableList<(DatabaseItem)->Unit> = mutableListOf()
+        private val fieldChangeMutex = Mutex()
+        private val subitemChangeMutex = Mutex()
+
+        private fun parseAndNotifyGroupListeners()
+        {
+            val dataType: KType = this::class.createType()
+            val eventType: DatabaseEventType = DatabaseEventType.MODIFIED
+
+            if (modifyListeners.containsKey(dataType)) {
+                for (listener in modifyListeners[dataType]!!) {
+                    listener(this,eventType)
+                }
+            }
+        }
+        init {
+            parseAndNotifyGroupListeners()
+        }
+
+        protected fun notifyFieldListeners(fieldChanged: DatabaseField<Any>)
+        {
+            databaseRef.update(fieldChanged.dbName, fieldChanged.databaseValue).addOnSuccessListener {
+                for(listener in onFieldChangeListeners)
+                {
+                    listener(fieldChanged)
+                }
+                parseAndNotifyGroupListeners()
+            }.addOnFailureListener {
+                    e -> Log.w(TAG, "Error updating document", e)
+            }
+        }
+        fun addOnFieldChangeListener(listener:(DatabaseField<Any>) -> Unit)
+        {
+            GlobalScope.launch {
+                fieldChangeMutex.withLock {
+                    onFieldChangeListeners.add(listener)
+                }
+            }
+        }
+        protected fun notifySubitemListeners(databaseItemChanged: DatabaseItem)
+        {
+            for(listener in onSubitemChangeListeners)
+            {
+                listener(databaseItemChanged)
+            }
+            parseAndNotifyGroupListeners()
+        }
+        fun addOnSubitemChangeListener(listener:(DatabaseItem) -> Unit)
+        {
+            GlobalScope.launch {
+                subitemChangeMutex.withLock {
+                    onSubitemChangeListeners.add(listener)
+                }
+            }
+        }
+    }
+    class Product(id: String, val name: DatabaseField<String>, val price: DatabaseField<Double>, val storeGivenId: DatabaseField<String>, val barcode: DatabaseField<String>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
+    {
+        init {
+            name.addOnChangeListener { notifyFieldListeners(name.eraseType()) }
+            price.addOnChangeListener { notifyFieldListeners(price.eraseType()) }
+            storeGivenId.addOnChangeListener { notifyFieldListeners(storeGivenId.eraseType()) }
+            barcode.addOnChangeListener { notifyFieldListeners(barcode.eraseType()) }
+        }
+    }
+    abstract class QuantityItem(id: String, val measuringUnit: DatabaseField<String>, val product: Product, val quantity: DatabaseField<Int>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
+    {
+        init {
+            measuringUnit.addOnChangeListener { notifyFieldListeners(measuringUnit.eraseType()) }
+            quantity.addOnChangeListener { notifyFieldListeners(quantity.eraseType()) }
+            measuringUnit.addOnChangeListener { notifyFieldListeners(measuringUnit.eraseType()) }
+            product.addOnFieldChangeListener { notifySubitemListeners(product) }
+        }
+    }
+
+    class FridgeItem(id: String, measuringUnit: DatabaseField<String>, product: Product, quantity: DatabaseField<Int>, databaseRef: DocumentReference) : QuantityItem(id, measuringUnit, product, quantity, databaseRef)
+    class BundleItem(id: String, measuringUnit: DatabaseField<String>, product: Product, quantity: DatabaseField<Int>, databaseRef: DocumentReference) : QuantityItem(id, measuringUnit, product, quantity, databaseRef)
+
+    class ShoppingBundle(id: String, val name: DatabaseField<String>, bundleItems: List<BundleItem>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
+    {
+        var items: List<BundleItem> = bundleItems
+            private set
+        init {
+            name.addOnChangeListener { notifyFieldListeners(name.eraseType()) }
+            for(item in items)
+            {
+                item.addOnFieldChangeListener { notifySubitemListeners(item) }
+            }
+        }
+        fun addBundleItem(newBundleItem: BundleItem)
+        {
+            items = items.plus(newBundleItem)
+            newBundleItem.addOnFieldChangeListener { notifySubitemListeners(newBundleItem) }
+        }
+    }
+    class UserOrder(id: String, shoppingBundles: List<ShoppingBundle>, val date: DatabaseField<LocalDateTime>, val daysToRepeat: DatabaseField<Int>, val recurring: DatabaseField<Boolean>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
+    {
+        var bundles: List<ShoppingBundle> = shoppingBundles
+            private set
+        init {
+            date.addOnChangeListener { notifyFieldListeners(date.eraseType()) }
+            daysToRepeat.addOnChangeListener { notifyFieldListeners(daysToRepeat.eraseType()) }
+            recurring.addOnChangeListener { notifyFieldListeners(recurring.eraseType()) }
+            for(bundle in bundles)
+            {
+                bundle.addOnFieldChangeListener { notifySubitemListeners(bundle) }
+                bundle.addOnSubitemChangeListener { notifySubitemListeners(bundle) }
+            }
+        }
+        fun addBunlde(newBundle: ShoppingBundle)
+        {
+            bundles = bundles.plus(newBundle)
+            newBundle.addOnFieldChangeListener { notifySubitemListeners(newBundle) }
+            newBundle.addOnSubitemChangeListener { notifySubitemListeners(newBundle) }
+        }
+    }
+    class Delivery(id: String, val date: DatabaseField<LocalDateTime>, userOrders: List<UserOrder>, val status: DatabaseField<String>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
+    {
+        var userOrders: List<UserOrder> = userOrders
+            private set
+        init {
+            date.addOnChangeListener { notifyFieldListeners(date.eraseType()) }
+            status.addOnChangeListener { notifyFieldListeners(status.eraseType()) }
+            for(userOrder in userOrders)
+            {
+                userOrder.addOnFieldChangeListener { notifySubitemListeners(userOrder) }
+                userOrder.addOnSubitemChangeListener { notifySubitemListeners(userOrder) }
+            }
+        }
+        fun addUserOrder(newUserOrder: UserOrder)
+        {
+            userOrders = userOrders.plus(newUserOrder)
+            newUserOrder.addOnFieldChangeListener { notifySubitemListeners(newUserOrder) }
+            newUserOrder.addOnSubitemChangeListener { notifySubitemListeners(newUserOrder) }
+        }
+
+    }
 }
 
-enum class DatabaseEventType {
-    MODIFIED,
-    ADDED,
-    REMOVED
-}
-abstract class DatabaseItem(val id: String, val databaseRef: DocumentReference)
-class Product(id: String, val name: String, val price: Double, val storeGivenId: String, val barcode: String, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
-abstract class QuantityItem(id: String, val measuringUnit: String, val product: Product, val quantity: Int, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
-class FridgeItem(id: String, measuringUnit: String, product: Product, quantity: Int, databaseRef: DocumentReference) : QuantityItem(id, measuringUnit, product, quantity, databaseRef)
-class BundleItem(id: String, measuringUnit: String, product: Product, quantity: Int, databaseRef: DocumentReference) : QuantityItem(id, measuringUnit, product, quantity, databaseRef)
-class ShoppingBundle(id: String, val name: String, val items: List<BundleItem>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
-class UserOrder(id: String, val bundles: List<ShoppingBundle>, val date: LocalDateTime, val daysToRepeat: Int, val recurring: Boolean, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
-class Delivery(id: String, val date: LocalDateTime, val userOrders: List<UserOrder>, val status: String, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
