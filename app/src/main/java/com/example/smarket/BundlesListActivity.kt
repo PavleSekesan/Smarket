@@ -18,7 +18,7 @@ class BundlesListActivity : AppCompatActivity() {
 
         val bundlesRecyclerView = findViewById<RecyclerView>(R.id.bundlesRecyclerView)
         GlobalScope.launch {
-            val adapter = BundlesListAdapter(UserData.getAllBundles() as MutableList<ShoppingBundle>)
+            val adapter = BundlesListAdapter(UserData.getAllBundles().toMutableList())
             runOnUiThread {
                 bundlesRecyclerView.adapter = adapter
                 bundlesRecyclerView.layoutManager = GridLayoutManager(this@BundlesListActivity, 2)

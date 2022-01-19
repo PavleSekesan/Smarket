@@ -2,6 +2,9 @@ package com.example.smarket
 
 import FridgeItem
 import QuantityItem
+import android.app.Activity
+import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +13,27 @@ import android.widget.TextView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class FridgeItemsListAdapter (private var fridgeItems: MutableList<FridgeItem>) : QuantityItemsListAdapter(fridgeItems as MutableList<QuantityItem>) {
+class FridgeItemsListAdapter (private val context: Context, private var fridgeItems: MutableList<FridgeItem>) : QuantityItemsListAdapter(context, fridgeItems as MutableList<QuantityItem>) {
+    init {
+        UserData.addOnFridgeModifyListener { fridgeItem, databaseEventType ->
+            when (databaseEventType) {
+                DatabaseEventType.MODIFIED -> {
+                    (context as Activity).runOnUiThread {
+                        update(fridgeItem!!)
+                    }
+                }
+                DatabaseEventType.ADDED -> {
+                    (context as Activity).runOnUiThread {
+                        addItem(fridgeItem!!)
+                    }
+                }
+                DatabaseEventType.REMOVED -> {
+                    Log.d("abb", "izbaceno")
+                }
+            }
+        }
+    }
+
     inner class ViewHolder(view: View) : QuantityViewHolder(view) {
         override val itemName : TextView = view.findViewById(R.id.fridgeItemNameTextView)
         override val quantity: TextView = view.findViewById(R.id.fridgeItemQuantityTextView)

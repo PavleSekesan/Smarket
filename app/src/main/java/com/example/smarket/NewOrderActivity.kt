@@ -24,7 +24,7 @@ class NewOrderActivity : AppCompatActivity() {
         unselectedBundlesList.layoutManager = LinearLayoutManager(this@NewOrderActivity)
 
         GlobalScope.launch {
-            unselectedBundles = UserData.getAllBundles() as MutableList<ShoppingBundle>
+            unselectedBundles = UserData.getAllBundles().toMutableList()
 
             val selectedBundlesAdapter = BundleSelectionAdapter(selectedBundles)
             val unselectedBundlesAdapter = BundleSelectionAdapter(unselectedBundles)

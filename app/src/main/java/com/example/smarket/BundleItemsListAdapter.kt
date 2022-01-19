@@ -9,8 +9,33 @@ import android.widget.Button
 import android.widget.TextView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import androidx.appcompat.app.AppCompatActivity
+import android.app.Activity
+import android.content.Context
 
-class BundleItemsListAdapter(private var bundleItems: MutableList<BundleItem>, private val editable : Boolean) : QuantityItemsListAdapter(bundleItems as MutableList<QuantityItem>) {
+
+class BundleItemsListAdapter(private val context : Context, private var bundleItems: MutableList<BundleItem>, private val editable : Boolean) : QuantityItemsListAdapter(context, bundleItems as MutableList<QuantityItem>) {
+    init {
+        // TODO handle bundle title modification
+        UserData.addOnBundleModifyListener { bundleItem, databaseEventType ->
+            when (databaseEventType) {
+                DatabaseEventType.MODIFIED -> {
+                    (context as Activity).runOnUiThread {
+                        update(bundleItem!!)
+                    }
+                }
+                DatabaseEventType.ADDED -> {
+                    (context as Activity).runOnUiThread {
+                        addItem(bundleItem!!)
+                    }
+                }
+                DatabaseEventType.REMOVED -> {
+                    // TODO Handle removal
+                }
+            }
+        }
+    }
+
     inner class ViewHolder(view: View) : QuantityViewHolder(view) {
         override val itemName : TextView = view.findViewById(R.id.bundleItemNameTextView)
         override val quantity: TextView = view.findViewById(R.id.quantityTextView)

@@ -29,35 +29,17 @@ class SelectedBundleActivity : AppCompatActivity() {
         val bundleItemsRecyclerView = findViewById<RecyclerView>(R.id.bundleItemsRecyclerView)
         val bundleTitleTextView = findViewById<TextView>(R.id.bundleTitleTextView)
         bundleItemsRecyclerView.layoutManager = LinearLayoutManager(this)
-        var bundleItemsAdapter = BundleItemsListAdapter(mutableListOf(), false)
+        var bundleItemsAdapter = BundleItemsListAdapter(this, mutableListOf(), false)
         bundleItemsRecyclerView.adapter = bundleItemsAdapter
 
         GlobalScope.launch {
-            val bundle = UserData.getAllBundles().find{ it.id == bundleId }!!
-            val bundleItems = bundle.items as MutableList<BundleItem>
+            val bundle = UserData.getAllBundles().find { it.id == bundleId }!!
+            val bundleItems = bundle.items.toMutableList()
 
             runOnUiThread {
                 bundleTitleTextView.text = bundle.name
-                bundleItemsAdapter = BundleItemsListAdapter(bundleItems, false)
+                bundleItemsAdapter = BundleItemsListAdapter(this@SelectedBundleActivity, bundleItems, false)
                 bundleItemsRecyclerView.adapter = bundleItemsAdapter
-            }
-        }
-
-
-        // TODO handle bundle title modification
-        UserData.addOnBundleModifyListener { bundleItem, databaseEventType ->
-            if (databaseEventType == DatabaseEventType.MODIFIED) {
-                // TODO Handle modification
-            }
-            else if (databaseEventType == DatabaseEventType.ADDED) {
-                runOnUiThread {
-                    bundleItemsAdapter.addItem(bundleItem!!)
-                    //bundleItemsAdapter.clearItems()
-                    // FIXME double adding to RecyclerView
-                }
-            }
-            else if (databaseEventType == DatabaseEventType.REMOVED) {
-                // TODO Handle removal
             }
         }
     }

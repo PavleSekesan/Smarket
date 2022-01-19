@@ -38,7 +38,7 @@ class AddItemActivity : AppCompatActivity() {
         searchRecycler.layoutManager = LinearLayoutManager(this)
 
         val addedItemsRecycler = findViewById<RecyclerView>(R.id.addedItemsRecycler)
-        val adapter2 = if (!isFridge) BundleItemsListAdapter(mutableListOf(), true) else FridgeItemsListAdapter(mutableListOf())
+        val adapter2 = if (!isFridge) BundleItemsListAdapter(this, mutableListOf(), true) else FridgeItemsListAdapter(this, mutableListOf())
         addedItemsAdapter = adapter2
         addedItemsRecycler.adapter = adapter2
         addedItemsRecycler.layoutManager = LinearLayoutManager(this)
@@ -50,9 +50,6 @@ class AddItemActivity : AppCompatActivity() {
                     UserData.addItemToBundle(bundleId!!, "kom", product, 1)
                 } else {
                     UserData.addItemToFridge("kom", product, 1)
-                }
-                runOnUiThread {
-                    adapter2.addItem(newItem)
                 }
             }
         }

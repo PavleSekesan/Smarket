@@ -30,29 +30,13 @@ class EditBundleActivity : AppCompatActivity() {
 
         GlobalScope.launch {
             val bundle = UserData.getAllBundles().find { it.id == bundleId }!!
-            var bundleItems = bundle.items as MutableList<BundleItem>
+            var bundleItems = bundle.items.toMutableList()
 
             runOnUiThread {
-                editBundleItemsAdapter = BundleItemsListAdapter(bundleItems, true)
+                editBundleItemsAdapter = BundleItemsListAdapter(this@EditBundleActivity, bundleItems, true)
                 bundleTitleEditText.setText(bundle.name)
                 editBundleItemsRecyclerView.adapter = editBundleItemsAdapter
             }
-
-//                UserData.addOnBundleModifyListener { bundleItem, databaseEventType ->
-//                    if (databaseEventType == DatabaseEventType.MODIFIED) {
-//                        // TODO Handle modification
-//                    }
-//                    else if (databaseEventType == DatabaseEventType.ADDED) {
-//                        runOnUiThread {
-//                            Log.d("velikaKitAAA", "nesto")
-//                            bundleItemsAdapter.addItem(bundleItem!!)
-//                            // FIXME double adding to RecyclerView
-//                        }
-//                    }
-//                    else if (databaseEventType == DatabaseEventType.REMOVED) {
-//                        // TODO Handle removal
-//                    }
-//                }
         }
 
         confirmEditFab.setOnClickListener {

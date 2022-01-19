@@ -22,9 +22,9 @@ class FridgeActivity : AppCompatActivity() {
 
         fridgeItemsRecyclerView.layoutManager = LinearLayoutManager(this)
         GlobalScope.launch {
-            val fridgeItems = UserData.getAllFridgeItems() as MutableList<FridgeItem>
+            val fridgeItems = UserData.getAllFridgeItems().toMutableList()
             runOnUiThread {
-                fridgeItemsRecyclerView.adapter = FridgeItemsListAdapter(fridgeItems)
+                fridgeItemsRecyclerView.adapter = FridgeItemsListAdapter(this@FridgeActivity, fridgeItems)
             }
         }
 
