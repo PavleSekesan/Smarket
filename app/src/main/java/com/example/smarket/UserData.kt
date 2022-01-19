@@ -29,14 +29,11 @@ object UserData {
     private val db = FirebaseFirestore.getInstance()
     private val auth = Firebase.auth
 
-    private val databaseItems = ObservableArrayMap<String, DatabaseItem>()
 
     // Listeners called when an item is modified (added or removed)
     private val modifyListeners: MutableMap<KType, MutableList<(DatabaseItem?, DatabaseEventType) -> (Unit)>> = mutableMapOf()
 
     init {
-        databaseItems.addOnMapChangedCallback(ObservableMapListener())
-
         val collectionsToListen = listOf("Bundles", "Fridge", "Orders")
         for (collection in collectionsToListen)
         {
@@ -62,54 +59,6 @@ object UserData {
     }
 
     //region Methods that get objects from the database
-    fun updateFromDatabase(item: DatabaseItem)
-    {
-        item.databaseRef.get().addOnSuccessListener {
-            val data = it.data!!
-            val props = item::class.memberProperties
-            for(prop in props)
-            {
-                val res = prop.getter.call()
-                if(res is DatabaseField<*>)
-                {
-                    val fieldType = res.databaseValue
-                    if (fieldType is Int)
-                    {
-                        val dbFieldCast = res as DatabaseField<Int>
-                        dbFieldCast.databaseValue = data[dbFieldCast.dbName] as Int
-                    }
-                    else if(fieldType is String)
-                    {
-                        val dbFieldCast = res as DatabaseField<String>
-                        dbFieldCast.databaseValue = data[dbFieldCast.dbName] as String
-                    }
-                    else if(fieldType is Boolean)
-                    {
-                        val dbFieldCast = res as DatabaseField<Boolean>
-                        dbFieldCast.databaseValue = data[dbFieldCast.dbName] as Boolean
-                    }
-                    else if(fieldType is LocalDateTime)
-                    {
-                        val dbFieldCast = res as DatabaseField<LocalDateTime>
-                        dbFieldCast.databaseValue = data[dbFieldCast.dbName] as LocalDateTime
-                    }
-                }
-                else if(res is DatabaseItem)
-                {
-
-                }
-                else if(res is List<*>)
-                {
-
-                }
-                else
-                {
-
-                }
-            }
-        }
-    }
-
     fun productFromDoc(doc: DocumentSnapshot): Product
     {
         val id = doc.id
@@ -143,7 +92,6 @@ object UserData {
         //updateDatabaseMapThreadSafe(itemId, newBundleItem)
         return newBundleItem
     }
-
 
     private suspend fun bundleFromDocument(doc: DocumentSnapshot): ShoppingBundle
     {
@@ -281,6 +229,36 @@ object UserData {
     }
     //endregion
 
+    //region Methods that instantiate new database objects
+    fun addNewFridgeItem(measuringUnit: String, product: Product, quantity: Int)
+    {
+        val data = hashMapOf(
+            "measuring_unit" to measuringUnit,
+            "product" to product.databaseRef,
+            "quantity" to quantity
+        )
+        db.collection("UserData").document(auth.uid.toString()).collection("Fridge").add(data).addOnSuccessListener {
+            val id = it.id
+            FridgeItem(id,
+                DatabaseField("measuring_unit",measuringUnit),
+                product,
+                DatabaseField("quantity",quantity),
+                it)
+        }
+    }
+
+    fun addNewBundle(name: String, itemsInBundle: List<BundleItem>)
+    {
+        val data = hashMapOf(
+            "name" to name
+        )
+        db.collection("UserData").document(auth.uid.toString()).collection("Bundles").add(data).addOnSuccessListener {
+            val id = it.id
+            ShoppingBundle(id, DatabaseField("name", name), itemsInBundle, it)
+        }
+    }
+
+    //endregion
 
     //region Listeners and helper methods
     private fun addOnModifyDatabaseItemListener(listener: (DatabaseItem?, DatabaseEventType) -> Unit, itemType : KType)
@@ -351,16 +329,6 @@ object UserData {
         addOnModifyDatabaseItemListener(wrapper, Delivery::class.createType())
     }
 
-    class ObservableMapListener: ObservableMap.OnMapChangedCallback<ObservableArrayMap<String,DatabaseItem>,String,DatabaseItem>()
-    {
-        private val copyMap = mutableMapOf<String,DatabaseItem>()
-        override fun onMapChanged(sender: ObservableArrayMap<String, DatabaseItem>?, key: String?) {
-            if(sender != null && key != null)
-            {
-
-            }
-        }
-    }
     //endregion
 
     enum class DatabaseEventType {
@@ -459,6 +427,7 @@ object UserData {
             price.addOnChangeListener { notifyFieldListeners(price.eraseType()) }
             storeGivenId.addOnChangeListener { notifyFieldListeners(storeGivenId.eraseType()) }
             barcode.addOnChangeListener { notifyFieldListeners(barcode.eraseType()) }
+
         }
     }
     abstract class QuantityItem(id: String, val measuringUnit: DatabaseField<String>, val product: Product, val quantity: DatabaseField<Int>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
@@ -472,6 +441,7 @@ object UserData {
     }
 
     class FridgeItem(id: String, measuringUnit: DatabaseField<String>, product: Product, quantity: DatabaseField<Int>, databaseRef: DocumentReference) : QuantityItem(id, measuringUnit, product, quantity, databaseRef)
+
     class BundleItem(id: String, measuringUnit: DatabaseField<String>, product: Product, quantity: DatabaseField<Int>, databaseRef: DocumentReference) : QuantityItem(id, measuringUnit, product, quantity, databaseRef)
 
     class ShoppingBundle(id: String, val name: DatabaseField<String>, bundleItems: List<BundleItem>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
@@ -485,10 +455,25 @@ object UserData {
                 item.addOnFieldChangeListener { notifySubitemListeners(item) }
             }
         }
-        fun addBundleItem(newBundleItem: BundleItem)
+        fun addBundleItem(measuringUnit: String, product: Product, quantity: Int)
         {
-            items = items.plus(newBundleItem)
-            newBundleItem.addOnFieldChangeListener { notifySubitemListeners(newBundleItem) }
+            val data = hashMapOf(
+                "measuring_unit" to measuringUnit,
+                "quantity" to quantity
+            )
+            this.databaseRef.collection("Products").add(data).addOnSuccessListener {
+                val id = it.id
+                val newBundleItem = BundleItem(
+                    id,
+                    DatabaseField("measuring_unit",measuringUnit),
+                    product,
+                    DatabaseField("quantity",quantity),
+                    it
+                )
+                items = items.plus(newBundleItem)
+                newBundleItem.addOnFieldChangeListener { notifySubitemListeners(newBundleItem) }
+            }
+
         }
     }
     class UserOrder(id: String, shoppingBundles: List<ShoppingBundle>, val date: DatabaseField<LocalDateTime>, val daysToRepeat: DatabaseField<Int>, val recurring: DatabaseField<Boolean>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
