@@ -46,6 +46,7 @@ object UserData {
 
                     Log.d(TAG, "Received $collection update from DB")
                     for (doc in value!!) {
+                        Log.d(TAG, "Firebase listener $collection: ${doc.id}")
                         GlobalScope.launch {
                             val newItem = when(collection) {
                                 "Bundles" -> bundleFromDocument(doc)
@@ -376,19 +377,15 @@ object UserData {
         private val fieldChangeMutex = Mutex()
         private val subitemChangeMutex = Mutex()
 
-        private fun parseAndNotifyGroupListeners()
+        protected fun parseAndNotifyGroupListeners(eventType: DatabaseEventType)
         {
             val dataType: KType = this::class.createType()
-            val eventType: DatabaseEventType = DatabaseEventType.MODIFIED
 
             if (modifyListeners.containsKey(dataType)) {
                 for (listener in modifyListeners[dataType]!!) {
                     listener(this,eventType)
                 }
             }
-        }
-        init {
-            parseAndNotifyGroupListeners()
         }
 
         protected fun notifyFieldListeners(fieldChanged: DatabaseField<Any>)
@@ -398,7 +395,7 @@ object UserData {
                 {
                     listener(fieldChanged)
                 }
-                parseAndNotifyGroupListeners()
+                parseAndNotifyGroupListeners(DatabaseEventType.MODIFIED)
             }.addOnFailureListener {
                     e -> Log.w(TAG, "Error updating document", e)
             }
@@ -417,7 +414,7 @@ object UserData {
             {
                 listener(databaseItemChanged)
             }
-            parseAndNotifyGroupListeners()
+            parseAndNotifyGroupListeners(DatabaseEventType.MODIFIED)
         }
         fun addOnSubitemChangeListener(listener:(DatabaseItem) -> Unit)
         {
@@ -435,7 +432,7 @@ object UserData {
             price.addOnChangeListener { notifyFieldListeners(price.eraseType()) }
             storeGivenId.addOnChangeListener { notifyFieldListeners(storeGivenId.eraseType()) }
             barcode.addOnChangeListener { notifyFieldListeners(barcode.eraseType()) }
-
+            super.parseAndNotifyGroupListeners(DatabaseEventType.ADDED)
         }
     }
     abstract class QuantityItem(id: String, val measuringUnit: DatabaseField<String>, val product: Product, val quantity: DatabaseField<Int>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
@@ -445,6 +442,7 @@ object UserData {
             quantity.addOnChangeListener { notifyFieldListeners(quantity.eraseType()) }
             measuringUnit.addOnChangeListener { notifyFieldListeners(measuringUnit.eraseType()) }
             product.addOnFieldChangeListener { notifySubitemListeners(product) }
+            super.parseAndNotifyGroupListeners(DatabaseEventType.ADDED)
         }
     }
 
@@ -462,6 +460,7 @@ object UserData {
             {
                 item.addOnFieldChangeListener { notifySubitemListeners(item) }
             }
+            super.parseAndNotifyGroupListeners(DatabaseEventType.ADDED)
         }
         fun addBundleItem(measuringUnit: String, product: Product, quantity: Int)
         {
@@ -497,6 +496,7 @@ object UserData {
                 bundle.addOnFieldChangeListener { notifySubitemListeners(bundle) }
                 bundle.addOnSubitemChangeListener { notifySubitemListeners(bundle) }
             }
+            super.parseAndNotifyGroupListeners(DatabaseEventType.ADDED)
         }
         fun addBunlde(newBundle: ShoppingBundle)
         {
@@ -517,6 +517,7 @@ object UserData {
                 userOrder.addOnFieldChangeListener { notifySubitemListeners(userOrder) }
                 userOrder.addOnSubitemChangeListener { notifySubitemListeners(userOrder) }
             }
+            super.parseAndNotifyGroupListeners(DatabaseEventType.ADDED)
         }
         fun addUserOrder(newUserOrder: UserOrder)
         {
