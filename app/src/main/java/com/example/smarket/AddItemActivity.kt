@@ -1,6 +1,7 @@
 package com.example.smarket
 
 import UserData.ShoppingBundle
+import UserData.getAllBundles
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -9,7 +10,6 @@ import android.widget.Button
 import android.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.smarket.MainActivity.Companion.bundles
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 
@@ -18,10 +18,6 @@ class AddItemActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_item)
-
-        //val bundle = Gson().fromJson(intent.getStringExtra("bundle"), ShoppingBundle::class.java)
-        val bundle = bundles.find { it.id == intent.getStringExtra("bundle_id") }
-        val isFridge = bundle == null
 
         findViewById<Button>(R.id.scan_barcode_button).setOnClickListener {
             val intent = Intent(this, BarcodeScannerActivity::class.java)
@@ -38,23 +34,7 @@ class AddItemActivity : AppCompatActivity() {
         searchRecycler.layoutManager = LinearLayoutManager(this)
 
         val addedItemsRecycler = findViewById<RecyclerView>(R.id.addedItemsRecycler)
-        val addedItemsAdapterLocal = if (!isFridge) BundleItemsListAdapter(bundle!!, true, false) else FridgeItemsListAdapter(mutableListOf())
-        addedItemsAdapter = addedItemsAdapterLocal
-        addedItemsRecycler.adapter = addedItemsAdapterLocal
         addedItemsRecycler.layoutManager = LinearLayoutManager(this)
-
-
-        searchAdapter.onSearchClicked = { product ->
-            // FIXME Uncomment when suspend functions are added
-            throw NotImplementedError("Search should be fixed")
-//            GlobalScope.launch {
-//                val newItem = if (!isFridge) {
-//                    UserData.suspendAddItemToBundle(bundle, "kom", product, 1)
-//                } else {
-//                    UserData.suspendAddItemToFridge("kom", product, 1)
-//                }
-//            }
-        }
 
         val productSearch: SearchView = findViewById(R.id.productSearchView)
         productSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -82,6 +62,23 @@ class AddItemActivity : AppCompatActivity() {
                 return true
             }
         })
+
+        getAllBundles().addOnSuccessListener { allBundles ->
+            val bundle = allBundles.find { it.id == intent.getStringExtra("bundle_id") } as ShoppingBundle?
+            val isFridge = bundle == null
+
+            val addedItemsAdapterLocal = if (!isFridge) BundleItemsListAdapter(bundle!!, true, false) else FridgeItemsListAdapter(mutableListOf())
+            addedItemsAdapter = addedItemsAdapterLocal
+            addedItemsRecycler.adapter = addedItemsAdapter
+
+            searchAdapter.onSearchClicked = { product ->
+                if (!isFridge) {
+                    bundle!!.addBundleItem("kom", product, 1)
+                } else {
+                    UserData.addNewFridgeItem("kom", product, 1)
+                }
+            }
+        }
     }
     companion object
     {

@@ -55,12 +55,10 @@ object UserData {
                     Log.d(TAG, "Received $collection update from DB")
                     for (doc in value!!) {
                         Log.d(TAG, "Firebase listener $collection: ${doc.id}")
-                        GlobalScope.launch {
-//                            val newItem = when(collection) {
-//                                "Bundles" -> bundleFromDocument(doc)
-//                                "Fridge" -> fridgeItemFromDocument(doc)
-//                                else -> userOrderFromDocument(doc)
-//                            }
+                        val newItem = when(collection) {
+                            "Bundles" -> bundleFromDocument(doc)
+                            "Fridge" -> fridgeItemFromDocument(doc)
+                            else -> userOrderFromDocument(doc)
                         }
                     }
                 }

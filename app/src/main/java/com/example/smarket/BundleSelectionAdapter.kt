@@ -37,6 +37,7 @@ class BundleSelectionAdapter(
         // contents of the view with that element
         val bundle = bundles[position]
         viewHolder.bundleName.text = bundle.name.databaseValue
+        bundle.name.addOnChangeListener { viewHolder.bundleName.text = it }
         viewHolder.itemView.setOnClickListener {
             onSelection(bundle)
             bundles.removeAt(viewHolder.bindingAdapterPosition)

@@ -15,7 +15,7 @@ abstract class QuantityItemsListAdapter :
      * (custom ViewHolder).
      */
 
-    protected var items: MutableList<QuantityItem> = mutableListOf()
+    protected var items: List<QuantityItem> = listOf()
 
     abstract inner class QuantityViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         abstract val itemName: TextView
@@ -25,30 +25,30 @@ abstract class QuantityItemsListAdapter :
         abstract val subtract: Button
     }
 
-    fun clearItems() {
-        items.clear()
-        notifyDataSetChanged()
-    }
-
-    fun removeItem(item : QuantityItem) {
-        val removePos = items.indexOf(items.find { it == item })
-        items.removeAt(removePos)
-        notifyItemRemoved(removePos)
-    }
-
-    fun updateItem(modifiedItem : QuantityItem) {
-        val changedItemPos = items.indexOf(items.find { it.id == modifiedItem.id })
-        if (changedItemPos != -1) {
-            Log.d("adapterUpdate", this.toString())
-            items[changedItemPos] = modifiedItem
-            notifyItemChanged(changedItemPos)
-        }
-    }
-
-    fun addItem(newItem: QuantityItem) {
-        items.add(newItem)
-        super.notifyItemInserted(items.size)
-    }
+//    fun clearItems() {
+//        items.clear()
+//        notifyDataSetChanged()
+//    }
+//
+//    fun removeItem(item : QuantityItem) {
+//        val removePos = items.indexOf(items.find { it == item })
+//        items.removeAt(removePos)
+//        notifyItemRemoved(removePos)
+//    }
+//
+//    fun updateItem(modifiedItem : QuantityItem) {
+//        val changedItemPos = items.indexOf(items.find { it.id == modifiedItem.id })
+//        if (changedItemPos != -1) {
+//            Log.d("adapterUpdate", this.toString())
+//            items[changedItemPos] = modifiedItem
+//            notifyItemChanged(changedItemPos)
+//        }
+//    }
+//
+//    fun addItem(newItem: QuantityItem) {
+//        items.add(newItem)
+//        super.notifyItemInserted(items.size)
+//    }
 
     // Create new views (invoked by the layout manager)
     abstract override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): QuantityViewHolder
