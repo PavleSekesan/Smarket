@@ -570,12 +570,13 @@ object UserData {
             }
             super.parseAndNotifyGroupListeners(DatabaseEventType.ADDED)
         }
-        fun addBundleItem(measuringUnit: String, product: Product, quantity: Int)
+        fun addBundleItem(measuringUnit: String, product: Product, quantity: Int) : DatabaseItemTask
         {
             val data = hashMapOf(
                 "measuring_unit" to measuringUnit,
                 "quantity" to quantity
             )
+            val bundleItemTask = DatabaseItemTask()
             this.databaseRef.collection("Products").add(data).addOnSuccessListener {
                 val id = it.id
                 val newBundleItem = BundleItem(
@@ -587,8 +588,9 @@ object UserData {
                 )
                 items = items.plus(newBundleItem)
                 newBundleItem.addOnFieldChangeListener { notifySubitemListeners(newBundleItem) }
+                bundleItemTask.finishTask(newBundleItem)
             }
-
+            return bundleItemTask
         }
     }
     class UserOrder(id: String, shoppingBundles: List<ShoppingBundle>, val date: DatabaseField<LocalDateTime>, val daysToRepeat: DatabaseField<Int>, val recurring: DatabaseField<Boolean>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
