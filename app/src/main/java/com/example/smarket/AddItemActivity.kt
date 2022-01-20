@@ -1,7 +1,6 @@
 package com.example.smarket
 
-import BundleItem
-import QuantityItem
+import UserData.ShoppingBundle
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,9 +9,9 @@ import android.widget.Button
 import android.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.smarket.MainActivity.Companion.bundles
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.google.gson.Gson
 
 class AddItemActivity : AppCompatActivity() {
 
@@ -20,8 +19,9 @@ class AddItemActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_item)
 
-        val bundleId = intent.getStringExtra("bundle_id")
-        val isFridge = bundleId == null
+        //val bundle = Gson().fromJson(intent.getStringExtra("bundle"), ShoppingBundle::class.java)
+        val bundle = bundles.find { it.id == intent.getStringExtra("bundle_id") }
+        val isFridge = bundle == null
 
         findViewById<Button>(R.id.scan_barcode_button).setOnClickListener {
             val intent = Intent(this, BarcodeScannerActivity::class.java)
@@ -38,20 +38,22 @@ class AddItemActivity : AppCompatActivity() {
         searchRecycler.layoutManager = LinearLayoutManager(this)
 
         val addedItemsRecycler = findViewById<RecyclerView>(R.id.addedItemsRecycler)
-        val adapter2 = if (!isFridge) BundleItemsListAdapter(this, mutableListOf(), true) else FridgeItemsListAdapter(this, mutableListOf())
-        addedItemsAdapter = adapter2
-        addedItemsRecycler.adapter = adapter2
+        val addedItemsAdapterLocal = if (!isFridge) BundleItemsListAdapter(bundle!!, true, false) else FridgeItemsListAdapter(mutableListOf())
+        addedItemsAdapter = addedItemsAdapterLocal
+        addedItemsRecycler.adapter = addedItemsAdapterLocal
         addedItemsRecycler.layoutManager = LinearLayoutManager(this)
 
 
         searchAdapter.onSearchClicked = { product ->
-            GlobalScope.launch {
-                val newItem = if (!isFridge) {
-                    UserData.addItemToBundle(bundleId!!, "kom", product, 1)
-                } else {
-                    UserData.addItemToFridge("kom", product, 1)
-                }
-            }
+            // FIXME Uncomment when suspend functions are added
+            throw NotImplementedError("Search should be fixed")
+//            GlobalScope.launch {
+//                val newItem = if (!isFridge) {
+//                    UserData.suspendAddItemToBundle(bundle, "kom", product, 1)
+//                } else {
+//                    UserData.suspendAddItemToFridge("kom", product, 1)
+//                }
+//            }
         }
 
         val productSearch: SearchView = findViewById(R.id.productSearchView)

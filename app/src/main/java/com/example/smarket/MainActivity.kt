@@ -1,9 +1,12 @@
 package com.example.smarket
 
-import Delivery
-import ShoppingBundle
+import UserData.FridgeItem
+import UserData.Delivery
+import UserData.ShoppingBundle
 import UserData
-import UserOrder
+import UserData.UserOrder
+import UserData.getAllBundles
+import UserData.getAllFridgeItems
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -30,8 +33,10 @@ import android.content.Intent
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.auth.User
 import com.google.firebase.ktx.Firebase
+import com.google.gson.Gson
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.time.temporal.ChronoUnit
@@ -49,6 +54,13 @@ class MonthViewContainer(view: View) : ViewContainer(view) {
 }
 
 class MainActivity : AppCompatActivity() {
+
+    // FIXME Promeni ovo sranje
+    companion object {
+        var bundles = mutableListOf<ShoppingBundle>()
+        var fridgeItems = mutableListOf<FridgeItem>()
+    }
+
     private fun setupListeners()
     {
         val settingsFab = findViewById<FloatingActionButton>(R.id.fabSettings)
@@ -60,26 +72,43 @@ class MainActivity : AppCompatActivity() {
         val fridgeFab = findViewById<FloatingActionButton>(R.id.fabFridge)
         fridgeFab.setOnClickListener {
             val intent = Intent(this, FridgeActivity::class.java)
+            //intent.putExtra("fridge_items", Gson().toJson(fridgeItems))
             startActivity(intent)
         }
 
         val bundlesFab = findViewById<FloatingActionButton>(R.id.fabBundles)
         bundlesFab.setOnClickListener {
             val intent = Intent(this, BundlesListActivity::class.java)
+            //intent.putExtra("bundles", Gson().toJson(bundles))
             startActivity(intent)
         }
 
         val newOrderFab = findViewById<FloatingActionButton>(R.id.fabNewOrder)
         newOrderFab.setOnClickListener {
             val intent = Intent(this, NewOrderActivity::class.java)
+            //intent.putExtra("bundles", Gson().toJson(bundles))
             startActivity(intent)
         }
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+
+
+        ///// MOVE SOMEWHERE ELSE /////
+            UserData.addOnShoppingBundleModifyListener { shoppingBundle, databaseEventType ->
+                if (databaseEventType == UserData.DatabaseEventType.ADDED)
+                    bundles.add(shoppingBundle!!)
+            }
+            UserData.addOnFridgeModifyListener { fridgeItem, databaseEventType ->
+                if (databaseEventType == UserData.DatabaseEventType.ADDED)
+                    fridgeItems.add(fridgeItem!!)
+            }
+            getAllBundles()
+            getAllFridgeItems()
+        ///////////////////////////////
         setupListeners()
 
         val currentUser = Firebase.auth.currentUser
@@ -87,6 +116,7 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, SignInActivity::class.java)
             startActivity(intent)
         }
+
 
 
         val calendarView = findViewById<CalendarView>(R.id.calendarView)
@@ -112,7 +142,7 @@ class MainActivity : AppCompatActivity() {
                     {
                         for(i in 0 .. textFields.size - 2)
                         {
-                            textFields[i].text = bundlesOnCurrentDay[i].name
+                            textFields[i].text = bundlesOnCurrentDay[i].name.databaseValue
                             textFields[i].setTextColor(bundleColor)
                         }
                         textFields.last().text = "..."
@@ -121,7 +151,7 @@ class MainActivity : AppCompatActivity() {
                     {
                         for(i in bundlesOnCurrentDay.indices)
                         {
-                            textFields[i].text = bundlesOnCurrentDay[i].name
+                            textFields[i].text = bundlesOnCurrentDay[i].name.databaseValue
                             textFields[i].setTextColor(bundleColor)
                         }
                     }
@@ -141,7 +171,7 @@ class MainActivity : AppCompatActivity() {
                     var dayColor: Int
                     for(delivery in deliveries)
                     {
-                        if (delivery.date.toLocalDate() == day.date)
+                        if (delivery.date.databaseValue.toLocalDate() == day.date)
                         {
                             dayColor = resources.getIntArray(R.array.different_32_colors)[day.date.dayOfMonth - 1]
                             runOnUiThread {

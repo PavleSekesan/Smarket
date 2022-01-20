@@ -48,11 +48,11 @@ object UserData {
                     for (doc in value!!) {
                         Log.d(TAG, "Firebase listener $collection: ${doc.id}")
                         GlobalScope.launch {
-                            val newItem = when(collection) {
-                                "Bundles" -> bundleFromDocument(doc)
-                                "Fridge" -> fridgeItemFromDocument(doc)
-                                else -> userOrderFromDocument(doc)
-                            }
+//                            val newItem = when(collection) {
+//                                "Bundles" -> bundleFromDocument(doc)
+//                                "Fridge" -> fridgeItemFromDocument(doc)
+//                                else -> userOrderFromDocument(doc)
+//                            }
                         }
                     }
                 }
@@ -294,7 +294,7 @@ object UserData {
         addOnModifyDatabaseItemListener(wrapper, FridgeItem::class.createType())
     }
 
-    fun addOnBundleModifyListener(listener: (BundleItem?, DatabaseEventType) -> Unit)
+    fun addOnBundleItemModifyListener(listener: (BundleItem?, DatabaseEventType) -> Unit)
     {
         val wrapper: (DatabaseItem?, DatabaseEventType) -> Unit = { databaseItem: DatabaseItem?, databaseEventType: DatabaseEventType ->
             if(databaseItem is BundleItem)
@@ -305,7 +305,7 @@ object UserData {
         addOnModifyDatabaseItemListener(wrapper, BundleItem::class.createType())
     }
 
-    fun addOnBundleModifyListener2(listener: (ShoppingBundle?, DatabaseEventType) -> Unit)
+    fun addOnShoppingBundleModifyListener(listener: (ShoppingBundle?, DatabaseEventType) -> Unit)
     {
         val wrapper: (DatabaseItem?, DatabaseEventType) -> Unit = { databaseItem: DatabaseItem?, databaseEventType: DatabaseEventType ->
             if(databaseItem is ShoppingBundle)

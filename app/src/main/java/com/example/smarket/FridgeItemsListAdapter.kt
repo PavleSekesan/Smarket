@@ -1,37 +1,16 @@
 package com.example.smarket
 
-import FridgeItem
-import QuantityItem
-import android.app.Activity
-import android.content.Context
-import android.util.Log
+import UserData.FridgeItem
+import UserData.QuantityItem
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
-class FridgeItemsListAdapter (private val context: Context, private var fridgeItems: MutableList<FridgeItem>) : QuantityItemsListAdapter(context, fridgeItems as MutableList<QuantityItem>) {
+class FridgeItemsListAdapter(fridgeItems: MutableList<FridgeItem>, private val displayPrevious : Boolean = true) : QuantityItemsListAdapter() {
     init {
-        UserData.addOnFridgeModifyListener { fridgeItem, databaseEventType ->
-            when (databaseEventType) {
-                DatabaseEventType.MODIFIED -> {
-                    (context as Activity).runOnUiThread {
-                        update(fridgeItem!!)
-                    }
-                }
-                DatabaseEventType.ADDED -> {
-                    (context as Activity).runOnUiThread {
-                        addItem(fridgeItem!!)
-                    }
-                }
-                DatabaseEventType.REMOVED -> {
-                    Log.d("abb", "izbaceno")
-                }
-            }
-        }
+        if (displayPrevious) items = fridgeItems as MutableList<QuantityItem>
     }
 
     inner class ViewHolder(view: View) : QuantityViewHolder(view) {
@@ -47,21 +26,5 @@ class FridgeItemsListAdapter (private val context: Context, private var fridgeIt
             .inflate(R.layout.fridge_item, viewGroup, false)
 
         return ViewHolder(view)
-    }
-
-    override fun onBindViewHolder(viewHolder: QuantityViewHolder, position: Int) {
-        super.onBindViewHolder(viewHolder, position)
-        val item = fridgeItems[position]
-
-        viewHolder.add.setOnClickListener {
-            GlobalScope.launch {
-                UserData.updateFridgeQuantity(item, 1)
-            }
-        }
-        viewHolder.subtract.setOnClickListener {
-            GlobalScope.launch {
-                UserData.updateFridgeQuantity(item, -1)
-            }
-        }
     }
 }

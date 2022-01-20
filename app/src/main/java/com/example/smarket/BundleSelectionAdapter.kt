@@ -1,6 +1,6 @@
 package com.example.smarket
 
-import ShoppingBundle
+import UserData.ShoppingBundle
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -36,7 +36,7 @@ class BundleSelectionAdapter(
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         val bundle = bundles[position]
-        viewHolder.bundleName.text = bundle.name
+        viewHolder.bundleName.text = bundle.name.databaseValue
         viewHolder.itemView.setOnClickListener {
             onSelection(bundle)
             bundles.removeAt(viewHolder.bindingAdapterPosition)

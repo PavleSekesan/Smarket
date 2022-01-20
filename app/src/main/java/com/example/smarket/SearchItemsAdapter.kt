@@ -1,6 +1,6 @@
 package com.example.smarket
 
-import Product
+import UserData.Product
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -51,7 +51,7 @@ class SearchItemsAdapter(private var dataSet: MutableList<Product>) :
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         val context = viewHolder.itemView.context
-        viewHolder.textView.text = dataSet[position].name
+        viewHolder.textView.text = dataSet[position].name.databaseValue
         viewHolder.itemView.setOnClickListener {
             onSearchClicked(dataSet[position])
         }
