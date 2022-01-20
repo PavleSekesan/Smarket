@@ -1,6 +1,12 @@
+import android.app.Activity
+import android.os.Bundle
+import android.os.Parcelable
 import android.util.Log
 import androidx.databinding.ObservableArrayMap
 import androidx.databinding.ObservableMap
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
@@ -8,16 +14,18 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.auth.User
 import com.google.firebase.ktx.Firebase
+import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
+import java.io.Serializable
+import java.lang.Exception
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
+import java.util.concurrent.Executor
 import kotlin.collections.ArrayList
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
@@ -76,42 +84,63 @@ object UserData {
             doc.reference)
     }
 
-    private suspend fun bundleItemFromDocument(doc: DocumentSnapshot): BundleItem {
+    private fun bundleItemFromDocument(doc: DocumentSnapshot): DatabaseItemTask {
         val productData = doc.data!!
         val itemId = doc.id
         val measuringUnit = productData["measuring_unit"] as String
         val quantity = (productData["quantity"] as Long).toInt()
         val productRef = productData["product"] as DocumentReference
-        val productDoc = productRef.get().await()
-        val newBundleItem = BundleItem(
-            itemId,
-            DatabaseField("measuring_unit",measuringUnit),
-            productFromDoc(productDoc),
-            DatabaseField("quantity",quantity),
-            doc.reference
-        )
+
+        val newBundelItemTask = DatabaseItemTask()
+        productRef.get().addOnSuccessListener { productDoc->
+            val newBundleItem = BundleItem(
+                itemId,
+                DatabaseField("measuring_unit",measuringUnit),
+                productFromDoc(productDoc),
+                DatabaseField("quantity",quantity),
+                doc.reference
+            )
+            newBundelItemTask.finishTask(newBundleItem)
+        }
+
         //updateDatabaseMapThreadSafe(itemId, newBundleItem)
-        return newBundleItem
+        return newBundelItemTask
     }
 
-    private suspend fun bundleFromDocument(doc: DocumentSnapshot): ShoppingBundle
+    private fun bundleFromDocument(doc: DocumentSnapshot): DatabaseItemTask
     {
         val id = doc.id
         val data = doc.data
         val bundleName = data!!["name"].toString()
 
         val itemsInBundle = mutableListOf<BundleItem>()
-        val itemDocuments = doc.reference.collection("Products").get().await()
-        Log.d(TAG, itemDocuments.count().toString())
-        for(itemDoc in itemDocuments)
-        {
-            itemsInBundle.add(bundleItemFromDocument(itemDoc))
-        }
 
-        return ShoppingBundle(id, DatabaseField("name",bundleName), itemsInBundle, doc.reference)
+        val bundleTask = DatabaseItemTask()
+        Log.d("bundleFromDocument", "Started get for bundle ${id}")
+        doc.reference.collection("Products").get().addOnSuccessListener { itemDocuments->
+            Log.d(TAG, "$id: ${itemDocuments.count()}")
+            var remainingToFinish = itemDocuments.count()
+            if (remainingToFinish == 0)
+            {
+                bundleTask.finishTask(ShoppingBundle(id, DatabaseField("name",bundleName), itemsInBundle, doc.reference))
+            }
+            for(itemDoc in itemDocuments)
+            {
+                bundleItemFromDocument(itemDoc).addOnSuccessListener {
+                    remainingToFinish--
+                    itemsInBundle.add(it as BundleItem)
+                    Log.d("bundleFromDocument", "Finished get for bunlde $id")
+                    if(remainingToFinish == 0)
+                    {
+                        bundleTask.finishTask(ShoppingBundle(id, DatabaseField("name",bundleName), itemsInBundle, doc.reference))
+                    }
+                }
+            }
+        }
+        return bundleTask
     }
 
-    private suspend fun userOrderFromDocument(doc: DocumentSnapshot): UserOrder
+    private fun userOrderFromDocument(doc: DocumentSnapshot): DatabaseItemTask
     {
         val id = doc.id
         val data = doc.data
@@ -126,35 +155,57 @@ object UserData {
         val daysToRepeat: Int
         daysToRepeat = if(recurring) (data["days_to_repeat"] as Long).toInt() else 0
 
+        val userOrderTask = DatabaseItemTask()
         val bundles = mutableListOf<ShoppingBundle>()
+        var remainingToFinish = bundlesRefs.size
+        if (remainingToFinish == 0)
+        {
+            userOrderTask.finishTask(UserOrder(id, bundles,
+                DatabaseField("date",date),
+                DatabaseField("days_to_repeat",daysToRepeat),
+                DatabaseField("recurring",recurring),
+                doc.reference))
+        }
         for(bundleRef in bundlesRefs)
         {
-            bundles.add(bundleFromDocument(bundleRef.get().await()))
+            bundleRef.get().addOnSuccessListener { bundleDoc->
+                bundleFromDocument(bundleDoc).addOnSuccessListener { bundle->
+                    bundles.add(bundle as ShoppingBundle)
+                    remainingToFinish--
+                    if(remainingToFinish == 0)
+                    {
+                        userOrderTask.finishTask(UserOrder(id, bundles,
+                            DatabaseField("date",date),
+                            DatabaseField("days_to_repeat",daysToRepeat),
+                            DatabaseField("recurring",recurring),
+                            doc.reference))
+                    }
+                }
+            }
         }
-        return UserOrder(id, bundles,
-            DatabaseField("date",date),
-            DatabaseField("days_to_repeat",daysToRepeat),
-            DatabaseField("recurring",recurring),
-            doc.reference)
+        return userOrderTask
     }
 
-    private suspend fun fridgeItemFromDocument(doc: DocumentSnapshot): FridgeItem
+    private fun fridgeItemFromDocument(doc: DocumentSnapshot): DatabaseItemTask
     {
         val id = doc.id
         val data: Map<String, Any> = doc.data!!
         val measuringUnit = data["measuring_unit"] as String
         val ref = data["product"] as DocumentReference
         val quantity = data["quantity"] as Long
-        val productDoc = ref.get().await()
-        val product = productFromDoc(productDoc)
-        return FridgeItem(id,
-            DatabaseField("measuring_unit",measuringUnit),
-            product,
-            DatabaseField("quantity",quantity.toInt()),
-            doc.reference)
+        val fridgeItemTask = DatabaseItemTask()
+        ref.get().addOnSuccessListener { productDoc->
+            val product = productFromDoc(productDoc)
+            fridgeItemTask.finishTask(FridgeItem(id,
+                DatabaseField("measuring_unit",measuringUnit),
+                product,
+                DatabaseField("quantity",quantity.toInt()),
+                doc.reference))
+        }
+        return fridgeItemTask
     }
 
-    private suspend fun deliveryFromDocument(doc: DocumentSnapshot): Delivery
+    private fun deliveryFromDocument(doc: DocumentSnapshot): DatabaseItemTask
     {
         val id = doc.id
         val data = doc.data!!
@@ -165,68 +216,138 @@ object UserData {
         val date = LocalDateTime.ofInstant(Instant.ofEpochMilli(javaDate.time), ZoneId.systemDefault());
 
         val status = data["status"] as String
-        val userOrdersDocs = doc.reference.collection("UserOrders").get().await()
-        val userOrders = mutableListOf<UserOrder>()
-        for(doc in userOrdersDocs)
-        {
-            val userOrderDoc = (doc.data["order"] as DocumentReference).get().await()
-            userOrders.add(userOrderFromDocument(userOrderDoc))
-        }
+        val deliveryTask = DatabaseItemTask()
+        doc.reference.collection("UserOrders").get().addOnSuccessListener { userOrdersDocs->
 
-        return Delivery(id,
-            DatabaseField("date",date),
-            userOrders,
-            DatabaseField("status",status),
-            doc.reference)
+            val userOrders = mutableListOf<UserOrder>()
+            var remainingToFinish = userOrdersDocs.size()
+            if (remainingToFinish == 0)
+            {
+                deliveryTask.finishTask(Delivery(id,
+                    DatabaseField("date",date),
+                    userOrders,
+                    DatabaseField("status",status),
+                    doc.reference))
+            }
+            for(userOrdersDoc in userOrdersDocs)
+            {
+                (userOrdersDoc.data["order"] as DocumentReference).get().addOnSuccessListener { userOrderDoc->
+                    userOrderFromDocument(userOrderDoc).addOnSuccessListener { userOrder->
+                        userOrders.add(userOrder as UserOrder)
+                        remainingToFinish--
+                        if (remainingToFinish == 0)
+                        {
+                            deliveryTask.finishTask(Delivery(id,
+                                DatabaseField("date",date),
+                                userOrders,
+                                DatabaseField("status",status),
+                                doc.reference))
+                        }
+                    }
+                }
+            }
+        }
+        return deliveryTask
     }
     //endregion
 
     //region Methods that get all objects of certain type from DB
-    fun getAllBundles()
+    fun getAllBundles() : DatabaseItemListTask
     {
-        val documents = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").get().addOnSuccessListener {
-            for (document in it)
+        val bundlesTask = DatabaseItemListTask()
+        db.collection("UserData").document(auth.uid.toString()).collection("Bundles").get().addOnSuccessListener { bundlesDocs->
+            val allBundles = mutableListOf<ShoppingBundle>()
+            var remainingToFinish = bundlesDocs.size()
+            if(remainingToFinish == 0)
             {
-                GlobalScope.launch {
-                    bundleFromDocument(document)
+                bundlesTask.finishTask(allBundles)
+            }
+            for (document in bundlesDocs)
+            {
+                bundleFromDocument(document).addOnSuccessListener { bundle->
+                    remainingToFinish--
+                    allBundles.add(bundle as ShoppingBundle)
+                    if(remainingToFinish == 0)
+                    {
+                        bundlesTask.finishTask(allBundles)
+                    }
                 }
             }
         }
+        return bundlesTask
     }
 
-    suspend fun getAllUserOrders(): List<UserOrder>
+    fun getAllUserOrders(): DatabaseItemListTask
     {
-        val documents = db.collection("UserData").document(auth.uid.toString()).collection("Orders").get().await()
-        val allUserOrders: MutableList<UserOrder> = mutableListOf()
-        for (document in documents) {
-            val userOrder = userOrderFromDocument(document)
-            allUserOrders.add(userOrder)
+        val userOrdersTask = DatabaseItemListTask()
+        db.collection("UserData").document(auth.uid.toString()).collection("Orders").get().addOnSuccessListener { documents->
+            val allUserOrders: MutableList<UserOrder> = mutableListOf()
+            var remainingToFinish = documents.size()
+            if(remainingToFinish == 0)
+            {
+                userOrdersTask.finishTask(allUserOrders)
+            }
+            for (document in documents) {
+                userOrderFromDocument(document).addOnSuccessListener { userOrder->
+                    allUserOrders.add(userOrder as UserOrder)
+                    remainingToFinish--
+                    if(remainingToFinish == 0)
+                    {
+                        userOrdersTask.finishTask(allUserOrders)
+                    }
+                }
+            }
         }
-        return allUserOrders
+        return userOrdersTask
     }
 
-    fun getAllFridgeItems()
+    fun getAllFridgeItems() : DatabaseItemListTask
     {
+        val fridgeItemsTask = DatabaseItemListTask()
         db.collection("UserData").document(auth.uid.toString()).collection("Fridge").get().addOnSuccessListener { documents->
+            val allFridgeItems = mutableListOf<FridgeItem>()
+            var remainingToFinish = documents.size()
+            if (remainingToFinish == 0)
+            {
+                fridgeItemsTask.finishTask(allFridgeItems)
+            }
             for (document in documents)
             {
-                GlobalScope.launch {
-                    fridgeItemFromDocument(document)
+                fridgeItemFromDocument(document).addOnSuccessListener { fridgeItem->
+                    allFridgeItems.add(fridgeItem as FridgeItem)
+                    remainingToFinish--
+                    if (remainingToFinish == 0)
+                    {
+                        fridgeItemsTask.finishTask(allFridgeItems)
+                    }
                 }
             }
         }
+        return fridgeItemsTask
     }
 
-    suspend fun getAllDeliveries(): List<Delivery>
+    fun getAllDeliveries(): DatabaseItemListTask
     {
-        val documents = db.collection("Orders").whereEqualTo("userId", auth.uid.toString()).get().await()
-        val allDeliveries: MutableList<Delivery> = mutableListOf()
-        for (document in documents) {
-            val delivery = deliveryFromDocument(document)
-            allDeliveries.add(delivery)
+        val deliveriesTask = DatabaseItemListTask()
+        db.collection("Orders").whereEqualTo("userId", auth.uid.toString()).get().addOnSuccessListener { documents->
+            val allDeliveries: MutableList<Delivery> = mutableListOf()
+            var remainingToFinish = documents.size()
+            if(remainingToFinish == 0)
+            {
+                deliveriesTask.finishTask(allDeliveries)
+            }
+            for (document in documents) {
+                deliveryFromDocument(document).addOnSuccessListener { delivery->
+                    allDeliveries.add(delivery as Delivery)
+                    remainingToFinish--
+                    if(remainingToFinish == 0)
+                    {
+                        deliveriesTask.finishTask(allDeliveries)
+                    }
+                }
+            }
         }
-
-        return allDeliveries
+        return deliveriesTask
     }
     //endregion
 
@@ -327,7 +448,7 @@ object UserData {
         addOnModifyDatabaseItemListener(wrapper, UserOrder::class.createType())
     }
 
-    fun addOnOrderModifyListener(listener: (Delivery?, DatabaseEventType) -> Unit)
+    fun addOnDeliveryModifyListener(listener: (Delivery?, DatabaseEventType) -> Unit)
     {
         val wrapper: (DatabaseItem?, DatabaseEventType) -> Unit = { databaseItem: DatabaseItem?, databaseEventType: DatabaseEventType ->
             if(databaseItem is Delivery)
@@ -338,6 +459,7 @@ object UserData {
         addOnModifyDatabaseItemListener(wrapper, Delivery::class.createType())
     }
 
+
     //endregion
 
     enum class DatabaseEventType {
@@ -345,9 +467,9 @@ object UserData {
         ADDED,
         REMOVED
     }
+
     class DatabaseField<T>(val dbName: String, dbVal: T)
     {
-        private val mutex = Mutex()
         private val onChangeListeners: MutableList<(T) -> Unit> = mutableListOf()
         var databaseValue = dbVal
             set(value){
@@ -359,11 +481,7 @@ object UserData {
             }
         fun addOnChangeListener(listener: (T) -> Unit)
         {
-            GlobalScope.launch {
-                mutex.withLock {
-                    onChangeListeners.add(listener)
-                }
-            }
+            onChangeListeners.add(listener)
         }
         fun eraseType() : DatabaseField<Any>
         {
@@ -374,8 +492,6 @@ object UserData {
     {
         private val onFieldChangeListeners: MutableList<(DatabaseField<Any>)->Unit> = mutableListOf()
         private val onSubitemChangeListeners: MutableList<(DatabaseItem)->Unit> = mutableListOf()
-        private val fieldChangeMutex = Mutex()
-        private val subitemChangeMutex = Mutex()
 
         protected fun parseAndNotifyGroupListeners(eventType: DatabaseEventType)
         {
@@ -402,11 +518,7 @@ object UserData {
         }
         fun addOnFieldChangeListener(listener:(DatabaseField<Any>) -> Unit)
         {
-            GlobalScope.launch {
-                fieldChangeMutex.withLock {
-                    onFieldChangeListeners.add(listener)
-                }
-            }
+            onFieldChangeListeners.add(listener)
         }
         protected fun notifySubitemListeners(databaseItemChanged: DatabaseItem)
         {
@@ -418,11 +530,7 @@ object UserData {
         }
         fun addOnSubitemChangeListener(listener:(DatabaseItem) -> Unit)
         {
-            GlobalScope.launch {
-                subitemChangeMutex.withLock {
-                    onSubitemChangeListeners.add(listener)
-                }
-            }
+            onSubitemChangeListeners.add(listener)
         }
     }
     class Product(id: String, val name: DatabaseField<String>, val price: DatabaseField<Double>, val storeGivenId: DatabaseField<String>, val barcode: DatabaseField<String>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
@@ -526,6 +634,181 @@ object UserData {
             newUserOrder.addOnSubitemChangeListener { notifySubitemListeners(newUserOrder) }
         }
 
+    }
+
+    class DatabaseItemTask: Task<DatabaseItem>()
+    {
+        private var completedTask = false
+        private var successTask = false
+        private lateinit var taskResult: DatabaseItem
+        private val onSuccessListeners: MutableList<OnSuccessListener<in DatabaseItem>> = mutableListOf()
+        override fun isComplete(): Boolean {
+            return completedTask
+        }
+
+        override fun isSuccessful(): Boolean {
+            return successTask
+        }
+
+        override fun isCanceled(): Boolean {
+            TODO("Not yet implemented")
+        }
+
+        override fun getResult(): DatabaseItem {
+            return taskResult
+        }
+
+        override fun <X : Throwable?> getResult(p0: Class<X>): DatabaseItem {
+            TODO("Not yet implemented")
+        }
+
+        override fun getException(): Exception? {
+            TODO("Not yet implemented")
+        }
+
+        override fun addOnSuccessListener(p0: OnSuccessListener<in DatabaseItem>): Task<DatabaseItem> {
+            onSuccessListeners.add(p0)
+            return this
+        }
+
+        override fun addOnSuccessListener(
+            p0: Executor,
+            p1: OnSuccessListener<in DatabaseItem>
+        ): Task<DatabaseItem> {
+            TODO("Not yet implemented")
+        }
+
+        override fun addOnSuccessListener(
+            p0: Activity,
+            p1: OnSuccessListener<in DatabaseItem>
+        ): Task<DatabaseItem> {
+            TODO("Not yet implemented")
+        }
+
+        override fun addOnFailureListener(p0: OnFailureListener): Task<DatabaseItem> {
+            TODO("Not yet implemented")
+        }
+
+        override fun addOnFailureListener(p0: Executor, p1: OnFailureListener): Task<DatabaseItem> {
+            TODO("Not yet implemented")
+        }
+
+        override fun addOnFailureListener(p0: Activity, p1: OnFailureListener): Task<DatabaseItem> {
+            TODO("Not yet implemented")
+        }
+
+        private fun onTaskSuccess()
+        {
+            successTask = true
+            for(listener in onSuccessListeners)
+            {
+                listener.onSuccess(taskResult)
+            }
+        }
+
+        private fun onTaskCompleted()
+        {
+            completedTask = true
+            // if successful
+            onTaskSuccess()
+        }
+
+        fun finishTask(dbItem: DatabaseItem)
+        {
+            taskResult = dbItem
+            onTaskCompleted()
+        }
+
+    }
+
+    class DatabaseItemListTask: Task<List<DatabaseItem>>()
+    {
+        private var completedTask = false
+        private var successTask = false
+        private lateinit var taskResult: List<DatabaseItem>
+        private val onSuccessListeners: MutableList<OnSuccessListener<in List<DatabaseItem>>> = mutableListOf()
+        override fun isComplete(): Boolean {
+            return completedTask
+        }
+
+        override fun isSuccessful(): Boolean {
+            return successTask
+        }
+
+        override fun isCanceled(): Boolean {
+            TODO("Not yet implemented")
+        }
+
+        override fun getResult(): List<DatabaseItem> {
+            return taskResult
+        }
+
+        override fun <X : Throwable?> getResult(p0: Class<X>): List<DatabaseItem> {
+            TODO("Not yet implemented")
+        }
+
+        override fun getException(): Exception? {
+            TODO("Not yet implemented")
+        }
+
+        override fun addOnSuccessListener(p0: OnSuccessListener<in List<DatabaseItem>>): Task<List<DatabaseItem>> {
+            onSuccessListeners.add(p0)
+            return this
+        }
+
+        override fun addOnSuccessListener(
+            p0: Executor,
+            p1: OnSuccessListener<in List<DatabaseItem>>
+        ): Task<List<DatabaseItem>> {
+            TODO("Not yet implemented")
+        }
+
+        override fun addOnSuccessListener(
+            p0: Activity,
+            p1: OnSuccessListener<in List<DatabaseItem>>
+        ): Task<List<DatabaseItem>> {
+            TODO("Not yet implemented")
+        }
+
+        override fun addOnFailureListener(p0: OnFailureListener): Task<List<DatabaseItem>> {
+            TODO("Not yet implemented")
+        }
+
+        override fun addOnFailureListener(
+            p0: Executor,
+            p1: OnFailureListener
+        ): Task<List<DatabaseItem>> {
+            TODO("Not yet implemented")
+        }
+
+        override fun addOnFailureListener(
+            p0: Activity,
+            p1: OnFailureListener
+        ): Task<List<DatabaseItem>> {
+            TODO("Not yet implemented")
+        }
+
+        private fun onTaskSuccess()
+        {
+            successTask = true
+            for(listener in onSuccessListeners)
+            {
+                listener.onSuccess(taskResult)
+            }
+        }
+
+        private fun onTaskCompleted()
+        {
+            completedTask = true
+            // if successful
+            onTaskSuccess()
+        }
+
+        fun finishTask(dbItem: List<DatabaseItem>)
+        {
+            taskResult = dbItem
+            onTaskCompleted()
+        }
     }
 }
 

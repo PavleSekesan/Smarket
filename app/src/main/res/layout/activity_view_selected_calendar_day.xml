@@ -3,10 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".ViewSelectedCalendarDay">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/calendarDayWrapper"
+        android:id="@+id/viewSelectedDayWrapper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/calendar_day_border"
@@ -18,15 +19,26 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0">
 
+        <TextView
+            android:id="@+id/viewSelectedDayText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="TextView"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <LinearLayout
-            android:id="@+id/linearLayout2"
+            android:id="@+id/viewSelectedDayLinearLayout2"
             android:layout_width="match_parent"
             android:layout_height="3dp"
             android:layout_marginTop="8dp"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/calendarDayText">
+            app:layout_constraintTop_toBottomOf="@+id/viewSelectedDayText">
 
             <View
                 android:layout_width="0dp"
@@ -35,7 +47,7 @@
                 android:background="@android:color/transparent" />
 
             <View
-                android:id="@+id/deliveryTag"
+                android:id="@+id/viewSelectedDayDeliveryTag"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight=".70"
@@ -48,55 +60,24 @@
                 android:background="@android:color/transparent" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
-
-            <TextView
-                android:id="@+id/calendarDayText1"
-                android:layout_width="wrap_content"
-                android:layout_height="10dp"
-                android:layout_weight="1"
-                android:text="111111111111111111111111111"
-                android:textSize="8sp" />
-
-            <TextView
-                android:id="@+id/calendarDayText2"
-                android:layout_width="wrap_content"
-                android:layout_height="10dp"
-                android:layout_weight="1"
-                android:text="2"
-                android:textSize="8sp" />
-
-            <TextView
-                android:id="@+id/calendarDayText3"
-                android:layout_width="wrap_content"
-                android:layout_height="10dp"
-                android:layout_weight="1"
-                android:text="3"
-                android:textSize="8sp" />
-        </LinearLayout>
-
         <TextView
-            android:id="@+id/calendarDayText"
+            android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="TextView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/viewSelectedDayLinearLayout2" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/viewSelectedDayRecycler"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-
