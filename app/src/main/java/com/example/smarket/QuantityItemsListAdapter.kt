@@ -1,25 +1,21 @@
 package com.example.smarket
 
-import BundleItem
-import FridgeItem
-import QuantityItem
-import android.content.Context
+import UserData.QuantityItem
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
-abstract class QuantityItemsListAdapter(private val context: Context, private var quantityItems: MutableList<QuantityItem>) :
+abstract class QuantityItemsListAdapter :
     RecyclerView.Adapter<QuantityItemsListAdapter.QuantityViewHolder>()  {
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
      */
+
+    protected var items: MutableList<QuantityItem> = mutableListOf()
 
     abstract inner class QuantityViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         abstract val itemName: TextView
@@ -30,22 +26,28 @@ abstract class QuantityItemsListAdapter(private val context: Context, private va
     }
 
     fun clearItems() {
-        quantityItems.clear()
-        super.notifyDataSetChanged()
+        items.clear()
+        notifyDataSetChanged()
     }
 
-    fun update(modifiedItem : QuantityItem) {
-        val changedItemPos = quantityItems.indexOf(quantityItems.find { it.id == modifiedItem.id })
+    fun removeItem(item : QuantityItem) {
+        val removePos = items.indexOf(items.find { it == item })
+        items.removeAt(removePos)
+        notifyItemRemoved(removePos)
+    }
+
+    fun updateItem(modifiedItem : QuantityItem) {
+        val changedItemPos = items.indexOf(items.find { it.id == modifiedItem.id })
         if (changedItemPos != -1) {
             Log.d("adapterUpdate", this.toString())
-            quantityItems[changedItemPos] = modifiedItem
+            items[changedItemPos] = modifiedItem
             notifyItemChanged(changedItemPos)
         }
     }
 
     fun addItem(newItem: QuantityItem) {
-        quantityItems.add(newItem)
-        super.notifyItemInserted(quantityItems.size)
+        items.add(newItem)
+        super.notifyItemInserted(items.size)
     }
 
     // Create new views (invoked by the layout manager)
@@ -57,13 +59,20 @@ abstract class QuantityItemsListAdapter(private val context: Context, private va
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         val context = viewHolder.itemView.context
-        val item = quantityItems[position]
-        viewHolder.itemName.text = item.product.name
-        viewHolder.quantity.text = item.quantity.toString()
-        viewHolder.measuringUnit.text = item.measuringUnit
+        val item = items[position]
+
+        viewHolder.itemName.text = item.product.name.databaseValue
+        viewHolder.quantity.text = item.quantity.databaseValue.toString()
+        viewHolder.measuringUnit.text = item.measuringUnit.databaseValue
+
+        item.product.name.addOnChangeListener { viewHolder.itemName.text = it }
+        item.quantity.addOnChangeListener { viewHolder.quantity.text = it.toString() }
+        item.measuringUnit.addOnChangeListener { viewHolder.measuringUnit.text = it }
+        viewHolder.add.setOnClickListener { item.quantity.databaseValue++ }
+        viewHolder.subtract.setOnClickListener { item.quantity.databaseValue-- }
     }
 
     // Return the size of your dataset (invoked by the layout manager)
-    override fun getItemCount() = quantityItems.size
+    override fun getItemCount() = items.size
 
 }

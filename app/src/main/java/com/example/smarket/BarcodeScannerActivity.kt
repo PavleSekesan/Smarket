@@ -1,6 +1,6 @@
 package com.example.smarket
 
-import BundleItem
+import UserData.BundleItem
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.Manifest

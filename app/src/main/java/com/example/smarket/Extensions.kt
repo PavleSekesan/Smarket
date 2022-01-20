@@ -1,6 +1,6 @@
 package com.example.smarket
 
-import UserOrder
+import UserData.UserOrder
 import android.content.Context
 import android.widget.TextView
 import androidx.annotation.ColorRes
@@ -36,19 +36,19 @@ fun expandUserOrders(userOrders: List<UserOrder>, date: LocalDate) : Map<LocalDa
     val monthEnd = date.withDayOfMonth(date.lengthOfMonth())
     val ordersOnDate: MutableMap<LocalDate, MutableList<String>> = mutableMapOf()
     for (order in userOrders) {
-        val orderDate = order.date.toLocalDate()
+        val orderDate = order.date.databaseValue.toLocalDate()
         if (orderDate.isAfter(monthEnd)) {
             continue
         }
-        if (order.recurring) {
+        if (order.recurring.databaseValue) {
             val minRepeats =
-                max(0, ChronoUnit.DAYS.between(orderDate, monthStart)) / order.daysToRepeat
+                max(0, ChronoUnit.DAYS.between(orderDate, monthStart)) / order.daysToRepeat.databaseValue
             val maxRepeats = ceil(
-                ChronoUnit.DAYS.between(orderDate, monthEnd).toDouble() / order.daysToRepeat
+                ChronoUnit.DAYS.between(orderDate, monthEnd).toDouble() / order.daysToRepeat.databaseValue
             ).toLong() + 1
 
             for (k in minRepeats..maxRepeats) {
-                val currentDate = orderDate.plusDays(k * order.daysToRepeat)
+                val currentDate = orderDate.plusDays(k * order.daysToRepeat.databaseValue)
                 if (currentDate.isAfter(monthEnd) || currentDate.isBefore(monthStart)) {
                     break
                 }
