@@ -574,7 +574,8 @@ object UserData {
         {
             val data = hashMapOf(
                 "measuring_unit" to measuringUnit,
-                "quantity" to quantity
+                "quantity" to quantity,
+                "product" to product.databaseRef
             )
             val bundleItemTask = DatabaseItemTask()
             this.databaseRef.collection("Products").add(data).addOnSuccessListener {
