@@ -468,18 +468,26 @@ object UserData {
         REMOVED
     }
 
-    class DatabaseField<T>(val dbName: String, dbVal: T)
+    class DatabaseField<T>(val dbName: String, private var dbVal: T)
     {
-        private val onChangeListeners: MutableList<(T) -> Unit> = mutableListOf()
+        enum class DatabaseFieldEventType
+        {
+            DOWNLOAD,
+            UPLOAD
+        }
+
+        private val onChangeListeners: MutableList<(T, DatabaseFieldEventType) -> Unit> = mutableListOf()
         var databaseValue = dbVal
             set(value){
                 field=value
+                dbVal = value
                 for(listener in onChangeListeners)
                 {
-                    listener(value)
+                    listener(value, DatabaseFieldEventType.UPLOAD)
                 }
             }
-        fun addOnChangeListener(listener: (T) -> Unit)
+            get() = dbVal
+        fun addOnChangeListener(listener: (T, DatabaseFieldEventType) -> Unit)
         {
             onChangeListeners.add(listener)
         }
@@ -517,7 +525,11 @@ object UserData {
 
                 if(newDbValue != databaseValue)
                 {
-                    databaseValue = newDbValue as T
+                    dbVal = newDbValue as T
+                    for(listener in onChangeListeners)
+                    {
+                        listener(newDbValue, DatabaseFieldEventType.DOWNLOAD)
+                    }
                 }
             }
         }
@@ -539,16 +551,24 @@ object UserData {
             }
         }
 
-        protected fun notifyFieldListeners(fieldChanged: DatabaseField<Any>)
+        protected fun notifyFieldListeners(fieldChanged: DatabaseField<Any>, eventType: DatabaseField.DatabaseFieldEventType)
         {
-            databaseRef.update(fieldChanged.dbName, fieldChanged.databaseValue).addOnSuccessListener {
-                for(listener in onFieldChangeListeners)
-                {
+            if(eventType == DatabaseField.DatabaseFieldEventType.UPLOAD) {
+                databaseRef.update(fieldChanged.dbName, fieldChanged.databaseValue)
+                    .addOnSuccessListener {
+                        for (listener in onFieldChangeListeners) {
+                            listener(fieldChanged)
+                        }
+                        parseAndNotifyGroupListeners(DatabaseEventType.MODIFIED)
+                    }.addOnFailureListener { e ->
+                    Log.w(TAG, "Error updating document", e)
+                }
+            }
+            else
+            {
+                for (listener in onFieldChangeListeners) {
                     listener(fieldChanged)
                 }
-                parseAndNotifyGroupListeners(DatabaseEventType.MODIFIED)
-            }.addOnFailureListener {
-                    e -> Log.w(TAG, "Error updating document", e)
             }
         }
         fun addOnFieldChangeListener(listener:(DatabaseField<Any>) -> Unit)
@@ -572,13 +592,13 @@ object UserData {
     class Product(id: String, val name: DatabaseField<String>, val price: DatabaseField<Double>, val storeGivenId: DatabaseField<String>, val barcode: DatabaseField<String>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
     {
         init {
-            name.addOnChangeListener { notifyFieldListeners(name.eraseType()) }
+            name.addOnChangeListener { v, t -> notifyFieldListeners(name.eraseType(), t) }
             name.bindToDatabaseListner(databaseRef)
-            price.addOnChangeListener { notifyFieldListeners(price.eraseType()) }
+            price.addOnChangeListener { v, t -> notifyFieldListeners(price.eraseType(), t) }
             price.bindToDatabaseListner(databaseRef)
-            storeGivenId.addOnChangeListener { notifyFieldListeners(storeGivenId.eraseType()) }
+            storeGivenId.addOnChangeListener { v, t -> notifyFieldListeners(storeGivenId.eraseType(), t) }
             storeGivenId.bindToDatabaseListner(databaseRef)
-            barcode.addOnChangeListener { notifyFieldListeners(barcode.eraseType()) }
+            barcode.addOnChangeListener { v, t -> notifyFieldListeners(barcode.eraseType(), t) }
             barcode.bindToDatabaseListner(databaseRef)
         }
     }
@@ -586,9 +606,9 @@ object UserData {
     abstract class QuantityItem(id: String, val measuringUnit: DatabaseField<String>, val product: Product, val quantity: DatabaseField<Int>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
     {
         init {
-            measuringUnit.addOnChangeListener { notifyFieldListeners(measuringUnit.eraseType()) }
+            measuringUnit.addOnChangeListener {v, t -> notifyFieldListeners(measuringUnit.eraseType(),t) }
             measuringUnit.bindToDatabaseListner(databaseRef)
-            quantity.addOnChangeListener { notifyFieldListeners(quantity.eraseType()) }
+            quantity.addOnChangeListener {v, t -> notifyFieldListeners(quantity.eraseType(),t) }
             quantity.bindToDatabaseListner(databaseRef)
             product.addOnFieldChangeListener { notifySubitemListeners(product) }
         }
@@ -603,7 +623,7 @@ object UserData {
         var items: List<BundleItem> = bundleItems
             private set
         init {
-            name.addOnChangeListener { notifyFieldListeners(name.eraseType()) }
+            name.addOnChangeListener { v, t -> notifyFieldListeners(name.eraseType(),t) }
             name.bindToDatabaseListner(databaseRef)
             for(item in items)
             {
@@ -629,6 +649,7 @@ object UserData {
                 )
                 items = items.plus(newBundleItem)
                 newBundleItem.addOnFieldChangeListener { notifySubitemListeners(newBundleItem) }
+                notifySubitemListeners(newBundleItem)
                 bundleItemTask.finishTask(newBundleItem)
             }
             return bundleItemTask
@@ -640,11 +661,11 @@ object UserData {
         var bundles: List<ShoppingBundle> = shoppingBundles
             private set
         init {
-            date.addOnChangeListener { notifyFieldListeners(date.eraseType()) }
+            date.addOnChangeListener {v, t -> notifyFieldListeners(date.eraseType(),t) }
             date.bindToDatabaseListner(databaseRef)
-            daysToRepeat.addOnChangeListener { notifyFieldListeners(daysToRepeat.eraseType()) }
+            daysToRepeat.addOnChangeListener {v, t -> notifyFieldListeners(daysToRepeat.eraseType(),t) }
             daysToRepeat.bindToDatabaseListner(databaseRef)
-            recurring.addOnChangeListener { notifyFieldListeners(recurring.eraseType()) }
+            recurring.addOnChangeListener {v, t -> notifyFieldListeners(recurring.eraseType(),t) }
             recurring.bindToDatabaseListner(databaseRef)
             for(bundle in bundles)
             {
@@ -665,9 +686,9 @@ object UserData {
         var userOrders: List<UserOrder> = userOrders
             private set
         init {
-            date.addOnChangeListener { notifyFieldListeners(date.eraseType()) }
+            date.addOnChangeListener {v, t -> notifyFieldListeners(date.eraseType(),t) }
             date.bindToDatabaseListner(databaseRef)
-            status.addOnChangeListener { notifyFieldListeners(status.eraseType()) }
+            status.addOnChangeListener {v, t -> notifyFieldListeners(status.eraseType(),t) }
             status.bindToDatabaseListner(databaseRef)
             for(userOrder in userOrders)
             {
