@@ -55,12 +55,10 @@ object UserData {
                     Log.d(TAG, "Received $collection update from DB")
                     for (doc in value!!) {
                         Log.d(TAG, "Firebase listener $collection: ${doc.id}")
-                        GlobalScope.launch {
-//                            val newItem = when(collection) {
-//                                "Bundles" -> bundleFromDocument(doc)
-//                                "Fridge" -> fridgeItemFromDocument(doc)
-//                                else -> userOrderFromDocument(doc)
-//                            }
+                        val newItem = when(collection) {
+                            "Bundles" -> bundleFromDocument(doc)
+                            "Fridge" -> fridgeItemFromDocument(doc)
+                            else -> userOrderFromDocument(doc)
                         }
                     }
                 }
@@ -149,7 +147,7 @@ object UserData {
         // parse date
         val firebaseTimestamp = data["date"] as Timestamp
         val javaDate = firebaseTimestamp.toDate()
-        val date = LocalDateTime.ofInstant(Instant.ofEpochMilli(javaDate.time), ZoneId.systemDefault());
+        val date = LocalDateTime.ofInstant(Instant.ofEpochMilli(javaDate.time), ZoneId.systemDefault())
 
         val recurring = data["recurring"] as Boolean
         val daysToRepeat: Int
@@ -489,6 +487,40 @@ object UserData {
         {
             return DatabaseField(dbName, this.databaseValue as Any)
         }
+        fun bindToDatabaseListner(docReference: DocumentReference)
+        {
+            docReference.addSnapshotListener { doc, error ->
+                if (error != null) {
+                    Log.w(TAG, "Listen failed.", error)
+                    return@addSnapshotListener
+                }
+                var newDbValue = doc?.data?.get(dbName)
+
+                if (newDbValue == null)
+                {
+                    return@addSnapshotListener
+                }
+
+                if (newDbValue is Timestamp)
+                {
+                    val javaDate = newDbValue.toDate()
+                    newDbValue = LocalDateTime.ofInstant(Instant.ofEpochMilli(javaDate.time), ZoneId.systemDefault())
+                }
+                else if(newDbValue is Number && databaseValue is Int)
+                {
+                    newDbValue = newDbValue.toInt()
+                }
+                else if(newDbValue is Number && databaseValue is Double)
+                {
+                    newDbValue = newDbValue.toDouble()
+                }
+
+                if(newDbValue != databaseValue)
+                {
+                    databaseValue = newDbValue as T
+                }
+            }
+        }
     }
 
     abstract class DatabaseItem(val id: String, val databaseRef: DocumentReference)
@@ -536,21 +568,28 @@ object UserData {
             onSubitemChangeListeners.add(listener)
         }
     }
+
     class Product(id: String, val name: DatabaseField<String>, val price: DatabaseField<Double>, val storeGivenId: DatabaseField<String>, val barcode: DatabaseField<String>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
     {
         init {
             name.addOnChangeListener { notifyFieldListeners(name.eraseType()) }
+            name.bindToDatabaseListner(databaseRef)
             price.addOnChangeListener { notifyFieldListeners(price.eraseType()) }
+            price.bindToDatabaseListner(databaseRef)
             storeGivenId.addOnChangeListener { notifyFieldListeners(storeGivenId.eraseType()) }
+            storeGivenId.bindToDatabaseListner(databaseRef)
             barcode.addOnChangeListener { notifyFieldListeners(barcode.eraseType()) }
+            barcode.bindToDatabaseListner(databaseRef)
         }
     }
+
     abstract class QuantityItem(id: String, val measuringUnit: DatabaseField<String>, val product: Product, val quantity: DatabaseField<Int>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
     {
         init {
             measuringUnit.addOnChangeListener { notifyFieldListeners(measuringUnit.eraseType()) }
+            measuringUnit.bindToDatabaseListner(databaseRef)
             quantity.addOnChangeListener { notifyFieldListeners(quantity.eraseType()) }
-            measuringUnit.addOnChangeListener { notifyFieldListeners(measuringUnit.eraseType()) }
+            quantity.bindToDatabaseListner(databaseRef)
             product.addOnFieldChangeListener { notifySubitemListeners(product) }
         }
     }
@@ -565,6 +604,7 @@ object UserData {
             private set
         init {
             name.addOnChangeListener { notifyFieldListeners(name.eraseType()) }
+            name.bindToDatabaseListner(databaseRef)
             for(item in items)
             {
                 item.addOnFieldChangeListener { notifySubitemListeners(item) }
@@ -601,8 +641,11 @@ object UserData {
             private set
         init {
             date.addOnChangeListener { notifyFieldListeners(date.eraseType()) }
+            date.bindToDatabaseListner(databaseRef)
             daysToRepeat.addOnChangeListener { notifyFieldListeners(daysToRepeat.eraseType()) }
+            daysToRepeat.bindToDatabaseListner(databaseRef)
             recurring.addOnChangeListener { notifyFieldListeners(recurring.eraseType()) }
+            recurring.bindToDatabaseListner(databaseRef)
             for(bundle in bundles)
             {
                 bundle.addOnFieldChangeListener { notifySubitemListeners(bundle) }
@@ -623,7 +666,9 @@ object UserData {
             private set
         init {
             date.addOnChangeListener { notifyFieldListeners(date.eraseType()) }
+            date.bindToDatabaseListner(databaseRef)
             status.addOnChangeListener { notifyFieldListeners(status.eraseType()) }
+            status.bindToDatabaseListner(databaseRef)
             for(userOrder in userOrders)
             {
                 userOrder.addOnFieldChangeListener { notifySubitemListeners(userOrder) }
