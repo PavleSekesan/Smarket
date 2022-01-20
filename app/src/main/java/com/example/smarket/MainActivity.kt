@@ -27,20 +27,9 @@ import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.*
 import android.content.Intent
-import android.util.Log
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.auth.User
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import java.io.Serializable
-import java.time.temporal.ChronoUnit
-
 
 
 class MonthViewContainer(view: View) : ViewContainer(view) {
@@ -151,7 +140,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         val textFields = listOf(container.text1, container.text2, container.text3)
                         runOnUiThread {
-                            displayOrdersOnDay(bundlesOnDay,ordersColor,textFields)
+                            //displayBundlesInTextFields(bundlesOnDay,ordersColor,textFields)
                         }
                     }
                 }

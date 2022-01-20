@@ -8,9 +8,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 
-class FridgeItemsListAdapter(fridgeItems: MutableList<FridgeItem>, private val displayPrevious : Boolean = true) : QuantityItemsListAdapter() {
+class FridgeItemsListAdapter(fridgeItems: List<FridgeItem>, displayPrevious : Boolean = true) : QuantityItemsListAdapter() {
     init {
-        if (displayPrevious) items = fridgeItems as MutableList<QuantityItem>
+        if (displayPrevious) items = fridgeItems
+        UserData.addOnFridgeModifyListener { fridgeItem, databaseEventType ->
+            if (databaseEventType == UserData.DatabaseEventType.ADDED)
+                notifyItemInserted(items.size)
+        }
     }
 
     inner class ViewHolder(view: View) : QuantityViewHolder(view) {

@@ -2,6 +2,7 @@ package com.example.smarket
 
 import UserData.ShoppingBundle
 import UserData.DatabaseEventType
+import UserData.getAllBundles
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -9,27 +10,21 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class BundlesListAdapter(private var bundles : MutableList<ShoppingBundle>) :
+class BundlesListAdapter(private val bundles : List<ShoppingBundle>) :
     RecyclerView.Adapter<BundlesListAdapter.ViewHolder>()  {
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
      */
-
-//    init {
-//        UserData.addOnShoppingBundleModifyListener { shoppingBundle, databaseEventType ->
-//            if (databaseEventType == DatabaseEventType.ADDED)
-//                addItem(shoppingBundle!!)
-////            else if (databaseEventType == DatabaseEventType.MODIFIED)
-////                // TODO Implement modificaiton
-////            else if (databaseEventType == DatabaseEventType.REMOVED)
-////                // TODO Implement removal
-//        }
-//    }
-
-    fun addItem(newItem: ShoppingBundle) {
-        //bundles.add(newItem)
-        super.notifyItemInserted(bundles.size)
+    init {
+        UserData.addOnShoppingBundleModifyListener { shoppingBundle, databaseEventType ->
+            if (databaseEventType == DatabaseEventType.ADDED)
+                notifyItemInserted(bundles.size)
+//            else if (databaseEventType == DatabaseEventType.MODIFIED)
+//                // TODO Implement modificaiton
+//            else if (databaseEventType == DatabaseEventType.REMOVED)
+//                // TODO Implement removal
+        }
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -63,12 +58,12 @@ class BundlesListAdapter(private var bundles : MutableList<ShoppingBundle>) :
         val context = viewHolder.itemView.context
         val bundle = bundles[position]
         viewHolder.bundleName.text = bundle.name.databaseValue
-        val item1 = bundle.items.getOrNull(0)?.product?.name?.databaseValue ?: ""
-        val item2 = bundle.items.getOrNull(1)?.product?.name?.databaseValue ?: ""
-        val item3 = bundle.items.getOrNull(2)?.product?.name?.databaseValue ?: ""
-        viewHolder.item1.text = if(item1 == "") item1 else "  -  " + item1
-        viewHolder.item2.text = if(item2 == "") item2 else "  -  " + item2
-        viewHolder.item3.text = if(item3 == "") item3 else "  -  " + item3
+        val item1 = bundle.items.getOrNull(0)?.product?.name?.databaseValue
+        val item2 = bundle.items.getOrNull(1)?.product?.name?.databaseValue
+        val item3 = bundle.items.getOrNull(2)?.product?.name?.databaseValue
+        viewHolder.item1.text = if(item1 == null) "" else "  -  " + item1
+        viewHolder.item2.text = if(item2 == null) "" else "  -  " + item2
+        viewHolder.item3.text = if(item3 == null) "" else "  -  " + item3
 
         bundle.name.addOnChangeListener { viewHolder.bundleName.text = it }
         viewHolder.itemView.setOnClickListener {
