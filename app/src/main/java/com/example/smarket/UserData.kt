@@ -488,16 +488,23 @@ object UserData {
         }
 
         private val onChangeListeners: MutableList<(T, DatabaseFieldEventType) -> Unit> = mutableListOf()
+        private var valueFilter: (T)->T = {x -> x}
         var databaseValue = dbVal
             set(value){
-                field=value
-                dbVal = value
+                field= valueFilter(value)
+                dbVal = valueFilter(value)
                 for(listener in onChangeListeners)
                 {
-                    listener(value, DatabaseFieldEventType.UPLOAD)
+                    listener(dbVal, DatabaseFieldEventType.UPLOAD)
                 }
             }
             get() = dbVal
+
+        fun setValueFilter(filter: (T)->T)
+        {
+            valueFilter = filter
+        }
+
         fun addOnChangeListener(listener: (T, DatabaseFieldEventType) -> Unit)
         {
             onChangeListeners.add(listener)
@@ -622,6 +629,26 @@ object UserData {
             quantity.addOnChangeListener {v, t -> notifyFieldListeners(quantity.eraseType(),t) }
             quantity.bindToDatabaseListner(databaseRef)
             product.addOnFieldChangeListener { notifySubitemListeners(product, DatabaseEventType.MODIFIED) }
+            quantity.setValueFilter { x->
+                if(x <= 0)
+                {
+                    databaseRef.delete()
+                    if(this is FridgeItem)
+                    {
+                        val dataType: KType = FridgeItem::class.createType()
+                        if (modifyListeners.containsKey(dataType)) {
+                            for (listener in modifyListeners[dataType]!!) {
+                                listener(this,DatabaseEventType.REMOVED)
+                            }
+                        }
+                    }
+                    return@setValueFilter 0
+                }
+                else
+                {
+                    return@setValueFilter x
+                }
+            }
         }
     }
 

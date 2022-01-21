@@ -32,8 +32,11 @@ abstract class QuantityItemsListAdapter :
 //
     fun removeItem(item : QuantityItem) {
         val removePos = items.indexOf(items.find { it == item })
-        items = items.filter { it-> it.id !=  item.id}
-        notifyItemRemoved(removePos)
+        if(removePos != -1)
+        {
+            items = items.filter { it-> it.id !=  item.id}
+            super.notifyItemRemoved(removePos)
+        }
     }
 //
 //    fun updateItem(modifiedItem : QuantityItem) {

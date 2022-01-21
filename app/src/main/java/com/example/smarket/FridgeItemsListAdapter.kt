@@ -17,6 +17,12 @@ class FridgeItemsListAdapter(fridgeItems: List<FridgeItem>, displayPrevious : Bo
                     addItem(fridgeItem)
                 }
             }
+            else if(databaseEventType == UserData.DatabaseEventType.REMOVED)
+            {
+                if (fridgeItem != null) {
+                    removeItem(fridgeItem)
+                }
+            }
         }
     }
 
