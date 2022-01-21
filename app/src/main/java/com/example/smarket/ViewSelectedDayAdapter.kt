@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import UserData.UserOrder
 import android.content.Intent
 import androidx.core.content.ContextCompat.startActivity
+import com.google.firebase.firestore.auth.User
 
 class ViewSelectedDayAdapter(private var dataSet: MutableList<UserOrder>) :
     RecyclerView.Adapter<ViewSelectedDayAdapter.ViewHolder>()  {
@@ -19,9 +20,17 @@ class ViewSelectedDayAdapter(private var dataSet: MutableList<UserOrder>) :
             view.findViewById<TextView>(R.id.userOrderBundleText3),
             view.findViewById<TextView>(R.id.userOrderBundleText4),
             view.findViewById<TextView>(R.id.userOrderBundleText5))
+    }
 
-        init {
-
+    fun onOrderChanged(orderChanged: UserOrder)
+    {
+        for(i in dataSet.indices)
+        {
+            val order = dataSet[i]
+            if (order.id == orderChanged.id)
+            {
+                super.notifyDataSetChanged()
+            }
         }
     }
 
@@ -29,6 +38,13 @@ class ViewSelectedDayAdapter(private var dataSet: MutableList<UserOrder>) :
     {
         dataSet.add(newOrder)
         super.notifyItemInserted(dataSet.size)
+    }
+
+    fun removeItem(orderToRemove: UserOrder)
+    {
+        val indexToRemove = dataSet.indexOfFirst { order -> order.id == orderToRemove.id }
+        dataSet.removeAt(indexToRemove)
+        super.notifyItemRemoved(indexToRemove)
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {

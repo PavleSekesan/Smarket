@@ -25,6 +25,10 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.*
+import androidx.recyclerview.widget.DefaultItemAnimator
+
+
+
 
 class ViewSelectedCalendarDay : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,10 +43,28 @@ class ViewSelectedCalendarDay : AppCompatActivity() {
         recycler.adapter = adapter
 
 
+        UserData.addOnUserOrderModifyListener { userOrder, databaseEventType ->
+            if(databaseEventType == UserData.DatabaseEventType.ADDED)
+            {
+                if (userOrder != null) {
+                    adapter.addItem(userOrder)
+                }
+            }
+            else if(databaseEventType == UserData.DatabaseEventType.REMOVED)
+            {
+                if (userOrder != null)
+                {
+                    adapter.removeItem(userOrder)
+                }
+            }
+        }
         val ordersOnCurrentDay = MainActivity.userOrdersOnSelectedDay
         for(order in ordersOnCurrentDay)
         {
             adapter.addItem(order)
+            order.addOnSubitemChangeListener { databaseItem, databaseEventType ->
+                adapter.onOrderChanged(order)
+            }
         }
     }
 

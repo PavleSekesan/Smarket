@@ -105,19 +105,17 @@ class MainActivity : AppCompatActivity() {
                             currentMonth = day.date.month
                             allOrdersInMonth = expandUserOrders(userOrders, day.date)
                         }
-                        runOnUiThread {
-                            container.textView.text = day.date.dayOfMonth.toString()
-                            container.deliveryTag.setBackgroundColor(Color.TRANSPARENT)
-                        }
+                        container.textView.text = day.date.dayOfMonth.toString()
+                        container.deliveryTag.setBackgroundColor(Color.TRANSPARENT)
+
                         var dayColor: Int
                         for(delivery in deliveries)
                         {
                             if (delivery.date.databaseValue.toLocalDate() == day.date)
                             {
                                 dayColor = resources.getIntArray(R.array.different_32_colors)[day.date.dayOfMonth - 1]
-                                runOnUiThread {
-                                    container.deliveryTag.setBackgroundColor(dayColor)
-                                }
+                                container.deliveryTag.setBackgroundColor(dayColor)
+
                                 for(userOrder in delivery.userOrders)
                                 {
                                     userOrderColors[userOrder.id] = dayColor
@@ -136,6 +134,22 @@ class MainActivity : AppCompatActivity() {
                                 {
                                     bundlesOnDay.add(bundle)
                                 }
+                                order.addOnSubitemChangeListener { databaseItem, databaseEventType ->
+                                    val bundleChanged = databaseItem as ShoppingBundle
+                                    if(databaseEventType == UserData.DatabaseEventType.ADDED)
+                                    {
+                                        bundlesOnDay.add(bundleChanged)
+                                    }
+                                    else if (databaseEventType == UserData.DatabaseEventType.REMOVED)
+                                    {
+                                        bundlesOnDay.removeIf { bundle-> bundle.id == bundleChanged.id}
+                                    }
+                                    else
+                                    {
+                                    }
+                                    val textFields = listOf(container.text1, container.text2, container.text3)
+                                    displayBundlesInTextFields(bundlesOnDay,ordersColor,textFields)
+                                }
                             }
                         }
                         val textFields = listOf(container.text1, container.text2, container.text3)
@@ -150,28 +164,25 @@ class MainActivity : AppCompatActivity() {
                     MonthHeaderFooterBinder<MonthViewContainer> {
                     override fun create(view: View) = MonthViewContainer(view)
                     override fun bind(container: MonthViewContainer, month: CalendarMonth) {
-                        runOnUiThread {
-                            // Setup each header day text if we have not done that already.
-                            if (container.legendLayout.tag == null) {
-                                container.legendLayout.tag = month.yearMonth
-                                container.legendLayout.children.map { it as TextView }.forEachIndexed { index, tv ->
-                                    tv.text = daysOfWeek[index].getDisplayName(TextStyle.SHORT, Locale.ENGLISH)
-                                        .toUpperCase(Locale.ENGLISH)
-                                    tv.setTextColorRes(R.color.example_5_text_grey)
-                                    tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-                                }
-                                month.yearMonth
-                            }}
-                    }
+                        // Setup each header day text if we have not done that already.
+                        if (container.legendLayout.tag == null) {
+                            container.legendLayout.tag = month.yearMonth
+                            container.legendLayout.children.map { it as TextView }.forEachIndexed { index, tv ->
+                                tv.text = daysOfWeek[index].getDisplayName(TextStyle.SHORT, Locale.ENGLISH)
+                                    .toUpperCase(Locale.ENGLISH)
+                                tv.setTextColorRes(R.color.example_5_text_grey)
+                                tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+                            }
+                            month.yearMonth
+                        }}
                 }
 
                 // Logic for showing the large month and year header
                 calendarView.monthScrollListener = {
-                    runOnUiThread{
                         findViewById<TextView>(R.id.calendarYearText).text = it.yearMonth.year.toString()
                         val monthTitleFormatter = DateTimeFormatter.ofPattern("MMMM")
                         findViewById<TextView>(R.id.calendarMonthText).text = monthTitleFormatter.format(it.yearMonth)
-                    }}
+                    }
 
                 // Change cell size so cells are longer
                 val daySize = calendarView.daySize

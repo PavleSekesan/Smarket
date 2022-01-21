@@ -30,11 +30,11 @@ abstract class QuantityItemsListAdapter :
 //        notifyDataSetChanged()
 //    }
 //
-//    fun removeItem(item : QuantityItem) {
-//        val removePos = items.indexOf(items.find { it == item })
-//        items.removeAt(removePos)
-//        notifyItemRemoved(removePos)
-//    }
+    fun removeItem(item : QuantityItem) {
+        val removePos = items.indexOf(items.find { it == item })
+        items = items.filter { it-> it.id !=  item.id}
+        notifyItemRemoved(removePos)
+    }
 //
 //    fun updateItem(modifiedItem : QuantityItem) {
 //        val changedItemPos = items.indexOf(items.find { it.id == modifiedItem.id })
@@ -45,10 +45,10 @@ abstract class QuantityItemsListAdapter :
 //        }
 //    }
 //
-//    fun addItem(newItem: QuantityItem) {
-//        items.add(newItem)
-//        super.notifyItemInserted(items.size)
-//    }
+    fun addItem(newItem: QuantityItem) {
+        items = items.plus(newItem)
+        super.notifyItemInserted(items.size)
+    }
 
     // Create new views (invoked by the layout manager)
     abstract override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): QuantityViewHolder

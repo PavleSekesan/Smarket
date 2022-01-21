@@ -49,8 +49,11 @@ class BundleSelectionAdapter(
     fun removeBundle(bundleToRemove: ShoppingBundle)
     {
         val indexToRemove = bundles.indexOfFirst { bundle-> bundle.id == bundleToRemove.id }
-        bundles.removeAt(indexToRemove)
-        super.notifyItemRemoved(indexToRemove)
+        if (indexToRemove != -1)
+        {
+            bundles.removeAt(indexToRemove)
+            super.notifyItemRemoved(indexToRemove)
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)

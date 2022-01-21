@@ -45,7 +45,7 @@ object UserData {
                     Log.d(TAG, "Received $collection update from DB")
                     for (doc in value!!) {
                         Log.d(TAG, "Firebase listener $collection: ${doc.id}")
-                        val newItem = when(collection) {
+                        val newItemTask = when(collection) {
                             "Bundles" -> bundleFromDocument(doc)
                             "Fridge" -> fridgeItemFromDocument(doc)
                             else -> userOrderFromDocument(doc)
@@ -345,21 +345,30 @@ object UserData {
     //endregion
 
     //region Methods that instantiate new database objects
-    fun addNewFridgeItem(measuringUnit: String, product: Product, quantity: Int)
+    fun addNewFridgeItem(measuringUnit: String, product: Product, quantity: Int) : DatabaseItemTask
     {
         val data = hashMapOf(
             "measuring_unit" to measuringUnit,
             "product" to product.databaseRef,
             "quantity" to quantity
         )
+        val fridgeItemTask = DatabaseItemTask()
         db.collection("UserData").document(auth.uid.toString()).collection("Fridge").add(data).addOnSuccessListener {
             val id = it.id
-            FridgeItem(id,
+            val newFridgeItem = FridgeItem(id,
                 DatabaseField("measuring_unit",measuringUnit),
                 product,
                 DatabaseField("quantity",quantity),
                 it)
+            val dataType: KType = newFridgeItem::class.createType()
+            if (modifyListeners.containsKey(dataType)) {
+                for (listener in modifyListeners[dataType]!!) {
+                    listener(newFridgeItem,DatabaseEventType.ADDED)
+                }
+            }
+            fridgeItemTask.finishTask(newFridgeItem)
         }
+        return fridgeItemTask
     }
 
     fun addNewBundle(name: String, itemsInBundle: List<BundleItem>) : DatabaseItemTask
@@ -636,12 +645,22 @@ object UserData {
                         if(items.none { item -> item.id == dc.document.id }) {
                             bundleItemFromDocument(dc.document).addOnSuccessListener {
                                 val newBundleItem = it as BundleItem
-                                items = bundleItems.plus(newBundleItem)
+                                items = items.plus(newBundleItem)
                                 newBundleItem.addOnFieldChangeListener {
                                     notifySubitemListeners(newBundleItem, DatabaseEventType.MODIFIED)
                                 }
                                 notifySubitemListeners(newBundleItem, DatabaseEventType.ADDED)
                             }
+                        }
+                    }
+                    else if(dc.type == DocumentChange.Type.REMOVED)
+                    {
+                        val bundleIndexToRemove = items.indexOfFirst { bundle -> bundle.id == dc.document.id }
+                        if(bundleIndexToRemove != -1)
+                        {
+                            val bundleItemToRemove = items[bundleIndexToRemove]
+                            items = items.filter { bundle -> bundle.id != dc.document.id }
+                            notifySubitemListeners(bundleItemToRemove, DatabaseEventType.REMOVED)
                         }
                     }
                 }
@@ -724,6 +743,16 @@ object UserData {
                                 }
                             }
                         }
+                    }
+                    else if(dc.type == DocumentChange.Type.REMOVED)
+                    {
+                        val bundleIndexToRemove = bundles.indexOfFirst { bundle -> bundle.id == dc.document.id }
+                        if (bundleIndexToRemove != -1)
+                        {
+                            val removedBundle = bundles[bundleIndexToRemove]
+                            bundles = bundles.filter { bundle->bundle.id != removedBundle.id }
+                            notifySubitemListeners(removedBundle, DatabaseEventType.REMOVED)
+                        }
 
                     }
                 }
@@ -760,9 +789,19 @@ object UserData {
             if(bundles.any { bundle-> bundle.id == bundleToRemove.id })
             {
                 this.databaseRef.collection("Bundles").document(bundleToRemove.id).delete().addOnSuccessListener {
-                    bundles = bundles.dropWhile { bundle -> bundle.id == bundleToRemove.id }
-                    notifySubitemListeners(bundleToRemove, DatabaseEventType.REMOVED)
-                    bundleItemTask.finishTask(bundleToRemove)
+
+                    val bundleIndexToRemove = bundles.indexOfFirst { bundle -> bundle.id == bundleToRemove.id }
+                    if (bundleIndexToRemove != -1)
+                    {
+                        val removedBundle = bundles[bundleIndexToRemove]
+                        bundles = bundles.filter { bundle->bundle.id != bundleToRemove.id }
+                        notifySubitemListeners(removedBundle, DatabaseEventType.REMOVED)
+                        bundleItemTask.finishTask(bundleToRemove)
+                    }
+                    else
+                    {
+                        bundleItemTask.finishTask(bundleToRemove)
+                    }
                 }
             }
             else
