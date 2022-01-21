@@ -379,7 +379,14 @@ object UserData {
         val newBundleTask = DatabaseItemTask()
         db.collection("UserData").document(auth.uid.toString()).collection("Bundles").add(data).addOnSuccessListener {
             val id = it.id
-            newBundleTask.finishTask(ShoppingBundle(id, DatabaseField("name", name), itemsInBundle, it))
+            val newBundle = ShoppingBundle(id, DatabaseField("name", name), itemsInBundle, it)
+            val dataType: KType = newBundle::class.createType()
+            if (modifyListeners.containsKey(dataType)) {
+                for (listener in modifyListeners[dataType]!!) {
+                    listener(newBundle,DatabaseEventType.ADDED)
+                }
+            }
+            newBundleTask.finishTask(newBundle)
         }
         return newBundleTask
     }
