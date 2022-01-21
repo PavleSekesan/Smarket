@@ -15,7 +15,6 @@ class FridgeItemsListAdapter(fridgeItems: List<FridgeItem>, displayPrevious : Bo
             if (databaseEventType == UserData.DatabaseEventType.ADDED) {
                 if (fridgeItem != null) {
                     addItem(fridgeItem)
-                    notifyItemInserted(items.size)
                 }
             }
         }

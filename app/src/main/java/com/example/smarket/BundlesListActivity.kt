@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import UserData.ShoppingBundle
 import UserData.getAllBundles
+import android.content.Intent
 
 class BundlesListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,12 +25,12 @@ class BundlesListActivity : AppCompatActivity() {
         val addBundleFab = findViewById<FloatingActionButton>(R.id.addBundleFab)
         addBundleFab.setOnClickListener {
             // FIXME Uncomment when onSuccessListener is implemented
-//            UserData.addNewBundle(getString(R.string.new_bundle_name), listOf()).onSuccessListener {
-//                val newBundle = it
-//                val intent = Intent(this@BundlesListActivity, EditBundleActivity::class.java)
-//                intent.putExtra("bundle_id", newBundle.id)
-//                startActivity(intent)
-//            }
+            UserData.addNewBundle(getString(R.string.new_bundle_name), listOf()).addOnSuccessListener {
+                val newBundle = it as ShoppingBundle
+                val intent = Intent(this@BundlesListActivity, EditBundleActivity::class.java)
+                intent.putExtra("bundle_id", newBundle.id)
+                startActivity(intent)
+            }
         }
     }
 }

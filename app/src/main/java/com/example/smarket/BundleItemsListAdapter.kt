@@ -12,22 +12,11 @@ import android.widget.TextView
 
 class BundleItemsListAdapter(bundle: ShoppingBundle, private val editable: Boolean, displayPrevious : Boolean = true) : QuantityItemsListAdapter() {
     init {
-        if (displayPrevious) {
-            items = bundle.items
-            // TODO Implement listener for bundle addition
-            bundle.addOnSubitemChangeListener { v, t ->
-                items = bundle.items
-                notifyDataSetChanged()
-            }
-        } else {
-            var toDisplay = mutableListOf<BundleItem>()
-            items = toDisplay
-            bundle.addOnSubitemChangeListener { databaseItem, databaseEventType ->
-                if (databaseEventType == DatabaseEventType.ADDED) {
-                    toDisplay.add(databaseItem as BundleItem)
-                    items = toDisplay
-                    notifyItemInserted(items.size)
-                }
+        if (displayPrevious) items = bundle.items
+        bundle.addOnSubitemChangeListener { databaseItem, databaseEventType ->
+            val bundleItem = databaseItem as BundleItem
+            if (databaseEventType == DatabaseEventType.ADDED) {
+                addItem(bundleItem)
             }
         }
     }

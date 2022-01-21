@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class BundlesListAdapter(private val bundles : List<ShoppingBundle>) :
+class BundlesListAdapter(private var bundles : List<ShoppingBundle>) :
     RecyclerView.Adapter<BundlesListAdapter.ViewHolder>()  {
     /**
      * Provide a reference to the type of views that you are using
@@ -18,13 +18,19 @@ class BundlesListAdapter(private val bundles : List<ShoppingBundle>) :
      */
     init {
         UserData.addOnShoppingBundleModifyListener { shoppingBundle, databaseEventType ->
+            val bundle = shoppingBundle as ShoppingBundle
             if (databaseEventType == DatabaseEventType.ADDED)
-                notifyItemInserted(bundles.size)
+                addItem(bundle)
 //            else if (databaseEventType == DatabaseEventType.MODIFIED)
 //                // TODO Implement modificaiton
 //            else if (databaseEventType == DatabaseEventType.REMOVED)
 //                // TODO Implement removal
         }
+    }
+
+    private fun addItem(bundle : ShoppingBundle) {
+        bundles = bundles.plus(bundle)
+        notifyItemInserted(bundles.size)
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
