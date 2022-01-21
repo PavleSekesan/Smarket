@@ -65,7 +65,7 @@ class BundlesListAdapter(private val bundles : List<ShoppingBundle>) :
         viewHolder.item2.text = if(item2 == null) "" else "  -  " + item2
         viewHolder.item3.text = if(item3 == null) "" else "  -  " + item3
 
-        bundle.name.addOnChangeListener { viewHolder.bundleName.text = it }
+        bundle.name.addOnChangeListener { it, _ -> viewHolder.bundleName.text = it }
         viewHolder.itemView.setOnClickListener {
             val intent = Intent(context, SelectedBundleActivity::class.java)
             intent.putExtra("bundle_id", bundle.id)

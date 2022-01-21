@@ -42,7 +42,7 @@ class EditBundleActivity : AppCompatActivity() {
                 intent.putExtra("bundle_id", bundle.id)
                 startActivity(intent)
             }
-            bundle.name.addOnChangeListener { bundleTitleEditText.setText(it) }
+            bundle.name.addOnChangeListener { it, _ -> bundleTitleEditText.setText(it) }
             editBundleItemsRecyclerView.adapter = BundleItemsListAdapter(bundle, true)
             bundleTitleEditText.setText(bundle.name.databaseValue)
         }

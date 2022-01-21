@@ -12,8 +12,10 @@ class FridgeItemsListAdapter(fridgeItems: List<FridgeItem>, displayPrevious : Bo
     init {
         if (displayPrevious) items = fridgeItems
         UserData.addOnFridgeModifyListener { fridgeItem, databaseEventType ->
-            if (databaseEventType == UserData.DatabaseEventType.ADDED)
+            if (databaseEventType == UserData.DatabaseEventType.ADDED) {
+                items = fridgeItems
                 notifyItemInserted(items.size)
+            }
         }
     }
 

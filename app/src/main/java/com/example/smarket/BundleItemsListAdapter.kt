@@ -12,6 +12,7 @@ class BundleItemsListAdapter(bundle: ShoppingBundle, private val editable: Boole
     init {
         // TODO Implement listener for bundle addition
         bundle.addOnSubitemChangeListener {
+            items = bundle.items
             notifyDataSetChanged()
         }
         if (displayPrevious || true) items = bundle.items

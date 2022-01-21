@@ -29,7 +29,7 @@ class SelectedBundleActivity : AppCompatActivity() {
                 intent.putExtra("bundle_id", bundle.id)
                 startActivity(intent)
             }
-            bundle.name.addOnChangeListener { bundleTitleTextView.text = it }
+            bundle.name.addOnChangeListener { it, _ -> bundleTitleTextView.text = it }
             bundleTitleTextView.text = bundle.name.databaseValue
         }
     }

@@ -672,10 +672,15 @@ object UserData {
                     DatabaseField("quantity",quantity),
                     it
                 )
-                items = items.plus(newBundleItem)
-                newBundleItem.addOnFieldChangeListener { notifySubitemListeners(newBundleItem) }
-                notifySubitemListeners(newBundleItem)
-                bundleItemTask.finishTask(newBundleItem)
+                val velikoGovno = items.filter { item -> item.id == it.id }
+                if (velikoGovno.isEmpty()) {
+                    items = items.plus(newBundleItem)
+                    newBundleItem.addOnFieldChangeListener { notifySubitemListeners(newBundleItem) }
+                    notifySubitemListeners(newBundleItem)
+                    bundleItemTask.finishTask(newBundleItem)
+                } else {
+                    bundleItemTask.finishTask(velikoGovno[0])
+                }
             }
             return bundleItemTask
         }
