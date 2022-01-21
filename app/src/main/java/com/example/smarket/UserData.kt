@@ -639,10 +639,17 @@ object UserData {
                 for (dc in snapshots!!.documentChanges) {
                     if(dc.type == DocumentChange.Type.ADDED)
                     {
-                        bundleItemFromDocument(dc.document).addOnSuccessListener {
-                            val newBundleItem = it as BundleItem
-                            items = bundleItems.plus(newBundleItem)
-                            notifySubitemListeners(newBundleItem)
+                        if(items.filter { item -> item.id == dc.document.id }.isEmpty()) {
+                            bundleItemFromDocument(dc.document).addOnSuccessListener {
+                                val newBundleItem = it as BundleItem
+                                items = bundleItems.plus(newBundleItem)
+                                newBundleItem.addOnFieldChangeListener {
+                                    notifySubitemListeners(
+                                        newBundleItem
+                                    )
+                                }
+                                notifySubitemListeners(newBundleItem)
+                            }
                         }
                     }
                 }
