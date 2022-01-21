@@ -18,11 +18,14 @@ class SelectedBundleActivity : AppCompatActivity() {
         val editBundleFab = findViewById<FloatingActionButton>(R.id.editBundleFab)
         val bundleItemsRecyclerView = findViewById<RecyclerView>(R.id.bundleItemsRecyclerView)
         bundleItemsRecyclerView.layoutManager = LinearLayoutManager(this)
-
+        val totalSumTextView = findViewById<TextView>(R.id.totalSumTextView)
         val bundleTitleTextView = findViewById<TextView>(R.id.bundleTitleTextView)
 
         getAllBundles().addOnSuccessListener { allBundles ->
             val bundle = allBundles.find { it.id == intent.getStringExtra("bundle_id") }!! as ShoppingBundle
+
+            TotalSumUpdater(totalSumTextView, bundle)
+
             bundleItemsRecyclerView.adapter = BundleItemsListAdapter(bundle, false)
             editBundleFab.setOnClickListener {
                 val intent = Intent(this, EditBundleActivity::class.java)

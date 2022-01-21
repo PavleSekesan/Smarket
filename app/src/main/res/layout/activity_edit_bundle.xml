@@ -48,15 +48,13 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:text="420 RSD"
         android:gravity="right"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="0.00 RSD"
+        app:layout_constraintBottom_toBottomOf="@+id/totalSumLabelTextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/totalSumLabelTextView"
-        app:layout_constraintBottom_toTopOf="@+id/addProductButton" />
+        app:layout_constraintTop_toTopOf="@+id/totalSumLabelTextView" />
 
     <Button
         android:id="@+id/addProductButton"
