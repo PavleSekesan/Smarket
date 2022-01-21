@@ -9,6 +9,7 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -625,9 +626,26 @@ object UserData {
         init {
             name.addOnChangeListener { v, t -> notifyFieldListeners(name.eraseType(),t) }
             name.bindToDatabaseListner(databaseRef)
-            for(item in items)
-            {
+            for(item in items) {
                 item.addOnFieldChangeListener { notifySubitemListeners(item) }
+            }
+
+            databaseRef.collection("Products").addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Log.w(TAG, "listen:error", e)
+                    return@addSnapshotListener
+                }
+
+                for (dc in snapshots!!.documentChanges) {
+                    if(dc.type == DocumentChange.Type.ADDED)
+                    {
+                        bundleItemFromDocument(dc.document).addOnSuccessListener {
+                            val newBundleItem = it as BundleItem
+                            items = bundleItems.plus(newBundleItem)
+                            notifySubitemListeners(newBundleItem)
+                        }
+                    }
+                }
             }
         }
         fun addBundleItem(measuringUnit: String, product: Product, quantity: Int) : DatabaseItemTask
