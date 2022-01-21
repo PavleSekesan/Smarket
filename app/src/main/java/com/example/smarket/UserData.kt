@@ -1,9 +1,6 @@
 import android.app.Activity
-import android.os.Bundle
-import android.os.Parcelable
+import android.provider.ContactsContract
 import android.util.Log
-import androidx.databinding.ObservableArrayMap
-import androidx.databinding.ObservableMap
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
@@ -13,24 +10,16 @@ import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.auth.User
 import com.google.firebase.ktx.Firebase
-import kotlinx.android.parcel.Parcelize
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.io.Serializable
 import java.lang.Exception
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
 import java.util.concurrent.Executor
-import kotlin.collections.ArrayList
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
-import kotlin.reflect.full.memberProperties
 
 object UserData {
     private val TAG = "UserData"
@@ -142,8 +131,7 @@ object UserData {
     private fun userOrderFromDocument(doc: DocumentSnapshot): DatabaseItemTask
     {
         val id = doc.id
-        val data = doc.data
-        val bundlesRefs = data!!["bundles"] as ArrayList<DocumentReference>
+        val data = doc.data ?: throw Exception("Error getting user order from document")
 
         // parse date
         val firebaseTimestamp = data["date"] as Timestamp
@@ -156,28 +144,34 @@ object UserData {
 
         val userOrderTask = DatabaseItemTask()
         val bundles = mutableListOf<ShoppingBundle>()
-        var remainingToFinish = bundlesRefs.size
-        if (remainingToFinish == 0)
-        {
-            userOrderTask.finishTask(UserOrder(id, bundles,
-                DatabaseField("date",date),
-                DatabaseField("days_to_repeat",daysToRepeat),
-                DatabaseField("recurring",recurring),
-                doc.reference))
-        }
-        for(bundleRef in bundlesRefs)
-        {
-            bundleRef.get().addOnSuccessListener { bundleDoc->
-                bundleFromDocument(bundleDoc).addOnSuccessListener { bundle->
-                    bundles.add(bundle as ShoppingBundle)
-                    remainingToFinish--
-                    if(remainingToFinish == 0)
-                    {
-                        userOrderTask.finishTask(UserOrder(id, bundles,
-                            DatabaseField("date",date),
-                            DatabaseField("days_to_repeat",daysToRepeat),
-                            DatabaseField("recurring",recurring),
-                            doc.reference))
+
+        doc.reference.collection("Bundles").get().addOnSuccessListener { bundleDocs ->
+            var remainingToFinish = bundleDocs.size()
+            if (remainingToFinish == 0)
+            {
+                userOrderTask.finishTask(UserOrder(id, bundles,
+                    DatabaseField("date",date),
+                    DatabaseField("days_to_repeat",daysToRepeat),
+                    DatabaseField("recurring",recurring),
+                    doc.reference))
+            }
+            for(bundleDocWithRef in bundleDocs)
+            {
+                val bundleRef = bundleDocWithRef.data["bundle"] as DocumentReference
+                bundleRef.get().addOnSuccessListener { bundleDoc ->
+                    bundleFromDocument(bundleDoc).addOnSuccessListener { ret1->
+
+                        val bundle = ret1 as ShoppingBundle
+                        bundles.add(bundle)
+                        remainingToFinish--
+                        if(remainingToFinish == 0)
+                        {
+                            userOrderTask.finishTask(UserOrder(id, bundles,
+                                DatabaseField("date",date),
+                                DatabaseField("days_to_repeat",daysToRepeat),
+                                DatabaseField("recurring",recurring),
+                                doc.reference))
+                        }
                     }
                 }
             }
@@ -539,7 +533,7 @@ object UserData {
     abstract class DatabaseItem(val id: String, val databaseRef: DocumentReference)
     {
         private val onFieldChangeListeners: MutableList<(DatabaseField<Any>)->Unit> = mutableListOf()
-        private val onSubitemChangeListeners: MutableList<(DatabaseItem)->Unit> = mutableListOf()
+        private val onSubitemChangeListeners: MutableList<(DatabaseItem, DatabaseEventType)->Unit> = mutableListOf()
 
         protected fun parseAndNotifyGroupListeners(eventType: DatabaseEventType)
         {
@@ -576,15 +570,15 @@ object UserData {
         {
             onFieldChangeListeners.add(listener)
         }
-        protected fun notifySubitemListeners(databaseItemChanged: DatabaseItem)
+        protected fun notifySubitemListeners(databaseItemChanged: DatabaseItem, eventType: DatabaseEventType)
         {
             for(listener in onSubitemChangeListeners)
             {
-                listener(databaseItemChanged)
+                listener(databaseItemChanged, eventType)
             }
             parseAndNotifyGroupListeners(DatabaseEventType.MODIFIED)
         }
-        fun addOnSubitemChangeListener(listener:(DatabaseItem) -> Unit)
+        fun addOnSubitemChangeListener(listener:(DatabaseItem, DatabaseEventType) -> Unit)
         {
             onSubitemChangeListeners.add(listener)
         }
@@ -611,7 +605,7 @@ object UserData {
             measuringUnit.bindToDatabaseListner(databaseRef)
             quantity.addOnChangeListener {v, t -> notifyFieldListeners(quantity.eraseType(),t) }
             quantity.bindToDatabaseListner(databaseRef)
-            product.addOnFieldChangeListener { notifySubitemListeners(product) }
+            product.addOnFieldChangeListener { notifySubitemListeners(product, DatabaseEventType.MODIFIED) }
         }
     }
 
@@ -627,7 +621,7 @@ object UserData {
             name.addOnChangeListener { v, t -> notifyFieldListeners(name.eraseType(),t) }
             name.bindToDatabaseListner(databaseRef)
             for(item in items) {
-                item.addOnFieldChangeListener { notifySubitemListeners(item) }
+                item.addOnFieldChangeListener { notifySubitemListeners(item, DatabaseEventType.MODIFIED) }
             }
 
             databaseRef.collection("Products").addSnapshotListener { snapshots, e ->
@@ -639,16 +633,14 @@ object UserData {
                 for (dc in snapshots!!.documentChanges) {
                     if(dc.type == DocumentChange.Type.ADDED)
                     {
-                        if(items.filter { item -> item.id == dc.document.id }.isEmpty()) {
+                        if(items.none { item -> item.id == dc.document.id }) {
                             bundleItemFromDocument(dc.document).addOnSuccessListener {
                                 val newBundleItem = it as BundleItem
                                 items = bundleItems.plus(newBundleItem)
                                 newBundleItem.addOnFieldChangeListener {
-                                    notifySubitemListeners(
-                                        newBundleItem
-                                    )
+                                    notifySubitemListeners(newBundleItem, DatabaseEventType.MODIFIED)
                                 }
-                                notifySubitemListeners(newBundleItem)
+                                notifySubitemListeners(newBundleItem, DatabaseEventType.ADDED)
                             }
                         }
                     }
@@ -672,10 +664,19 @@ object UserData {
                     DatabaseField("quantity",quantity),
                     it
                 )
-                items = items.plus(newBundleItem)
-                newBundleItem.addOnFieldChangeListener { notifySubitemListeners(newBundleItem) }
-                notifySubitemListeners(newBundleItem)
-                bundleItemTask.finishTask(newBundleItem)
+                val itemAlreadyInserted = items.filter { item-> item.id == it.id }
+                if(itemAlreadyInserted.isEmpty())
+                {
+                    items = items.plus(newBundleItem)
+                    newBundleItem.addOnFieldChangeListener { notifySubitemListeners(newBundleItem,DatabaseEventType.MODIFIED) }
+                    notifySubitemListeners(newBundleItem, DatabaseEventType.ADDED)
+                    bundleItemTask.finishTask(newBundleItem)
+                }
+                else
+                {
+                    bundleItemTask.finishTask(itemAlreadyInserted[0])
+                }
+
             }
             return bundleItemTask
         }
@@ -694,15 +695,81 @@ object UserData {
             recurring.bindToDatabaseListner(databaseRef)
             for(bundle in bundles)
             {
-                bundle.addOnFieldChangeListener { notifySubitemListeners(bundle) }
-                bundle.addOnSubitemChangeListener { notifySubitemListeners(bundle) }
+                bundle.addOnFieldChangeListener { notifySubitemListeners(bundle, DatabaseEventType.MODIFIED) }
+                bundle.addOnSubitemChangeListener { v,t -> notifySubitemListeners(bundle, DatabaseEventType.MODIFIED) }
+            }
+
+            databaseRef.collection("Bundles").addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Log.w(TAG, "listen:error", e)
+                    return@addSnapshotListener
+                }
+
+                for (dc in snapshots!!.documentChanges) {
+                    if(dc.type == DocumentChange.Type.ADDED)
+                    {
+                        val bundleRef = dc.document.data["bundle"] as DocumentReference
+                        bundleRef.get().addOnSuccessListener { bundleDoc->
+                            bundleFromDocument(bundleDoc).addOnSuccessListener {
+                                val newBundle = it as ShoppingBundle
+                                if(bundles.none { item -> item.id == newBundle.id }) {
+                                    bundles = bundles.plus(newBundle)
+                                    newBundle.addOnFieldChangeListener {
+                                        notifySubitemListeners(newBundle, DatabaseEventType.MODIFIED)
+                                    }
+                                    newBundle.addOnSubitemChangeListener { v,t->
+                                        notifySubitemListeners(newBundle, DatabaseEventType.MODIFIED)
+                                    }
+                                    notifySubitemListeners(newBundle, DatabaseEventType.ADDED)
+                                }
+                            }
+                        }
+
+                    }
+                }
             }
         }
-        fun addBunlde(newBundle: ShoppingBundle)
+        fun addBunlde(newBundle: ShoppingBundle) : DatabaseItemTask
         {
-            bundles = bundles.plus(newBundle)
-            newBundle.addOnFieldChangeListener { notifySubitemListeners(newBundle) }
-            newBundle.addOnSubitemChangeListener { notifySubitemListeners(newBundle) }
+            val data = hashMapOf(
+                "bundle" to newBundle.databaseRef
+            )
+            val bundleItemTask = DatabaseItemTask()
+            this.databaseRef.collection("Bundles").document(newBundle.id).set(data).addOnSuccessListener {
+                val itemAlreadyInserted = bundles.filter { item-> item.id == newBundle.id }
+                if(itemAlreadyInserted.isEmpty())
+                {
+                    bundles = bundles.plus(newBundle)
+                    newBundle.addOnFieldChangeListener { notifySubitemListeners(newBundle, DatabaseEventType.MODIFIED) }
+                    newBundle.addOnSubitemChangeListener { v,t -> notifySubitemListeners(newBundle, DatabaseEventType.MODIFIED) }
+                    notifySubitemListeners(newBundle, DatabaseEventType.ADDED)
+                    bundleItemTask.finishTask(newBundle)
+                }
+                else
+                {
+                    bundleItemTask.finishTask(itemAlreadyInserted[0])
+                }
+
+            }
+            return bundleItemTask
+        }
+
+        fun removeBundle(bundleToRemove: ShoppingBundle) : DatabaseItemTask
+        {
+            val bundleItemTask = DatabaseItemTask()
+            if(bundles.any { bundle-> bundle.id == bundleToRemove.id })
+            {
+                this.databaseRef.collection("Bundles").document(bundleToRemove.id).delete().addOnSuccessListener {
+                    bundles = bundles.dropWhile { bundle -> bundle.id == bundleToRemove.id }
+                    notifySubitemListeners(bundleToRemove, DatabaseEventType.REMOVED)
+                    bundleItemTask.finishTask(bundleToRemove)
+                }
+            }
+            else
+            {
+                bundleItemTask.finishTask(bundleToRemove)
+            }
+            return bundleItemTask
         }
     }
 
@@ -717,17 +784,10 @@ object UserData {
             status.bindToDatabaseListner(databaseRef)
             for(userOrder in userOrders)
             {
-                userOrder.addOnFieldChangeListener { notifySubitemListeners(userOrder) }
-                userOrder.addOnSubitemChangeListener { notifySubitemListeners(userOrder) }
+                userOrder.addOnFieldChangeListener { notifySubitemListeners(userOrder, DatabaseEventType.MODIFIED) }
+                userOrder.addOnSubitemChangeListener {v,t -> notifySubitemListeners(userOrder, DatabaseEventType.MODIFIED) }
             }
         }
-        fun addUserOrder(newUserOrder: UserOrder)
-        {
-            userOrders = userOrders.plus(newUserOrder)
-            newUserOrder.addOnFieldChangeListener { notifySubitemListeners(newUserOrder) }
-            newUserOrder.addOnSubitemChangeListener { notifySubitemListeners(newUserOrder) }
-        }
-
     }
 
     class DatabaseItemTask: Task<DatabaseItem>()

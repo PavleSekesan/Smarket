@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
 
         val newOrderFab = findViewById<FloatingActionButton>(R.id.fabNewOrder)
         newOrderFab.setOnClickListener {
-            val intent = Intent(this, NewOrderActivity::class.java)
+            val intent = Intent(this, EditOrderActivity::class.java)
             startActivity(intent)
         }
     }
@@ -139,9 +139,7 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                         val textFields = listOf(container.text1, container.text2, container.text3)
-                        runOnUiThread {
-                            //displayBundlesInTextFields(bundlesOnDay,ordersColor,textFields)
-                        }
+                        displayBundlesInTextFields(bundlesOnDay,ordersColor,textFields)
                     }
                 }
 

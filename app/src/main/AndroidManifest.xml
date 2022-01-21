@@ -22,7 +22,7 @@
             android:name=".AddItemActivity"
             android:exported="false" />
         <activity
-            android:name=".NewOrderActivity"
+            android:name=".EditOrderActivity"
             android:exported="false" />
         <activity
             android:name=".SelectedBundleActivity"

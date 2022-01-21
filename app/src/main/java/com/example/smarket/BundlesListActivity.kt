@@ -16,7 +16,7 @@ class BundlesListActivity : AppCompatActivity() {
         val bundlesRecyclerView = findViewById<RecyclerView>(R.id.bundlesRecyclerView)
         getAllBundles().addOnSuccessListener {
             val bundles = it as List<ShoppingBundle>
-            bundlesRecyclerView.adapter = BundlesListAdapter(it)
+            bundlesRecyclerView.adapter = BundlesListAdapter(bundles)
         }
 
         bundlesRecyclerView.layoutManager = GridLayoutManager(this, 2)
