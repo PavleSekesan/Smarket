@@ -4,6 +4,7 @@ import android.widget.TextView
 import UserData.DatabaseEventType
 import UserData.ShoppingBundle
 import UserData.BundleItem
+import kotlin.math.round
 
 class TotalSumUpdater(val textView : TextView, val bundle : ShoppingBundle) {
     private var totalSum : Double = 0.0
@@ -20,7 +21,8 @@ class TotalSumUpdater(val textView : TextView, val bundle : ShoppingBundle) {
         for (item in bundle.items) {
             totalSum += item.quantity.databaseValue * item.product.price.databaseValue
         }
-        textView.text = totalSum.toString() + currency
+        val roundedTotalSum = round(totalSum * 100) / 100
+        textView.text = String.format("%.2f", roundedTotalSum) + currency
     }
 
 }
