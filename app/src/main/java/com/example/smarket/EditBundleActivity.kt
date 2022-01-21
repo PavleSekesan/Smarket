@@ -10,7 +10,6 @@ import android.widget.EditText
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.gson.Gson
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -42,7 +41,7 @@ class EditBundleActivity : AppCompatActivity() {
                 intent.putExtra("bundle_id", bundle.id)
                 startActivity(intent)
             }
-            bundle.name.addOnChangeListener { it, _ -> bundleTitleEditText.setText(it) }
+            bundle.name.addOnChangeListener {it,_ -> bundleTitleEditText.setText(it) }
             editBundleItemsRecyclerView.adapter = BundleItemsListAdapter(bundle, true)
             bundleTitleEditText.setText(bundle.name.databaseValue)
         }

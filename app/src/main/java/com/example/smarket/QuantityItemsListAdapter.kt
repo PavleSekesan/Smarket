@@ -65,9 +65,9 @@ abstract class QuantityItemsListAdapter :
         viewHolder.quantity.text = item.quantity.databaseValue.toString()
         viewHolder.measuringUnit.text = item.measuringUnit.databaseValue
 
-        item.product.name.addOnChangeListener { it, _ -> viewHolder.itemName.text = it }
-        item.quantity.addOnChangeListener { it, _ -> viewHolder.quantity.text = it.toString() }
-        item.measuringUnit.addOnChangeListener { it, _ -> viewHolder.measuringUnit.text = it }
+        item.product.name.addOnChangeListener {it,_ -> viewHolder.itemName.text = it }
+        item.quantity.addOnChangeListener {it,_ -> viewHolder.quantity.text = it.toString() }
+        item.measuringUnit.addOnChangeListener {it,_ -> viewHolder.measuringUnit.text = it }
         viewHolder.add.setOnClickListener { item.quantity.databaseValue++ }
         viewHolder.subtract.setOnClickListener { item.quantity.databaseValue-- }
     }

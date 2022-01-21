@@ -44,7 +44,6 @@ class ViewSelectedCalendarDay : AppCompatActivity() {
         {
             adapter.addItem(order)
         }
-
     }
 
 }

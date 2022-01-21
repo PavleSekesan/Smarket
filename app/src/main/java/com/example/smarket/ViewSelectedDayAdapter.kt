@@ -6,16 +6,22 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import UserData.UserOrder
+import android.content.Intent
+import androidx.core.content.ContextCompat.startActivity
 
 class ViewSelectedDayAdapter(private var dataSet: MutableList<UserOrder>) :
     RecyclerView.Adapter<ViewSelectedDayAdapter.ViewHolder>()  {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val textView: TextView
+        val textView = view.findViewById<TextView>(R.id.userOrderItemText)
+        val bundlesTexts = listOf(view.findViewById<TextView>(R.id.userOrderBundleText1),
+            view.findViewById<TextView>(R.id.userOrderBundleText2),
+            view.findViewById<TextView>(R.id.userOrderBundleText3),
+            view.findViewById<TextView>(R.id.userOrderBundleText4),
+            view.findViewById<TextView>(R.id.userOrderBundleText5))
 
         init {
-            // Define click listener for the ViewHolder's View.
-            textView = view.findViewById(R.id.userOrderItemText)
+
         }
     }
 
@@ -35,6 +41,12 @@ class ViewSelectedDayAdapter(private var dataSet: MutableList<UserOrder>) :
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val context = viewHolder.itemView.context
         viewHolder.textView.text = dataSet[position].id
+        viewHolder.textView.setOnClickListener {
+            val intent = Intent(viewHolder.textView.context, EditOrderActivity::class.java)
+            intent.putExtra("selected_order_id", dataSet[position].id)
+            viewHolder.textView.context.startActivity(intent)
+        }
+        displayBundlesInTextFields(dataSet[position].bundles,R.color.kelly_medium_gray,viewHolder.bundlesTexts)
     }
 
     // Return the size of your dataset (invoked by the layout manager)

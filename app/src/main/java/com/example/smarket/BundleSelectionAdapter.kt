@@ -9,14 +9,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class BundleSelectionAdapter(
-    var bundles: MutableList<ShoppingBundle>,
+    val bundles: MutableList<ShoppingBundle>,
     var onSelection: (bundle: ShoppingBundle) -> Unit = { b : ShoppingBundle -> }
 ) :
     RecyclerView.Adapter<BundleSelectionAdapter.ViewHolder>()  {
-    /**
-     * Provide a reference to the type of views that you are using
-     * (custom ViewHolder).
-     */
+
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val bundleName: TextView = view.findViewById(R.id.bundleNameTextView)
     }
@@ -37,12 +34,23 @@ class BundleSelectionAdapter(
         // contents of the view with that element
         val bundle = bundles[position]
         viewHolder.bundleName.text = bundle.name.databaseValue
-        bundle.name.addOnChangeListener { it, _ -> viewHolder.bundleName.text = it }
+        bundle.name.addOnChangeListener {it,_ -> viewHolder.bundleName.text = it }
         viewHolder.itemView.setOnClickListener {
             onSelection(bundle)
-            bundles.removeAt(viewHolder.bindingAdapterPosition)
-            notifyItemRemoved(viewHolder.bindingAdapterPosition)
         }
+    }
+
+    fun addBundle(newBundle: ShoppingBundle)
+    {
+        bundles.add(newBundle)
+        super.notifyItemInserted(bundles.size)
+    }
+
+    fun removeBundle(bundleToRemove: ShoppingBundle)
+    {
+        val indexToRemove = bundles.indexOfFirst { bundle-> bundle.id == bundleToRemove.id }
+        bundles.removeAt(indexToRemove)
+        super.notifyItemRemoved(indexToRemove)
     }
 
     // Return the size of your dataset (invoked by the layout manager)

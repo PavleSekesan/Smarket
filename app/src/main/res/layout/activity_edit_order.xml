@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".NewOrderActivity">
+    tools:context=".EditOrderActivity">
 
     <TextView
         android:id="@+id/labelTextView"
@@ -29,7 +29,7 @@
         app:layout_constraintTop_toBottomOf="@+id/labelTextView"
         tools:itemCount="3" />
 
-    <SearchView
+    <androidx.appcompat.widget.SearchView
         android:id="@+id/bundlesSearchView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

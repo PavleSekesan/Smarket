@@ -10,12 +10,12 @@ import android.widget.TextView
 
 class BundleItemsListAdapter(bundle: ShoppingBundle, private val editable: Boolean, displayPrevious : Boolean = true) : QuantityItemsListAdapter() {
     init {
+        items = bundle.items
         // TODO Implement listener for bundle addition
-        bundle.addOnSubitemChangeListener {
+        bundle.addOnSubitemChangeListener { v,t->
             items = bundle.items
             notifyDataSetChanged()
         }
-        if (displayPrevious || true) items = bundle.items
     }
 
     inner class ViewHolder(view: View) : QuantityViewHolder(view) {

@@ -70,3 +70,28 @@ fun expandUserOrders(userOrders: List<UserOrder>, date: LocalDate) : Map<LocalDa
     }
     return ordersOnDate
 }
+
+fun displayBundlesInTextFields(bundlesOnCurrentDay: List<UserData.ShoppingBundle>, bundleColor: Int, textFields: List<TextView>)
+{
+    for (textField in textFields)
+    {
+        textField.text = ""
+    }
+    if (bundlesOnCurrentDay.size > textFields.size)
+    {
+        for(i in 0 .. textFields.size - 2)
+        {
+            textFields[i].text = bundlesOnCurrentDay[i].name.databaseValue
+            textFields[i].setTextColor(bundleColor)
+        }
+        textFields.last().text = "..."
+    }
+    else
+    {
+        for(i in bundlesOnCurrentDay.indices)
+        {
+            textFields[i].text = bundlesOnCurrentDay[i].name.databaseValue
+            textFields[i].setTextColor(bundleColor)
+        }
+    }
+}
