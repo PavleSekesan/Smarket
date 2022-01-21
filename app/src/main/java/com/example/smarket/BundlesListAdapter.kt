@@ -18,17 +18,27 @@ class BundlesListAdapter(private var bundles : List<ShoppingBundle>) :
      */
     init {
         UserData.addOnShoppingBundleModifyListener { shoppingBundle, databaseEventType ->
-            val bundle = shoppingBundle as ShoppingBundle
-            if (databaseEventType == DatabaseEventType.ADDED)
-                addItem(bundle)
-//            else if (databaseEventType == DatabaseEventType.REMOVED)
-//                // TODO Implement removal
+            if (shoppingBundle != null) {
+                if (databaseEventType == DatabaseEventType.ADDED)
+                    addItem(shoppingBundle)
+                else if (databaseEventType == DatabaseEventType.REMOVED)
+                    removeItem(shoppingBundle)
+            }
         }
     }
 
     private fun addItem(bundle : ShoppingBundle) {
         bundles = bundles.plus(bundle)
         notifyItemInserted(bundles.size)
+    }
+
+    private fun removeItem(bundle : ShoppingBundle) {
+        val removePos = bundles.indexOf(bundles.find { it == bundle })
+        if(removePos != -1)
+        {
+            bundles = bundles.filter { it.id !=  bundle.id}
+            super.notifyItemRemoved(removePos)
+        }
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

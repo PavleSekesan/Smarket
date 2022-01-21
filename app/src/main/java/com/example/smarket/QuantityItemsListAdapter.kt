@@ -34,7 +34,7 @@ abstract class QuantityItemsListAdapter :
         val removePos = items.indexOf(items.find { it == item })
         if(removePos != -1)
         {
-            items = items.filter { it-> it.id !=  item.id}
+            items = items.filter { it.id !=  item.id}
             super.notifyItemRemoved(removePos)
         }
     }
