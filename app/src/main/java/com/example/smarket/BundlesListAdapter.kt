@@ -21,8 +21,6 @@ class BundlesListAdapter(private var bundles : List<ShoppingBundle>) :
             val bundle = shoppingBundle as ShoppingBundle
             if (databaseEventType == DatabaseEventType.ADDED)
                 addItem(bundle)
-//            else if (databaseEventType == DatabaseEventType.MODIFIED)
-//                // TODO Implement modificaiton
 //            else if (databaseEventType == DatabaseEventType.REMOVED)
 //                // TODO Implement removal
         }

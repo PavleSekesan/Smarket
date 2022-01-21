@@ -24,7 +24,6 @@ class BundlesListActivity : AppCompatActivity() {
 
         val addBundleFab = findViewById<FloatingActionButton>(R.id.addBundleFab)
         addBundleFab.setOnClickListener {
-            // FIXME Uncomment when onSuccessListener is implemented
             UserData.addNewBundle(getString(R.string.new_bundle_name), listOf()).addOnSuccessListener {
                 val newBundle = it as ShoppingBundle
                 val intent = Intent(this@BundlesListActivity, EditBundleActivity::class.java)
