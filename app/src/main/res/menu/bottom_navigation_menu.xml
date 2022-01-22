@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/fridge"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_fridge_24"
+        android:title="@string/fridge"/>
+    <item
+        android:id="@+id/calendar"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_calendar_month_24"
+        android:title="@string/calendar"/>
+    <item
+        android:id="@+id/bundles"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_bundle_24"
+        android:title="@string/bundles"/>
+</menu>
