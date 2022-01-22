@@ -371,6 +371,21 @@ object UserData {
         return fridgeItemTask
     }
 
+    fun removeBundle(bundleToRemove: ShoppingBundle) : DatabaseItemTask
+    {
+        val removeBundleTask = DatabaseItemTask()
+        bundleToRemove.databaseRef.delete().addOnSuccessListener {
+            val dataType: KType = bundleToRemove::class.createType()
+            if (modifyListeners.containsKey(dataType)) {
+                for (listener in modifyListeners[dataType]!!) {
+                    listener(bundleToRemove, DatabaseEventType.REMOVED)
+                }
+            }
+            removeBundleTask.finishTask(bundleToRemove)
+        }
+        return removeBundleTask
+    }
+
     fun addNewBundle(name: String, itemsInBundle: List<BundleItem>) : DatabaseItemTask
     {
         val data = hashMapOf(
@@ -390,15 +405,6 @@ object UserData {
         }
         return newBundleTask
     }
-    suspend fun suspendAddNewBundle(name: String, itemsInBundle: List<BundleItem>) : ShoppingBundle
-    {
-        val data = hashMapOf(
-            "name" to name
-        )
-        val doc = db.collection("UserData").document(auth.uid.toString()).collection("Bundles").add(data).await()
-        return ShoppingBundle(doc.id, DatabaseField("name", name), itemsInBundle, doc)
-    }
-
     //endregion
 
     //region Listeners and helper methods
