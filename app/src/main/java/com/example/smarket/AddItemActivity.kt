@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 
@@ -18,6 +19,8 @@ class AddItemActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_item)
+
+        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
         findViewById<Button>(R.id.scan_barcode_button).setOnClickListener {
             val intent = Intent(this, BarcodeScannerActivity::class.java)
@@ -66,6 +69,9 @@ class AddItemActivity : AppCompatActivity() {
         getAllBundles().addOnSuccessListener { allBundles ->
             val bundle = allBundles.find { it.id == intent.getStringExtra("bundle_id") } as ShoppingBundle?
             val isFridge = bundle == null
+
+            bottomNavigation.selectedItemId = if (isFridge) R.id.fridge else R.id.bundles
+            BottomNavigator(this, bottomNavigation)
 
             val addedItemsAdapterLocal = if (!isFridge) BundleItemsListAdapter(bundle!!, true, false) else FridgeItemsListAdapter(mutableListOf())
             addedItemsAdapter = addedItemsAdapterLocal

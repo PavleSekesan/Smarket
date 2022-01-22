@@ -46,10 +46,19 @@
         app:cv_orientation="vertical"
         app:cv_outDateStyle="none"
         app:cv_scrollMode="paged"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout">
 
     </com.kizitonwose.calendarview.CalendarView>
 
-    <include layout="@layout/navigation"/>
+    <include
+        android:id="@+id/botNavBar"
+        layout="@layout/navigation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

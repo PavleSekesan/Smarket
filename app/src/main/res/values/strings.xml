@@ -56,5 +56,8 @@
 
     <!-- View Selected Day Strings -->
     <string name="selected_bundles"></string>
+    <string name="fridge">Frižider</string>
+    <string name="calendar">Kalendar</string>
+    <string name="bundles">Spiskovi</string>
 
 </resources>

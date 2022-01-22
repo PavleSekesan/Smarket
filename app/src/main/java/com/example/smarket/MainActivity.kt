@@ -28,14 +28,15 @@ import java.time.temporal.WeekFields
 import java.util.*
 import android.content.Intent
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.navigation.*
 
 
 class MonthViewContainer(view: View) : ViewContainer(view) {
     val legendLayout = view.findViewById<LinearLayout>(R.id.legendLayout)
 }
-
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -43,38 +44,15 @@ class MainActivity : AppCompatActivity() {
         lateinit var allOrdersInMonth: Map<LocalDate, MutableList<String>>
         lateinit var userOrders: List<UserOrder>
     }
-    private fun setupListeners()
-    {
-        val settingsFab = findViewById<FloatingActionButton>(R.id.fabSettings)
-        settingsFab.setOnClickListener {
-            val intent = Intent(this, SettingsActivity::class.java)
-            startActivity(intent)
-        }
-
-        val fridgeFab = findViewById<FloatingActionButton>(R.id.fabFridge)
-        fridgeFab.setOnClickListener {
-            val intent = Intent(this, FridgeActivity::class.java)
-            startActivity(intent)
-        }
-
-        val bundlesFab = findViewById<FloatingActionButton>(R.id.fabBundles)
-        bundlesFab.setOnClickListener {
-            val intent = Intent(this, BundlesListActivity::class.java)
-            startActivity(intent)
-        }
-
-        val newOrderFab = findViewById<FloatingActionButton>(R.id.fabNewOrder)
-        newOrderFab.setOnClickListener {
-            val intent = Intent(this, EditOrderActivity::class.java)
-            startActivity(intent)
-        }
-    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setupListeners()
+
+        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        bottomNavigation.selectedItemId = R.id.calendar
+        BottomNavigator(this, bottomNavigation)
 
         val currentUser = Firebase.auth.currentUser
         if (currentUser == null) {
