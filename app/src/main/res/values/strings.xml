@@ -59,5 +59,15 @@
     <string name="fridge">Frižider</string>
     <string name="calendar">Kalendar</string>
     <string name="bundles">Spiskovi</string>
+    <string name="search">Pretraži</string>
+    <string name="calendar_page_title">Kalendar porudžbina</string>
+    <string name="logout">Izloguj se</string>
+    <string name="add_item_activity_title">Dodavanje proizvoda</string>
+    <string name="bundles_list_activity_title">Moji spiskovi</string>
+    <string name="edit_bundle_activity_title">Izmena spiska</string>
+    <string name="edit_bundle_name_hint">Novi spisak</string>
+    <string name="fridge_activity_title">Moj frižider</string>
+    <string name="edit_order_activity_title">Porudžbina</string>
+    <string name="selected_bundle_activity_title">Spisak</string>
 
 </resources>
