@@ -7,6 +7,7 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
@@ -46,6 +47,7 @@ class BundlesListAdapter(private var bundles : List<ShoppingBundle>) :
         val item1: TextView
         val item2: TextView
         val item3: TextView
+        val removeBundleButton : ImageButton
 
         init {
             // Define click listener for the ViewHolder's View.
@@ -53,6 +55,7 @@ class BundlesListAdapter(private var bundles : List<ShoppingBundle>) :
             item1 = view.findViewById(R.id.item1TextView)
             item2 = view.findViewById(R.id.item2TextView)
             item3 = view.findViewById(R.id.item3TextView)
+            removeBundleButton = view.findViewById(R.id.removeBundleButton)
         }
     }
 
@@ -79,6 +82,9 @@ class BundlesListAdapter(private var bundles : List<ShoppingBundle>) :
         viewHolder.item2.text = if(item2 == null) "" else "  -  " + item2
         viewHolder.item3.text = if(item3 == null) "" else "  -  " + item3
 
+        viewHolder.removeBundleButton.setOnClickListener {
+            UserData.removeBundle(bundle)
+        }
         bundle.name.addOnChangeListener {it,_ -> viewHolder.bundleName.text = it }
         viewHolder.itemView.setOnClickListener {
             val intent = Intent(context, SelectedBundleActivity::class.java)
