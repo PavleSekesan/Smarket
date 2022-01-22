@@ -17,6 +17,8 @@ class BundleItemsListAdapter(bundle: ShoppingBundle, private val editable: Boole
             val bundleItem = databaseItem as BundleItem
             if (databaseEventType == DatabaseEventType.ADDED) {
                 addItem(bundleItem)
+            } else if (databaseEventType == DatabaseEventType.REMOVED) {
+                removeItem(bundleItem)
             }
         }
     }
