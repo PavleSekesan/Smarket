@@ -170,7 +170,7 @@ class MainActivity : AppCompatActivity() {
                             container.legendLayout.children.map { it as TextView }.forEachIndexed { index, tv ->
                                 tv.text = daysOfWeek[index].getDisplayName(TextStyle.SHORT, Locale.ENGLISH)
                                     .toUpperCase(Locale.ENGLISH)
-                                tv.setTextColorRes(R.color.example_5_text_grey)
+                                tv.setTextColorRes(R.color.kelly_medium_gray)
                                 tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
                             }
                             month.yearMonth
