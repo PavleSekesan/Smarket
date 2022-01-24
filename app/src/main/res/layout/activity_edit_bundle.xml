@@ -22,7 +22,8 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:hint="@string/edit_bundle_name_hint"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="@color/md_theme_light_primary"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/appBarLayout" />
@@ -59,6 +60,7 @@
         android:layout_marginEnd="16dp"
         android:gravity="right"
         android:text="0.00 RSD"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintBottom_toBottomOf="@+id/totalSumLabelTextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/totalSumLabelTextView"
