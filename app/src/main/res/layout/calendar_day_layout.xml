@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/calendar_day_border"
-        android:clickable="true"
+        android:clickable="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -19,82 +19,84 @@
         app:layout_constraintVertical_bias="0.0">
 
         <LinearLayout
-            android:id="@+id/linearLayout2"
-            android:layout_width="match_parent"
-            android:layout_height="3dp"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/calendarDayText">
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight=".15"
-                android:background="@android:color/transparent" />
-
-            <View
-                android:id="@+id/deliveryTag"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight=".70"
-                android:background="#03A9F4" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight=".15"
-                android:background="@android:color/transparent" />
-        </LinearLayout>
-
-        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+            app:layout_constraintTop_toBottomOf="@+id/calendarDayText">
 
-            <TextView
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/calendarDayText1"
-                android:layout_width="wrap_content"
-                android:layout_height="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
                 android:layout_weight="1"
-                android:background="?attr/colorPrimary"
-                android:text="1111111111111111111111111"
-                android:textSize="8sp" />
+                android:clickable="false"
+                android:paddingLeft="0sp"
+                android:paddingTop="0dp"
+                android:paddingRight="0sp"
+                android:paddingBottom="0dp"
+                android:text="text1"
+                android:textSize="6sp"
+                app:cornerRadius="2dp" />
 
-            <TextView
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/calendarDayText2"
-                android:layout_width="wrap_content"
-                android:layout_height="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
                 android:layout_weight="1"
-                android:text="2"
-                android:textSize="8sp" />
+                android:clickable="false"
+                android:paddingLeft="0sp"
+                android:paddingTop="0dp"
+                android:paddingRight="0sp"
+                android:paddingBottom="0dp"
+                android:text="text2"
+                android:textSize="6sp"
+                app:cornerRadius="2dp" />
 
-            <TextView
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/calendarDayText3"
-                android:layout_width="wrap_content"
-                android:layout_height="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
                 android:layout_weight="1"
-                android:text="3"
-                android:textSize="8sp" />
+                android:clickable="false"
+                android:paddingLeft="0sp"
+                android:paddingTop="0dp"
+                android:paddingRight="0sp"
+                android:paddingBottom="0dp"
+                android:text="text3"
+                android:textSize="6sp"
+                app:cornerRadius="2dp" />
+
         </LinearLayout>
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/calendarDayText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="TextView"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="8dp"
+            android:clickable="false"
+            android:includeFontPadding="false"
+            android:insetLeft="0dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetBottom="0dp"
+            android:paddingLeft="0dp"
+            android:paddingTop="0dp"
+            android:paddingRight="0dp"
+            android:paddingBottom="0dp"
+            android:text="5"
+            android:textAlignment="center"
+            app:cornerRadius="30dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            android:stateListAnimator="@null"
             app:layout_constraintTop_toTopOf="parent" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

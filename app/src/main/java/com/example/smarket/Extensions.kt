@@ -2,9 +2,11 @@ package com.example.smarket
 
 import UserData.UserOrder
 import android.content.Context
+import android.view.View
 import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
+import com.google.android.material.button.MaterialButton
 import java.lang.Long.max
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -71,26 +73,61 @@ fun expandUserOrders(userOrders: List<UserOrder>, date: LocalDate) : Map<LocalDa
     return ordersOnDate
 }
 
-fun displayBundlesInTextFields(bundlesOnCurrentDay: List<UserData.ShoppingBundle>, bundleColor: Int, textFields: List<TextView>)
+fun displayBundlesInMaterialButtons(bundlesOnCurrentDay: List<UserData.ShoppingBundle>, bundleColor: Int, textFields: List<MaterialButton>)
 {
     for (textField in textFields)
     {
         textField.text = ""
+        textField.visibility = View.INVISIBLE
     }
     if (bundlesOnCurrentDay.size > textFields.size)
     {
         for(i in 0 .. textFields.size - 2)
         {
+            textFields[i].visibility = View.VISIBLE
             textFields[i].text = bundlesOnCurrentDay[i].name.databaseValue
-            textFields[i].setTextColor(bundleColor)
+            textFields[i].setBackgroundColor(bundleColor)
         }
         textFields.last().text = "..."
+        textFields.last().setBackgroundColor(bundleColor)
+        textFields.last().visibility = View.VISIBLE
     }
     else
     {
         for(i in bundlesOnCurrentDay.indices)
         {
             textFields[i].text = bundlesOnCurrentDay[i].name.databaseValue
+            textFields[i].visibility = View.VISIBLE
+            textFields[i].setBackgroundColor(bundleColor)
+        }
+    }
+}
+
+fun displayBundlesInTextFields(bundlesOnCurrentDay: List<UserData.ShoppingBundle>, bundleColor: Int, textFields: List<TextView>)
+{
+    for (textField in textFields)
+    {
+        textField.text = ""
+        textField.visibility = View.GONE
+    }
+    if (bundlesOnCurrentDay.size > textFields.size)
+    {
+        for(i in 0 .. textFields.size - 2)
+        {
+            textFields[i].text = bundlesOnCurrentDay[i].name.databaseValue
+            textFields[i].visibility = View.VISIBLE
+            textFields[i].setTextColor(bundleColor)
+        }
+        textFields.last().text = "..."
+        textFields.last().visibility = View.VISIBLE
+        textFields.last().setTextColor(bundleColor)
+    }
+    else
+    {
+        for(i in bundlesOnCurrentDay.indices)
+        {
+            textFields[i].text = bundlesOnCurrentDay[i].name.databaseValue
+            textFields[i].visibility = View.VISIBLE
             textFields[i].setTextColor(bundleColor)
         }
     }

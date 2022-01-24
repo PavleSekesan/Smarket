@@ -10,10 +10,11 @@ import UserData.getAllBundles
 import android.content.Intent
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class BundlesListActivity : AppCompatActivity() {
+class BundlesListActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bundles_list)
+        super.bindListenersToTopBar()
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNavigation.selectedItemId = R.id.bundles

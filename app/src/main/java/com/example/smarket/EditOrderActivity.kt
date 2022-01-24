@@ -5,14 +5,21 @@ import UserData.getAllBundles
 import UserData.getAllUserOrders
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import java.time.format.DateTimeFormatter
 
-class EditOrderActivity : AppCompatActivity() {
+class EditOrderActivity : BaseActivity() {
+    companion object{
+        lateinit var selectedOrder: UserData.UserOrder
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_order)
+        super.bindListenersToTopBar()
+
         val selectedOrderId = intent.getStringExtra("selected_order_id")
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
@@ -28,7 +35,11 @@ class EditOrderActivity : AppCompatActivity() {
         var unselectedBundles = mutableListOf<ShoppingBundle>()
         getAllUserOrders().addOnSuccessListener { ret1->
             val allUserOrders = ret1 as List<UserData.UserOrder>
-            val selectedOrder = allUserOrders.filter { order-> order.id == selectedOrderId }[0]
+            selectedOrder = allUserOrders.filter { order-> order.id == selectedOrderId }[0]
+            val formatter = DateTimeFormatter.ofPattern("E, d MMMM yyyy")
+            findViewById<TextView>(R.id.editOrderSelectedDate).text = selectedOrder.date.databaseValue.toLocalDate().format(formatter)
+            findViewById<TextView>(R.id.editOrderSelectedRepeat).text = if(selectedOrder.recurring.databaseValue) getString(R.string.edit_order_activity_recurring)
+                                                                        else getString(R.string.edit_order_activity_not_recurring)
 
             getAllBundles().addOnSuccessListener { ret2 ->
                 val allBundles = ret2 as MutableList<ShoppingBundle>

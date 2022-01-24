@@ -1,13 +1,4 @@
 <resources>
-        <style name="GreenButtonTheme">
-            <item name="colorPrimary">@color/correct</item>
-            <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
-        </style>
-        <style name="RedButtonTheme">
-            <item name="colorPrimary">@color/md_theme_light_error</item>
-            <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
-        </style>
-
     <style name="Theme.Smarket.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
@@ -17,4 +8,7 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
 
+    <style name="Widget.Smarket.TextView" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textColor">?attr/colorSecondary</item>
+    </style>
 </resources>
