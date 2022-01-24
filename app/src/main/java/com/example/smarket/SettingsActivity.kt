@@ -9,16 +9,14 @@ class SettingsActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        //bottomNavigation.selectedItemId = R.id.calendar
-        BottomNavigator(this, bottomNavigation)
-
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.settings_container, SettingsFragment())
             .commit()
         setContentView(R.layout.activity_settings)
+
         super.bindListenersToTopBar()
+        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        BottomNavigator(this, bottomNavigation)
     }
 }

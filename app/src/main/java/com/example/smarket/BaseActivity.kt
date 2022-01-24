@@ -22,7 +22,8 @@ open class BaseActivity : AppCompatActivity() {
                     true
                 }
                 R.id.settings -> {
-
+                    val intent = Intent(this, SettingsActivity::class.java)
+                    startActivity(intent)
                     true
                 }
                 else -> false
