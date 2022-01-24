@@ -34,9 +34,19 @@ class ViewSelectedCalendarDay : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_selected_calendar_day)
+
+        // Get data from intent
         val selectedDay = intent.getSerializableExtra("selectedDay") as CalendarDay
-        findViewById<TextView>(R.id.viewSelectedDayText).text = selectedDay.date.toString()
+        val deliveryDay = intent.getSerializableExtra("deliveryDay") as LocalDate?
+        val dayColor = intent.getIntExtra("dayColor",-1)
+
+        // Format date for the selected day
+        val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
+        findViewById<TextView>(R.id.viewSelectedDayText).text = selectedDay.date.format(formatter)
+
         val deliveryTag = findViewById<View>(R.id.viewSelectedDayDeliveryTag)
+
+        // Setup recycler view
         val recycler = findViewById<RecyclerView>(R.id.viewSelectedDayRecycler)
         recycler.layoutManager = LinearLayoutManager(this)
         val adapter = ViewSelectedDayAdapter(mutableListOf())
@@ -58,7 +68,20 @@ class ViewSelectedCalendarDay : AppCompatActivity() {
                 }
             }
         }
+
         val ordersOnCurrentDay = MainActivity.userOrdersOnSelectedDay
+        // Set description for the selected day
+        if (deliveryDay != null)
+        {
+            val dateString = deliveryDay.format(formatter)
+            findViewById<TextView>(R.id.viewSelectedDayDescription).text =
+                resources.getQuantityString(R.plurals.view_selected_day_has_delivery, ordersOnCurrentDay.size,ordersOnCurrentDay.size,dateString)
+        }
+        else
+        {
+            findViewById<TextView>(R.id.viewSelectedDayDescription).text =
+                resources.getQuantityString(R.plurals.view_selected_day_no_delivery, ordersOnCurrentDay.size,ordersOnCurrentDay.size)
+        }
         for(order in ordersOnCurrentDay)
         {
             adapter.addItem(order)

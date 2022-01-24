@@ -18,11 +18,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 
-class AddItemActivity : AppCompatActivity() {
+class AddItemActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_item)
+        super.bindListenersToTopBar()
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         val search = findViewById<FloatingSearchView>(R.id.floating_search_view)

@@ -4,6 +4,7 @@ import UserData.Delivery
 import UserData.ShoppingBundle
 import UserData
 import UserData.UserOrder
+import UserData.removeUserOrder
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -27,28 +28,69 @@ import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.*
 import android.content.Intent
+import android.util.Log
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.navigation.*
+import java.time.LocalDateTime
+import android.app.Activity
+
+
+
 
 
 class MonthViewContainer(view: View) : ViewContainer(view) {
     val legendLayout = view.findViewById<LinearLayout>(R.id.legendLayout)
 }
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
     companion object {
         lateinit var userOrdersOnSelectedDay: List<UserOrder>
         lateinit var allOrdersInMonth: Map<LocalDate, MutableList<String>>
+        lateinit var dayColors: MutableList<Int>
         lateinit var userOrders: List<UserOrder>
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 0)
+        {
+            val editedOrder = EditOrderActivity.selectedOrder
+            if (editedOrder.bundles.isEmpty())
+            {
+                removeUserOrder(editedOrder)
+            }
+        }
+    }
+
+    fun setLocale(activity: Activity, languageCode: String?) {
+        val locale = Locale(languageCode)
+        Locale.setDefault(locale)
+        val resources = activity.resources
+        val config = resources.getConfiguration()
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.getDisplayMetrics())
     }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        super.bindListenersToTopBar()
+        setLocale(this,"sr")
+
+        val newOrderFab = findViewById<FloatingActionButton>(R.id.fabAddNewOrder)
+        newOrderFab.setOnClickListener {
+            UserData.addNewUserOrder(LocalDateTime.now(),false,-1).addOnSuccessListener {
+                val intent = Intent(this, EditOrderActivity::class.java)
+                intent.putExtra("selected_order_id",it.id)
+                startActivityForResult(intent,0)
+            }
+        }
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNavigation.selectedItemId = R.id.calendar
@@ -68,7 +110,9 @@ class MainActivity : AppCompatActivity() {
                 val deliveries = res2 as List<Delivery>
                 var currentMonth = LocalDate.now().month
                 allOrdersInMonth = expandUserOrders(userOrders,LocalDate.now())
+                dayColors = resources.getIntArray(R.array.different_32_colors).toMutableList()
                 val userOrderColors = mutableMapOf<String,Int>()
+                val userOrderDeliveryDates = mutableMapOf<String,LocalDate>()
 
                 // Logic for showing calendar cells (days)
                 calendarView.dayBinder = object : DayBinder<DayViewContainer> {
@@ -82,32 +126,38 @@ class MainActivity : AppCompatActivity() {
                         {
                             currentMonth = day.date.month
                             allOrdersInMonth = expandUserOrders(userOrders, day.date)
+                            dayColors = resources.getIntArray(R.array.different_32_colors).toMutableList()
                         }
                         container.textView.text = day.date.dayOfMonth.toString()
                         container.deliveryTag.setBackgroundColor(Color.TRANSPARENT)
+                        container.deliveryTag.setTextColor(ContextCompat.getColor(container.textView.context, R.color.md_theme_light_inverseSurface))
 
                         var dayColor: Int
                         for(delivery in deliveries)
                         {
                             if (delivery.date.databaseValue.toLocalDate() == day.date)
                             {
-                                dayColor = resources.getIntArray(R.array.different_32_colors)[day.date.dayOfMonth - 1]
+                                dayColor = dayColors.first()
+                                dayColors.removeFirst()
                                 container.deliveryTag.setBackgroundColor(dayColor)
+                                container.deliveryTag.setTextColor(ContextCompat.getColor(container.textView.context, R.color.md_theme_light_onPrimary))
 
                                 for(userOrder in delivery.userOrders)
                                 {
                                     userOrderColors[userOrder.id] = dayColor
+                                    userOrderDeliveryDates[userOrder.id] = delivery.date.databaseValue.toLocalDate()
                                 }
                             }
                         }
 
                         val ordersOnCurrentDay = allOrdersInMonth[day.date]
                         val bundlesOnDay = mutableListOf<ShoppingBundle>()
-                        var ordersColor = R.color.kelly_medium_gray
                         if (ordersOnCurrentDay != null) {
                             for (userOrderId in ordersOnCurrentDay) {
                                 val order = userOrders.filter { it.id == userOrderId }[0]
-                                ordersColor = userOrderColors[order.id]!!
+
+                                container.dayColor = if(userOrderColors.containsKey(order.id)) userOrderColors[order.id]!! else Color.GRAY
+                                container.deliveryDay = if(userOrderDeliveryDates.containsKey(order.id)) userOrderDeliveryDates[order.id]!! else null
                                 for(bundle in order.bundles)
                                 {
                                     bundlesOnDay.add(bundle)
@@ -126,12 +176,12 @@ class MainActivity : AppCompatActivity() {
                                     {
                                     }
                                     val textFields = listOf(container.text1, container.text2, container.text3)
-                                    displayBundlesInTextFields(bundlesOnDay,ordersColor,textFields)
+                                    displayBundlesInMaterialButtons(bundlesOnDay,container.dayColor,textFields)
                                 }
                             }
                         }
                         val textFields = listOf(container.text1, container.text2, container.text3)
-                        displayBundlesInTextFields(bundlesOnDay,ordersColor,textFields)
+                        displayBundlesInMaterialButtons(bundlesOnDay,container.dayColor,textFields)
                     }
                 }
 
@@ -164,7 +214,7 @@ class MainActivity : AppCompatActivity() {
 
                 // Change cell size so cells are longer
                 val daySize = calendarView.daySize
-                calendarView.daySize = Size(daySize.width,250)
+                calendarView.daySize = Size(daySize.width,280)
 
                 // Setup and show calendar
                 val currentMonthCalendar = YearMonth.now()
@@ -180,12 +230,15 @@ class MainActivity : AppCompatActivity() {
 
     class DayViewContainer(view: View) : ViewContainer(view) {
         val textView = view.findViewById<TextView>(R.id.calendarDayText)
-        val deliveryTag = view.findViewById<View>(R.id.deliveryTag)
-        val text1 = view.findViewById<TextView>(R.id.calendarDayText1)
-        val text2 = view.findViewById<TextView>(R.id.calendarDayText2)
-        val text3 = view.findViewById<TextView>(R.id.calendarDayText3)
+        val deliveryTag = view.findViewById<MaterialButton>(R.id.calendarDayText)
+
+        val text1 = view.findViewById<MaterialButton>(R.id.calendarDayText1)
+        val text2 = view.findViewById<MaterialButton>(R.id.calendarDayText2)
+        val text3 = view.findViewById<MaterialButton>(R.id.calendarDayText3)
         val wrapper = view.findViewById<ConstraintLayout>(R.id.calendarDayWrapper)
         lateinit var day: CalendarDay
+        var deliveryDay: LocalDate? = null
+        var dayColor = -1
         init {
             wrapper.setOnClickListener {
                 val orders = mutableListOf<UserOrder>()
@@ -201,6 +254,9 @@ class MainActivity : AppCompatActivity() {
                 userOrdersOnSelectedDay = orders
                 val intent = Intent(view.context,ViewSelectedCalendarDay::class.java)
                 intent.putExtra("selectedDay", day)
+                intent.putExtra("deliveryDay",deliveryDay)
+                intent.putExtra("dayColor",dayColor)
+
                 view.context.startActivity(intent)
             }
         }

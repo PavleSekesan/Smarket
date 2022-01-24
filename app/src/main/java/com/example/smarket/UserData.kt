@@ -16,9 +16,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 import java.lang.Exception
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.*
 import java.util.*
 import java.util.concurrent.Executor
 import kotlin.reflect.KType
@@ -398,6 +396,7 @@ object UserData {
         db.collection("UserData").document(auth.uid.toString()).collection("Bundles").add(data).addOnSuccessListener {
             val id = it.id
             val newBundle = ShoppingBundle(id, DatabaseField("name", name), itemsInBundle, it)
+
             val dataType: KType = newBundle::class.createType()
             if (modifyListeners.containsKey(dataType)) {
                 for (listener in modifyListeners[dataType]!!) {
@@ -408,6 +407,48 @@ object UserData {
         }
         return newBundleTask
     }
+
+    fun addNewUserOrder(date: LocalDateTime, recurring: Boolean, daysToRepeat: Int) : DatabaseItemTask
+    {
+        val data = hashMapOf(
+            "recurring" to recurring,
+            "days_to_repeat" to daysToRepeat,
+            "date" to Timestamp(date.toEpochSecond(ZoneOffset.UTC),0)
+        )
+        val newUserOrderTask = DatabaseItemTask()
+        db.collection("UserData").document(auth.uid.toString()).collection("Orders").add(data).addOnSuccessListener {
+            val id = it.id
+            val newUserOrder = UserOrder(id, emptyList(),
+                DatabaseField("date",date),
+                DatabaseField("days_to_repeat",daysToRepeat),
+                DatabaseField("recurring",recurring), it)
+
+            val dataType: KType = newUserOrder::class.createType()
+            if (modifyListeners.containsKey(dataType)) {
+                for (listener in modifyListeners[dataType]!!) {
+                    listener(newUserOrder,DatabaseEventType.ADDED)
+                }
+            }
+            newUserOrderTask.finishTask(newUserOrder)
+        }
+        return newUserOrderTask
+    }
+
+    fun removeUserOrder(orderToRemove: UserOrder): DatabaseItemTask
+    {
+        val removeOrderTask = DatabaseItemTask()
+        orderToRemove.databaseRef.delete().addOnSuccessListener {
+            val dataType: KType = orderToRemove::class.createType()
+            if (modifyListeners.containsKey(dataType)) {
+                for (listener in modifyListeners[dataType]!!) {
+                    listener(orderToRemove, DatabaseEventType.REMOVED)
+                }
+            }
+            removeOrderTask.finishTask(orderToRemove)
+        }
+        return removeOrderTask
+    }
+
     //endregion
 
     //region Listeners and helper methods

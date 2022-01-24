@@ -16,4 +16,8 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
+
+    <style name="Widget.Smarket.TextView" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textColor">?attr/colorSecondary</item>
+    </style>
 </resources>

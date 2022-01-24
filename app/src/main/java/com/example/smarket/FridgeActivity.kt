@@ -14,10 +14,11 @@ import kotlinx.android.synthetic.main.activity_fridge.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class FridgeActivity : AppCompatActivity() {
+class FridgeActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fridge)
+        super.bindListenersToTopBar()
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNavigation.selectedItemId = R.id.fridge

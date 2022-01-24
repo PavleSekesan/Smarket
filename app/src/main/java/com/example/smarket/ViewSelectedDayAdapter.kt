@@ -7,8 +7,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import UserData.UserOrder
 import android.content.Intent
+import android.content.res.Resources
 import androidx.core.content.ContextCompat.startActivity
 import com.google.firebase.firestore.auth.User
+import java.time.format.DateTimeFormatter
 
 class ViewSelectedDayAdapter(private var dataSet: MutableList<UserOrder>) :
     RecyclerView.Adapter<ViewSelectedDayAdapter.ViewHolder>()  {
@@ -55,8 +57,15 @@ class ViewSelectedDayAdapter(private var dataSet: MutableList<UserOrder>) :
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+        val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
         val context = viewHolder.itemView.context
-        viewHolder.textView.text = dataSet[position].id
+        val dateStr = dataSet[position].date.databaseValue.format(formatter).toString()
+        viewHolder.textView.text =
+            if(dataSet[position].recurring.databaseValue)
+                context.getString(R.string.view_selected_day_order_recurring, dataSet[position].daysToRepeat.databaseValue, dateStr)
+            else
+                context.getString(R.string.view_selected_day_order_not_recurring, dateStr)
+
         viewHolder.textView.setOnClickListener {
             val intent = Intent(viewHolder.textView.context, EditOrderActivity::class.java)
             intent.putExtra("selected_order_id", dataSet[position].id)
