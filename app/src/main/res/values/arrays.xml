@@ -10,22 +10,24 @@
         <item>reply_all</item>
     </string-array>
 
-    <string-array name="test">
-        <item>08:00 – 09:00</item>
-        <item>09:00 – 10:00</item>
-        <item>10:00 – 11:00</item>
-        <item>11:00 – 12:00</item>
-        <item>12:00 – 13:00</item>
-        <item>13:00 – 14:00</item>
+    <string-array name="delivery_times">
+        <item>06:00 – 07:00</item>
+        <item>07:00 – 08:00</item>
+        <item>08:00 – 10:00</item>
+        <item>10:00 – 12:00</item>
+        <item>12:00 – 14:00</item>
+        <item>15:00 – 17:00</item>
+        <item>17:00 – 19:00</item>
+        <item>19:00 – 21:00</item>
     </string-array>
 
-    <string-array name="test_values">
-        <item>08:00 – 09:00</item>
-        <item>09:00 – 10:00</item>
-        <item>10:00 – 11:00</item>
-        <item>11:00 – 12:00</item>
-        <item>12:00 – 13:00</item>
-        <item>13:00 – 14:00</item>
+    <string-array name="delivery_times_sunday">
+        <item>08:00 – 10:00</item>
+        <item>10:00 – 12:00</item>
+        <item>12:00 – 14:00</item>
+        <item>15:00 – 17:00</item>
+        <item>17:00 – 19:00</item>
+        <item>19:00 – 21:00</item>
     </string-array>
 
     <array name="kelly_colors">

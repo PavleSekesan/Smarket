@@ -39,10 +39,6 @@ import kotlinx.android.synthetic.main.navigation.*
 import java.time.LocalDateTime
 import android.app.Activity
 
-
-
-
-
 class MonthViewContainer(view: View) : ViewContainer(view) {
     val legendLayout = view.findViewById<LinearLayout>(R.id.legendLayout)
 }
@@ -82,6 +78,7 @@ class MainActivity : BaseActivity() {
         setContentView(R.layout.activity_main)
         super.bindListenersToTopBar()
         setLocale(this,"sr")
+        UserData.loadPreferencesFromFirebase(this)
 
         val newOrderFab = findViewById<FloatingActionButton>(R.id.fabAddNewOrder)
         newOrderFab.setOnClickListener {

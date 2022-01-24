@@ -1,4 +1,5 @@
 import android.app.Activity
+import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
 import android.provider.ContactsContract
@@ -21,6 +22,12 @@ import java.util.*
 import java.util.concurrent.Executor
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
+
+import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
+
 
 object UserData {
     private val TAG = "UserData"
@@ -520,6 +527,55 @@ object UserData {
         addOnModifyDatabaseItemListener(wrapper, Delivery::class.createType())
     }
 
+    fun loadPreferencesFromFirebase(context: Context)
+    {
+        val personalDataKeys = listOf("address","first_name","last_name","phone_number")
+
+        db.collection("UserData").document(auth.uid.toString()).collection("Settings").document("personal_info").get().addOnSuccessListener {
+            val data = it.data
+            val editor: SharedPreferences.Editor = PreferenceManager.getDefaultSharedPreferences(context).edit()
+            for (key in personalDataKeys)
+            {
+                if (data != null && data.containsKey(key))
+                {
+                    editor.putString(key, data[key].toString())
+                }
+                else
+                {
+
+                }
+            }
+            editor.apply()
+        }
+        val deliveryKeys = listOf("time_selection_monday","time_selection_tuesday","time_selection_wednesday",
+            "time_selection_thursday","time_selection_friday","time_selection_saturday","time_selection_sunday")
+        db.collection("UserData").document(auth.uid.toString()).collection("Settings").document("delivery_info").get().addOnSuccessListener {
+            val data = it.data
+            val editor: SharedPreferences.Editor = PreferenceManager.getDefaultSharedPreferences(context).edit()
+            for(key in deliveryKeys)
+            {
+                if (data != null && data.containsKey(key))
+                {
+                    val valueFromDb = data[key] as ArrayList<String>
+                    editor.putStringSet(key,valueFromDb.toHashSet())
+                }
+                else
+                {
+                    editor.putStringSet(key, emptySet())
+                }
+            }
+            editor.apply()
+        }
+    }
+
+    fun updatePersonalInfo(key: String, newValue: String): Task<Void> {
+        return db.collection("UserData").document(auth.uid.toString()).collection("Settings").document("personal_info").update(key,newValue)
+    }
+
+    fun updateDeliveryInfo(key: String, newValues: HashSet<String>): Task<Void> {
+        val valuesArray = newValues.toList()
+        return db.collection("UserData").document(auth.uid.toString()).collection("Settings").document("delivery_info").update(key,valuesArray)
+    }
 
     //endregion
 

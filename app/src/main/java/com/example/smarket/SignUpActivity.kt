@@ -28,7 +28,7 @@ class PersonalUserData (val firstName: String, val lastName: String, val address
             "address" to address,
             "first_name" to firstName,
             "last_name" to lastName,
-            "phone" to phoneNumber
+            "phone_number" to phoneNumber
         )
         db.collection("UserData").document(auth.uid.toString()).collection("Settings").document("personal_info")
             .set(data)

@@ -30,34 +30,46 @@
     <PreferenceCategory app:title="@string/delivery_header">
 
         <MultiSelectListPreference
-            android:entries="@array/test"
-            android:entryValues="@array/test_values"
+            android:entries="@array/delivery_times"
+            android:entryValues="@array/delivery_times"
             android:key="time_selection_monday"
             android:title="@string/monday_delivery_time" />
 
         <MultiSelectListPreference
-            android:entries="@array/test"
-            android:entryValues="@array/test_values"
+            android:entries="@array/delivery_times"
+            android:entryValues="@array/delivery_times"
             android:key="time_selection_tuesday"
             android:title="@string/tuesday_delivery_time" />
 
         <MultiSelectListPreference
-            android:entries="@array/test"
-            android:entryValues="@array/test_values"
+            android:entries="@array/delivery_times"
+            android:entryValues="@array/delivery_times"
             android:key="time_selection_wednesday"
             android:title="@string/wednesday_delivery_time" />
 
         <MultiSelectListPreference
-            android:entries="@array/test"
-            android:entryValues="@array/test_values"
+            android:entries="@array/delivery_times"
+            android:entryValues="@array/delivery_times"
             android:key="time_selection_thursday"
             android:title="@string/thursday_delivery_time" />
 
         <MultiSelectListPreference
-            android:entries="@array/test"
-            android:entryValues="@array/test_values"
+            android:entries="@array/delivery_times"
+            android:entryValues="@array/delivery_times"
             android:key="time_selection_friday"
             android:title="@string/friday_delivery_time" />
+
+        <MultiSelectListPreference
+            android:entries="@array/delivery_times"
+            android:entryValues="@array/delivery_times"
+            android:key="time_selection_saturday"
+            android:title="@string/saturday_delivery_time" />
+
+        <MultiSelectListPreference
+            android:entries="@array/delivery_times_sunday"
+            android:entryValues="@array/delivery_times_sunday"
+            android:key="time_selection_sunday"
+            android:title="@string/sunday_delivery_time" />
     </PreferenceCategory>
 
 </PreferenceScreen>
