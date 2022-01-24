@@ -16,6 +16,7 @@ class SettingsActivity : BaseActivity() {
         setContentView(R.layout.activity_settings)
 
         super.bindListenersToTopBar()
+        super.setTitle(getString(R.string.title_activity_settings))
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         BottomNavigator(this, bottomNavigation)
     }

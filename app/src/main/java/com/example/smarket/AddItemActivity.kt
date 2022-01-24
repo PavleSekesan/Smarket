@@ -24,7 +24,7 @@ class AddItemActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_item)
         super.bindListenersToTopBar()
-
+        super.setTitle(getString(R.string.add_item_activity_title))
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         val search = findViewById<FloatingSearchView>(R.id.floating_search_view)
         val confirmFab = findViewById<FloatingActionButton>(R.id.confirmFab)

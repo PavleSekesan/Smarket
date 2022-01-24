@@ -22,6 +22,7 @@ class EditBundleActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_bundle)
         super.bindListenersToTopBar()
+        super.setTitle(getString(R.string.edit_bundle_activity_title))
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNavigation.selectedItemId = R.id.bundles

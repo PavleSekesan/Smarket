@@ -15,6 +15,8 @@ class BundlesListActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bundles_list)
         super.bindListenersToTopBar()
+        super.removeBackButton()
+        super.setTitle(getString(R.string.bundles_list_activity_title))
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNavigation.selectedItemId = R.id.bundles

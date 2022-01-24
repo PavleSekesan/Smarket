@@ -62,11 +62,11 @@ class FridgeItemsListAdapter(fridgeItems: List<FridgeItem>, displayPrevious : Bo
     }
 
     inner class ViewHolder(view: View) : QuantityViewHolder(view) {
-        override val itemName : TextView = view.findViewById(R.id.fridgeItemNameTextView)
-        override val quantity: TextView = view.findViewById(R.id.fridgeItemQuantityTextView)
-        override val measuringUnit: TextView = view.findViewById(R.id.fridgeItemMeasuringUnitTextView)
-        override val add: Button = view.findViewById(R.id.fridgeAddButton)
-        override val subtract: Button = view.findViewById(R.id.fridgeSubtractButton)
+        override val itemName : TextView = view.findViewById(R.id.bundleItemNameTextView)
+        override val quantity: TextView = view.findViewById(R.id.quantityTextView)
+        override val measuringUnit: TextView = view.findViewById(R.id.measuringUnitTextView)
+        override val add: Button = view.findViewById(R.id.addButton)
+        override val subtract: Button = view.findViewById(R.id.subtractButton)
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
