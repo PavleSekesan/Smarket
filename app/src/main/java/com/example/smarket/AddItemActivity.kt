@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arlib.floatingsearchview.FloatingSearchView
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 
@@ -25,6 +26,9 @@ class AddItemActivity : AppCompatActivity() {
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         val search = findViewById<FloatingSearchView>(R.id.floating_search_view)
+        val confirmFab = findViewById<FloatingActionButton>(R.id.confirmFab)
+
+        confirmFab.setOnClickListener { finish() }
 
         search.setOnMenuItemClickListener {
             val intent = Intent(this, BarcodeScannerActivity::class.java)
@@ -32,28 +36,29 @@ class AddItemActivity : AppCompatActivity() {
         }
         
         search.setOnQueryChangeListener { oldQuery, newQuery ->
-            val db = FirebaseFirestore.getInstance()
-            val docRef = db.collection("Products")
-                .whereGreaterThanOrEqualTo("name", newQuery)
-                .whereLessThanOrEqualTo("name", newQuery + "\uf8ff")
-                .limit(10)
+            if (search.isSearchBarFocused) {
+                val db = FirebaseFirestore.getInstance()
+                val docRef = db.collection("Products")
+                    .whereGreaterThanOrEqualTo("name", newQuery)
+                    .whereLessThanOrEqualTo("name", newQuery + "\uf8ff")
+                    .limit(8)
 
-            docRef.get()
-                .addOnSuccessListener { documents ->
-                    val suggestions = mutableListOf<UserData.Product>()
-                    for (document in documents) {
-                        val prod = UserData.productFromDoc(document)
-                        suggestions.add(prod)
+                docRef.get()
+                    .addOnSuccessListener { documents ->
+                        val suggestions = mutableListOf<UserData.Product>()
+                        for (document in documents) {
+                            val prod = UserData.productFromDoc(document)
+                            suggestions.add(prod)
+                        }
+                        search.swapSuggestions(suggestions)
                     }
-                    search.swapSuggestions(suggestions)
-                }
-                .addOnFailureListener { exception ->
-                    Log.d("Kurac", "Crko")
-                }
+                    .addOnFailureListener { exception ->
+                        Log.d("Kurac", "Crko")
+                    }
+            }
         }
 
-        val searchAdapter = SearchItemsAdapter(mutableListOf())
-        // TODO Set focus
+        search.setSearchFocused(true)
 
         val addedItemsRecycler = findViewById<RecyclerView>(R.id.addedItemsRecycler)
         addedItemsRecycler.layoutManager = LinearLayoutManager(this)
@@ -76,8 +81,8 @@ class AddItemActivity : AppCompatActivity() {
                     } else {
                         UserData.addNewFridgeItem("kom", item as UserData.Product, 1)
                     }
-                    search.clearQuery()
                     search.clearSearchFocus()
+                    search.clearQuery()
                 }
             }
         }
