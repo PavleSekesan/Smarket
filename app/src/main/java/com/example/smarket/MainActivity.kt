@@ -38,9 +38,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.navigation.*
 import java.time.LocalDateTime
 import android.app.Activity
-
-
-
+import com.google.android.material.appbar.MaterialToolbar
 
 
 class MonthViewContainer(view: View) : ViewContainer(view) {
@@ -81,6 +79,8 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         super.bindListenersToTopBar()
+        super.removeBackButton()
+        super.setTitle(getString(R.string.calendar_page_title))
         setLocale(this,"sr")
 
         val newOrderFab = findViewById<FloatingActionButton>(R.id.fabAddNewOrder)

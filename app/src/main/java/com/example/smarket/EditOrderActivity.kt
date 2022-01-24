@@ -19,6 +19,7 @@ class EditOrderActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_order)
         super.bindListenersToTopBar()
+        super.setTitle(getString(R.string.edit_order_activity_title))
 
         val selectedOrderId = intent.getStringExtra("selected_order_id")
 
