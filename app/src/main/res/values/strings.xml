@@ -6,8 +6,8 @@
     <string name="new_bundle_name">Novi spisak</string>
 
     <!-- Preference Titles -->
-    <string name="delivery_header">Podesavanja dostave</string>
-    <string name="personal_data_header">Licni Podaci</string>
+    <string name="delivery_header">Podešavanja dostave</string>
+    <string name="personal_data_header">Lični Podaci</string>
 
     <!-- Personal Data Preferences -->
     <string name="first_name">Ime</string>
@@ -21,6 +21,8 @@
     <string name="wednesday_delivery_time">Vreme dostave (sreda)</string>
     <string name="thursday_delivery_time">Vreme dostave (četvrtak)</string>
     <string name="friday_delivery_time">Vreme dostave (petak)</string>
+    <string name="saturday_delivery_time">Vreme dostave (subota)</string>
+    <string name="sunday_delivery_time">Vreme dostave (nedelja)</string>
 
     <!-- Login screen strings -->
     <string name="prompt_email">Email</string>
