@@ -75,16 +75,18 @@ class BundlesListAdapter(private var bundles : List<ShoppingBundle>) :
         val context = viewHolder.itemView.context
         val bundle = bundles[position]
         viewHolder.bundleName.text = bundle.name.databaseValue
-        val item1 = bundle.items.getOrNull(0)?.product?.name?.databaseValue
-        val item2 = bundle.items.getOrNull(1)?.product?.name?.databaseValue
-        val item3 = bundle.items.getOrNull(2)?.product?.name?.databaseValue
-        viewHolder.item1.text = if(item1 == null) "" else "  -  " + item1
-        viewHolder.item2.text = if(item2 == null) "" else "  -  " + item2
-        viewHolder.item3.text = if(item3 == null) "" else "  -  " + item3
+        var item1 = bundle.items.getOrNull(0)?.product?.name?.databaseValue
+        var item2 = bundle.items.getOrNull(1)?.product?.name?.databaseValue
+        var item3 = bundle.items.getOrNull(2)?.product?.name?.databaseValue
+        viewHolder.item1.text = if(item1 == null) "" else "-  " + item1
+        viewHolder.item2.text = if(item2 == null) "" else "-  " + item2
+        viewHolder.item3.text = if(item3 == null) "" else "-  " + item3
 
         viewHolder.removeBundleButton.setOnClickListener {
             UserData.removeBundle(bundle)
         }
+
+        bundle.addOnSubitemChangeListener { databaseItem, databaseEventType -> notifyDataSetChanged() }
         bundle.name.addOnChangeListener {it,_ -> viewHolder.bundleName.text = it }
         viewHolder.itemView.setOnClickListener {
             val intent = Intent(context, SelectedBundleActivity::class.java)

@@ -29,7 +29,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="24dp"
             android:layout_marginEnd="16dp"
             android:ellipsize="end"
             android:text="  -  Item1"
@@ -73,7 +73,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_baseline_delete_24"
+            android:src="@drawable/ic_baseline_close_24"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
