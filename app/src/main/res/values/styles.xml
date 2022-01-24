@@ -1,4 +1,13 @@
 <resources>
+        <style name="GreenButtonTheme">
+            <item name="colorPrimary">@color/correct</item>
+            <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
+        </style>
+        <style name="RedButtonTheme">
+            <item name="colorPrimary">@color/md_theme_light_error</item>
+            <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
+        </style>
+
     <style name="Theme.Smarket.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>

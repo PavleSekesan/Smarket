@@ -1,6 +1,9 @@
 import android.app.Activity
+import android.os.Parcel
+import android.os.Parcelable
 import android.provider.ContactsContract
 import android.util.Log
+import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
@@ -654,8 +657,17 @@ object UserData {
         }
     }
 
-    class Product(id: String, val name: DatabaseField<String>, val price: DatabaseField<Double>, val storeGivenId: DatabaseField<String>, val barcode: DatabaseField<String>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
+    class Product(id: String, val name: DatabaseField<String>, val price: DatabaseField<Double>, val storeGivenId: DatabaseField<String>, val barcode: DatabaseField<String>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef), SearchSuggestion
     {
+        constructor(parcel: Parcel) : this(
+            "69",
+            DatabaseField<String>("name",parcel.readString()!!),
+            DatabaseField<Double>("",-1.0),
+            DatabaseField<String>("","-1"),
+            DatabaseField<String>("","-1"),
+            db.collection("1").document("1"),
+        )
+
         init {
             name.addOnChangeListener { v, t -> notifyFieldListeners(name.eraseType(), t) }
             name.bindToDatabaseListner(databaseRef)
@@ -665,6 +677,28 @@ object UserData {
             storeGivenId.bindToDatabaseListner(databaseRef)
             barcode.addOnChangeListener { v, t -> notifyFieldListeners(barcode.eraseType(), t) }
             barcode.bindToDatabaseListner(databaseRef)
+        }
+
+        override fun writeToParcel(parcel: Parcel, flags: Int) {
+            parcel.writeString(name.databaseValue)
+        }
+
+        override fun getBody(): String {
+            return name.databaseValue
+        }
+
+        override fun describeContents(): Int {
+            return 0
+        }
+
+        companion object CREATOR : Parcelable.Creator<Product> {
+            override fun createFromParcel(parcel: Parcel): Product {
+                return Product(parcel)
+            }
+
+            override fun newArray(size: Int): Array<Product?> {
+                return arrayOfNulls(size)
+            }
         }
     }
 

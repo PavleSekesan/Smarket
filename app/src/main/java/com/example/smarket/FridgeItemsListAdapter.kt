@@ -9,6 +9,8 @@ import android.widget.Button
 import android.widget.TextView
 
 class FridgeItemsListAdapter(fridgeItems: List<FridgeItem>, displayPrevious : Boolean = true) : QuantityItemsListAdapter() {
+    var hiddenItems : List<FridgeItem> = listOf()
+
     init {
         if (displayPrevious) items = fridgeItems
         UserData.addOnFridgeModifyListener { fridgeItem, databaseEventType ->
@@ -20,6 +22,43 @@ class FridgeItemsListAdapter(fridgeItems: List<FridgeItem>, displayPrevious : Bo
                 }
             }
         }
+    }
+
+    fun getItemsFittingSearch(query : String) : List<FridgeItem> {
+        var fittingItems = mutableListOf<FridgeItem>()
+        var allItems = items as MutableList<FridgeItem>
+        for (item in hiddenItems) {
+            if (!allItems.contains(item))
+                allItems.add(item)
+        }
+        if (query == "") {
+            fittingItems = allItems
+        } else {
+            for (item in allItems) {
+                if (item.product.name.databaseValue.startsWith(query)) {
+                    fittingItems.add(item)
+                }
+            }
+        }
+
+        return fittingItems
+    }
+
+    fun displaySearchedItems(query : String) {
+        val fittingItems = getItemsFittingSearch(query)
+        val newHiddenItems = mutableListOf<FridgeItem>()
+        for (item in items) {
+            if (!fittingItems.contains(item))
+                newHiddenItems.add(item as FridgeItem)
+        }
+        for (item in hiddenItems) {
+            if (!fittingItems.contains(item))
+                newHiddenItems.add(item)
+        }
+
+        items = items.filter { fittingItems.contains(it) }
+        hiddenItems = newHiddenItems
+        super.notifyDataSetChanged()
     }
 
     inner class ViewHolder(view: View) : QuantityViewHolder(view) {

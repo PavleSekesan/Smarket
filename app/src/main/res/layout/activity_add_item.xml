@@ -6,76 +6,34 @@
     android:layout_height="match_parent"
     tools:context=".AddItemActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/topAppBar"
-            style="@style/Widget.MaterialComponents.Toolbar.Primary"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:menu="@menu/top_app_bar"
-            app:title="@string/add_item_activity_title" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <Button
-        android:id="@+id/finishAddingItemsButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/action_finish_adding"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/appBarLayout" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/scan_barcode_button"
-        android:layout_width="60dp"
-        android:layout_height="70dp"
-        android:gravity="center"
-        android:includeFontPadding="false"
-        android:paddingLeft="8dp"
-        android:paddingTop="4dp"
-        android:paddingRight="0dp"
-        android:paddingBottom="4dp"
-        android:textAlignment="center"
-        app:icon="@drawable/ic_qr_code_scanner_24"
-        app:iconGravity="textStart"
-        app:iconSize="40dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addedItemsRecycler" />
-
-    <androidx.appcompat.widget.SearchView
-        android:id="@+id/productSearchView"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="6dp"
-        app:layout_constraintEnd_toStartOf="@+id/scan_barcode_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addedItemsRecycler">
-
-    </androidx.appcompat.widget.SearchView>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/searchResultList"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/botNavBar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/scan_barcode_button" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/addedItemsRecycler"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="64dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/finishAddingItemsButton" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/botNavBar">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <com.arlib.floatingsearchview.FloatingSearchView
+        android:id="@+id/floating_search_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:floatingSearch_close_search_on_keyboard_dismiss="true"
+        app:floatingSearch_leftActionMode="showHome"
+        app:floatingSearch_menu="@menu/add_item_search"
+        app:floatingSearch_searchBarMarginLeft="0dp"
+        app:floatingSearch_searchBarMarginRight="0dp"
+        app:floatingSearch_searchBarMarginTop="0dp"
+        app:floatingSearch_searchHint="@string/add_item_search_hint"
+        app:floatingSearch_showSearchKey="false"
+        app:floatingSearch_suggestionsListAnimDuration="250"
+        tools:layout_editor_absoluteY="64dp">
+
+    </com.arlib.floatingsearchview.FloatingSearchView>
 
     <include
         android:id="@+id/botNavBar"
