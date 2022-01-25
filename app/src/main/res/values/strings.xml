@@ -70,7 +70,8 @@
     <string name="selected_bundle_activity_title">Spisak</string>
     <string name="fridge_search_hint">Pretraži frižider</string>
     <string name="add_item_search_hint">Pretraži proizvode</string>
-
+    <string name="select_bundle_search_hint">Pretraži spiskove za dodavanje</string>
+    <string name="selected_bundles_label">Izabrani spiskovi</string>
     <!-- Edit order activity -->
     <string name="edit_order_activity_recurring">Ponavlja se</string>
     <string name="edit_order_activity_not_recurring">Ne ponavlja se</string>

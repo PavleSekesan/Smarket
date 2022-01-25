@@ -6,6 +6,7 @@ import UserData.getAllUserOrders
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -29,8 +30,8 @@ class EditOrderActivity : BaseActivity() {
 
         val selectedBundlesList = findViewById<RecyclerView>(R.id.selectedBundlesRecyclerView)
         val unselectedBundlesList = findViewById<RecyclerView>(R.id.unselectedBundlesRecyclerView)
-        selectedBundlesList.layoutManager = LinearLayoutManager(this)
-        unselectedBundlesList.layoutManager = LinearLayoutManager(this)
+        selectedBundlesList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        unselectedBundlesList.layoutManager = GridLayoutManager(this, 2)
 
         var selectedBundles = mutableListOf<ShoppingBundle>()
         var unselectedBundles = mutableListOf<ShoppingBundle>()
@@ -46,10 +47,10 @@ class EditOrderActivity : BaseActivity() {
                 val allBundles = ret2 as MutableList<ShoppingBundle>
 
                 selectedBundles = selectedOrder.bundles.toMutableList()
-                val selectedBundlesAdapter = BundleSelectionAdapter(selectedBundles)
+                val selectedBundlesAdapter = BundleSelectionAdapter(selectedBundles, false)
                 selectedBundlesList.adapter = selectedBundlesAdapter
                 unselectedBundles = allBundles.filter { bundle -> selectedBundles.none { selectedBundle -> selectedBundle.id == bundle.id } }.toMutableList()
-                val unselectedBundlesAdapter = BundleSelectionAdapter(unselectedBundles)
+                val unselectedBundlesAdapter = BundleSelectionAdapter(unselectedBundles, true)
                 unselectedBundlesList.adapter = unselectedBundlesAdapter
 
                 selectedOrder.addOnSubitemChangeListener { databaseItem, databaseEventType ->

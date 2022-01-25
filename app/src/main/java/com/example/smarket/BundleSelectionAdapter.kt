@@ -9,20 +9,27 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class BundleSelectionAdapter(
-    val bundles: MutableList<ShoppingBundle>,
+    val bundles: MutableList<ShoppingBundle>, val unselected : Boolean,
     var onSelection: (bundle: ShoppingBundle) -> Unit = { b : ShoppingBundle -> }
 ) :
     RecyclerView.Adapter<BundleSelectionAdapter.ViewHolder>()  {
 
+    lateinit var recyclerView : RecyclerView
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        this.recyclerView = recyclerView
+    }
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val bundleName: TextView = view.findViewById(R.id.bundleNameTextView)
+        val price : TextView = view.findViewById(R.id.priceTextView)
     }
 
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         // Create a new view, which defines the UI of the list item
-        val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.bundle_simple, viewGroup, false)
+
+        val view = if (unselected) LayoutInflater.from(viewGroup.context).inflate(R.layout.bundle_simple, viewGroup, false)
+        else LayoutInflater.from(viewGroup.context).inflate(R.layout.bundle_simple_selected, viewGroup, false)
 
         return ViewHolder(view)
     }
@@ -34,6 +41,7 @@ class BundleSelectionAdapter(
         // contents of the view with that element
         val bundle = bundles[position]
         viewHolder.bundleName.text = bundle.name.databaseValue
+        TotalSumUpdater(viewHolder.price, bundle)
         bundle.name.addOnChangeListener {it,_ -> viewHolder.bundleName.text = it }
         viewHolder.itemView.setOnClickListener {
             onSelection(bundle)
@@ -44,6 +52,7 @@ class BundleSelectionAdapter(
     {
         bundles.add(newBundle)
         super.notifyItemInserted(bundles.size)
+        recyclerView.layoutManager?.scrollToPosition(bundles.size - 1)
     }
 
     fun removeBundle(bundleToRemove: ShoppingBundle)
