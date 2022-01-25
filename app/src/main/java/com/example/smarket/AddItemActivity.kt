@@ -33,6 +33,7 @@ class AddItemActivity : BaseActivity() {
 
         search.setOnMenuItemClickListener {
             val intent = Intent(this, BarcodeScannerActivity::class.java)
+            intent.putExtra("adding",true)
             startActivity(intent)
         }
         

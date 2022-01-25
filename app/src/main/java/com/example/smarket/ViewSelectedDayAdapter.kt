@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import UserData.UserOrder
 import android.content.Intent
 import android.content.res.Resources
+import android.widget.ImageButton
 import androidx.core.content.ContextCompat.startActivity
+import com.google.android.material.card.MaterialCardView
 import com.google.firebase.firestore.auth.User
 import java.time.format.DateTimeFormatter
 
@@ -16,12 +18,20 @@ class ViewSelectedDayAdapter(private var dataSet: MutableList<UserOrder>) :
     RecyclerView.Adapter<ViewSelectedDayAdapter.ViewHolder>()  {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val card = view.findViewById<MaterialCardView>(R.id.userOrderItemCard)
         val textView = view.findViewById<TextView>(R.id.userOrderItemText)
-        val bundlesTexts = listOf(view.findViewById<TextView>(R.id.userOrderBundleText1),
-            view.findViewById<TextView>(R.id.userOrderBundleText2),
-            view.findViewById<TextView>(R.id.userOrderBundleText3),
-            view.findViewById<TextView>(R.id.userOrderBundleText4),
-            view.findViewById<TextView>(R.id.userOrderBundleText5))
+        val bundlesTexts = listOf<TextView>(
+            view.findViewById(R.id.userOrderBundleText1),
+            view.findViewById(R.id.userOrderBundleText2),
+            view.findViewById(R.id.userOrderBundleText3),
+            view.findViewById(R.id.userOrderBundleText4),
+            view.findViewById(R.id.userOrderBundleText5))
+        val bundleIcons = listOf<ImageButton>(
+            view.findViewById(R.id.imageButton1),
+            view.findViewById(R.id.imageButton2),
+            view.findViewById(R.id.imageButton3),
+            view.findViewById(R.id.imageButton4),
+            view.findViewById(R.id.imageButton5))
     }
 
     fun onOrderChanged(orderChanged: UserOrder)
@@ -65,12 +75,16 @@ class ViewSelectedDayAdapter(private var dataSet: MutableList<UserOrder>) :
             else
                 context.getString(R.string.view_selected_day_order_not_recurring, dateStr)
 
-        viewHolder.textView.setOnClickListener {
+        viewHolder.card.setOnClickListener {
             val intent = Intent(viewHolder.textView.context, EditOrderActivity::class.java)
             intent.putExtra("selected_order_id", dataSet[position].id)
             viewHolder.textView.context.startActivity(intent)
         }
         displayBundlesInTextFields(dataSet[position].bundles,R.color.kelly_medium_gray,viewHolder.bundlesTexts)
+        for(i in viewHolder.bundlesTexts.indices)
+        {
+            viewHolder.bundleIcons[i].visibility = viewHolder.bundlesTexts[i].visibility
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)

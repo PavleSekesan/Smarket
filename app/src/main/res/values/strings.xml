@@ -68,6 +68,7 @@
     <string name="fridge_activity_title">Moj frižider</string>
     <string name="edit_order_activity_title">Porudžbina</string>
     <string name="selected_bundle_activity_title">Spisak</string>
+    <string name="barcode_scanner_activity_title">Skenirajte bar-kod</string>
     <string name="fridge_search_hint">Pretraži frižider</string>
     <string name="add_item_search_hint">Pretraži proizvode</string>
     <string name="select_bundle_search_hint">Pretraži spiskove za dodavanje</string>
@@ -81,18 +82,18 @@
 
     <!-- View Selected Calendar Day activity -->
     <plurals name="view_selected_day_has_delivery">
-        <item quantity="zero">Za ovaj dan nije predviđen ni jedan spisak.</item>
-        <item quantity="one">Za ovaj dan predviđen je %1$d spisak, koji će biti dostavljen u %2$s</item>
-        <item quantity="few">Za ovaj dan predviđena su %1$d spiska, koji će biti dostavljeni u %2$s</item>
-        <item quantity="many">Za ovaj dan predviđeno je %1$d spiskova, koji će biti dostavljeni u %2$s</item>
-        <item quantity="other">Za ovaj dan predviđeno je %1$d spiskova, koji će biti dostavljeni u %2$s</item>
+        <item quantity="zero">Za ovaj dan nije postavljena ni jedna porudžbina.</item>
+        <item quantity="one">Za ovaj dan postavljena je %1$d porudžbina, koja će biti dostavljena u %2$s</item>
+        <item quantity="few">Za ovaj dan postavljene su %1$d porudžbine, koje će biti dostavljene u %2$s</item>
+        <item quantity="many">Za ovaj dan postavljeno je %1$d porudžbina, koje će biti dostavljene u %2$s</item>
+        <item quantity="other">Za ovaj dan postavljeno je %1$d porudžbina, koje će biti dostavljene u %2$s</item>
     </plurals>
     <plurals name="view_selected_day_no_delivery">
-        <item quantity="zero">Za ovaj dan nije predviđen ni jedan spisak.</item>
-        <item quantity="one">Za ovaj dan predviđen je %1$d spisak, za koji još uvek nije određen datum dostave.</item>
-        <item quantity="few">Za ovaj dan predviđena su %1$d spiska, za koje još uvek nije određen datum dostave.</item>
-        <item quantity="many">Za ovaj dan predviđeno je %1$d spiskova, za koje još uvek nije određen datum dostave.</item>
-        <item quantity="other">Za ovaj dan predviđeno je %1$d spiskova, za koje još uvek nije određen datum dostave.</item>
+        <item quantity="zero">Za ovaj dan nije postavljena ni jedna porudžbina.</item>
+        <item quantity="one">Za ovaj dan postavljena je %1$d porudžbina, za koje još uvek nije određen datum dostave.</item>
+        <item quantity="few">Za ovaj dan postavljene su %1$d porudžbine, za koje još uvek nije određen datum dostave.</item>
+        <item quantity="many">Za ovaj dan postavljeno je %1$d porudžbina, za koje još uvek nije određen datum dostave.</item>
+        <item quantity="other">Za ovaj dan postavljeno je %1$d porudžbina, za koje još uvek nije određen datum dostave.</item>
     </plurals>
 
     <string name="view_selected_day_order_recurring">Porudžbina koja se ponavlja na svakih %1$d dana, postavljena %2$s</string>

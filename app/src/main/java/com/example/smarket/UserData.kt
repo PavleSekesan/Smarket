@@ -50,7 +50,6 @@ object UserData {
                         return@addSnapshotListener
                     }
 
-                    Log.d(TAG, "Received $collection update from DB")
                     for (doc in value!!) {
                         Log.d(TAG, "Firebase listener $collection: ${doc.id}")
                         val newItemTask = when(collection) {
@@ -67,7 +66,6 @@ object UserData {
                     Log.w(TAG, "Listen failed.", e)
                     return@addSnapshotListener
                 }
-
 
                 for (dc in value!!.documentChanges) {
                     when (dc.type) {
@@ -401,13 +399,13 @@ object UserData {
             "quantity" to quantity
         )
         val fridgeItemTask = DatabaseItemTask()
-        db.collection("UserData").document(auth.uid.toString()).collection("Fridge").add(data).addOnSuccessListener {
-            val id = it.id
-            val newFridgeItem = FridgeItem(id,
+        val newDocReference = db.collection("UserData").document(auth.uid.toString()).collection("Fridge").document(product.id)
+        newDocReference.set(data).addOnSuccessListener {
+            val newFridgeItem = FridgeItem(product.id,
                 DatabaseField("measuring_unit",measuringUnit),
                 product,
                 DatabaseField("quantity",quantity),
-                it)
+                newDocReference)
             val dataType: KType = newFridgeItem::class.createType()
             if (modifyListeners.containsKey(dataType)) {
                 for (listener in modifyListeners[dataType]!!) {
@@ -417,6 +415,12 @@ object UserData {
             fridgeItemTask.finishTask(newFridgeItem)
         }
         return fridgeItemTask
+    }
+
+    fun removeFridgeItemByProduct(product: Product)
+    {
+        val docRef = db.collection("UserData").document(auth.uid.toString()).collection("Fridge").document(product.id)
+        docRef.delete()
     }
 
     fun removeBundle(bundleToRemove: ShoppingBundle) : DatabaseItemTask

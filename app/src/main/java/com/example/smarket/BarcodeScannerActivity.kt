@@ -4,6 +4,8 @@ import UserData.BundleItem
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.Manifest
+import android.app.LauncherActivity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
 import android.view.View
@@ -18,6 +20,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -61,28 +64,30 @@ private class BarCodeAnalyzer(private val listener: BarCodeListener) : ImageAnal
     }
 }
 
-class BarcodeScannerActivity : AppCompatActivity() {
+class BarcodeScannerActivity : BaseActivity() {
 
     private lateinit var cameraExecutor: ExecutorService
     private var barcodeCountMap = mutableMapOf<String,Int>()
     private val minimumBarcodeCount = 5
     private var waitingForResponse = false
     private lateinit var chosenBarcode: String
-    private var chosenItemId: String? = null
-    private var chosenItemName: String? = null
+    private lateinit var chosenProduct: UserData.Product
     private var db = FirebaseFirestore.getInstance()
+    private var addingItemToFridge: Boolean = true
 
     private fun scanConfirmed()
     {
         barcodeCountMap.clear()
         waitingForResponse = false
 
-        // FIXME Add items
-        //AddItemActivity.addedItemsAdapter.addItem(BundleItem(chosenItemName.toString(), 420.00, chosenItemId.toString(),"kurac"))
-//        val intent = Intent(this, QuantitySelectorActivity::class.java)
-//        intent.putExtra("itemName", chosenItemName)
-//        intent.putExtra("itemId", chosenItemId)
-//        startActivity(intent)
+        if (addingItemToFridge)
+        {
+            UserData.addNewFridgeItem("kom",chosenProduct,1)
+        }
+        else
+        {
+
+        }
     }
     private fun scanDeclined()
     {
@@ -104,7 +109,14 @@ class BarcodeScannerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_barcode_scanner)
+        super.bindListenersToTopBar()
+        super.setTitle(getString(R.string.barcode_scanner_activity_title))
 
+        findViewById<FloatingActionButton>(R.id.finishBarcodeScanningFab).setOnClickListener {
+            finish()
+        }
+
+        addingItemToFridge = intent.getBooleanExtra("adding", true)
         val addedItemsRecycler = findViewById<RecyclerView>(R.id.addedItemsRecyclerBarcode)
         addedItemsRecycler.adapter = AddItemActivity.addedItemsAdapter
         addedItemsRecycler.layoutManager = LinearLayoutManager(this)
@@ -191,9 +203,8 @@ class BarcodeScannerActivity : AppCompatActivity() {
         db.collection("Products").whereEqualTo("barcode",chosenBarcode).get().addOnSuccessListener { documents->
             if (!documents.isEmpty)
             {
-                chosenItemName= documents.first().data["name"]?.toString()
-                chosenItemId = documents.first().data["id"]?.toString()
-                findViewById<TextView>(R.id.barcodeScannerFoundItemText).text = chosenItemName
+                chosenProduct =  UserData.productFromDoc(documents.first())
+                findViewById<TextView>(R.id.barcodeScannerFoundItemText).text = chosenProduct.name.databaseValue
             }
         }
     }
