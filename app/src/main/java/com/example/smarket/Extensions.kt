@@ -114,11 +114,11 @@ fun displayBundlesInTextFields(bundlesOnCurrentDay: List<UserData.ShoppingBundle
         {
             textFields[i].text = bundlesOnCurrentDay[i].name.databaseValue
             textFields[i].visibility = View.VISIBLE
-            textFields[i].setTextColor(bundleColor)
+//            textFields[i].setTextColor(bundleColor)
         }
         textFields.last().text = "..."
         textFields.last().visibility = View.VISIBLE
-        textFields.last().setTextColor(bundleColor)
+//        textFields.last().setTextColor(bundleColor)
     }
     else
     {
@@ -126,7 +126,7 @@ fun displayBundlesInTextFields(bundlesOnCurrentDay: List<UserData.ShoppingBundle
         {
             textFields[i].text = bundlesOnCurrentDay[i].name.databaseValue
             textFields[i].visibility = View.VISIBLE
-            textFields[i].setTextColor(bundleColor)
+//            textFields[i].setTextColor(bundleColor)
         }
     }
 }
