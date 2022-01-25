@@ -61,6 +61,39 @@ object UserData {
                     }
                 }
         }
+        db.collection("Deliveries").whereEqualTo("userId", auth.uid.toString())
+            .addSnapshotListener { value, e ->
+                if (e != null) {
+                    Log.w(TAG, "Listen failed.", e)
+                    return@addSnapshotListener
+                }
+
+
+                for (dc in value!!.documentChanges) {
+                    when (dc.type) {
+                        DocumentChange.Type.ADDED -> {
+                            Log.d(TAG, "Received new delivery from DB")
+                            val newItemTask = deliveryFromDocument(dc.document)
+                            newItemTask.addOnSuccessListener {
+                                val newDelivery = it as Delivery
+                                val dataType: KType = newDelivery::class.createType()
+                                if (modifyListeners.containsKey(dataType)) {
+                                    for (listener in modifyListeners[dataType]!!) {
+                                        listener(newDelivery,DatabaseEventType.ADDED)
+                                    }
+                                }
+                            }
+                        }
+                        DocumentChange.Type.MODIFIED -> {
+                            Log.d(TAG, "Delivery modified from DB")
+                        }
+                        DocumentChange.Type.REMOVED -> {
+                            Log.d(TAG, "Delivery removed from DB")
+                        }
+                    }
+                }
+
+            }
     }
 
     //region Methods that get objects from the database
@@ -212,9 +245,14 @@ object UserData {
         val data = doc.data!!
 
         // parse date
-        val firebaseTimestamp = data["date"] as Timestamp
-        val javaDate = firebaseTimestamp.toDate()
-        val date = LocalDateTime.ofInstant(Instant.ofEpochMilli(javaDate.time), ZoneId.systemDefault());
+        var firebaseTimestamp = data["date"] as Timestamp
+        var javaDate = firebaseTimestamp.toDate()
+        val date = LocalDateTime.ofInstant(Instant.ofEpochMilli(javaDate.time), ZoneId.systemDefault())
+
+        // parse end date
+        firebaseTimestamp = data["end_date"] as Timestamp
+        javaDate = firebaseTimestamp.toDate()
+        val endDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(javaDate.time), ZoneId.systemDefault())
 
         val status = data["status"] as String
         val deliveryTask = DatabaseItemTask()
@@ -226,6 +264,7 @@ object UserData {
             {
                 deliveryTask.finishTask(Delivery(id,
                     DatabaseField("date",date),
+                    DatabaseField("end_date", endDate),
                     userOrders,
                     DatabaseField("status",status),
                     doc.reference))
@@ -240,6 +279,7 @@ object UserData {
                         {
                             deliveryTask.finishTask(Delivery(id,
                                 DatabaseField("date",date),
+                                DatabaseField("end_date", endDate),
                                 userOrders,
                                 DatabaseField("status",status),
                                 doc.reference))
@@ -330,7 +370,7 @@ object UserData {
     fun getAllDeliveries(): DatabaseItemListTask
     {
         val deliveriesTask = DatabaseItemListTask()
-        db.collection("Orders").whereEqualTo("userId", auth.uid.toString()).get().addOnSuccessListener { documents->
+        db.collection("Deliveries").whereEqualTo("userId", auth.uid.toString()).get().addOnSuccessListener { documents->
             val allDeliveries: MutableList<Delivery> = mutableListOf()
             var remainingToFinish = documents.size()
             if(remainingToFinish == 0)
@@ -994,19 +1034,51 @@ object UserData {
         }
     }
 
-    class Delivery(id: String, val date: DatabaseField<LocalDateTime>, userOrders: List<UserOrder>, val status: DatabaseField<String>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
+    class Delivery(id: String, val date: DatabaseField<LocalDateTime>, val endDate: DatabaseField<LocalDateTime>, userOrders: List<UserOrder>, val status: DatabaseField<String>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
     {
         var userOrders: List<UserOrder> = userOrders
             private set
         init {
             date.addOnChangeListener {v, t -> notifyFieldListeners(date.eraseType(),t) }
             date.bindToDatabaseListner(databaseRef)
+            endDate.addOnChangeListener {v, t -> notifyFieldListeners(endDate.eraseType(),t) }
+            endDate.bindToDatabaseListner(databaseRef)
             status.addOnChangeListener {v, t -> notifyFieldListeners(status.eraseType(),t) }
             status.bindToDatabaseListner(databaseRef)
             for(userOrder in userOrders)
             {
                 userOrder.addOnFieldChangeListener { notifySubitemListeners(userOrder, DatabaseEventType.MODIFIED) }
                 userOrder.addOnSubitemChangeListener {v,t -> notifySubitemListeners(userOrder, DatabaseEventType.MODIFIED) }
+            }
+
+            // Bind to database listener and listen if removed or changed
+            databaseRef.addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.w(TAG, "listen:error", e)
+                    return@addSnapshotListener
+                }
+
+                if (!snapshot!!.exists())
+                {
+                    val dataType: KType = this::class.createType()
+                    if (modifyListeners.containsKey(dataType)) {
+                        for (listener in modifyListeners[dataType]!!) {
+                            listener(this,DatabaseEventType.REMOVED)
+                        }
+                    }
+                }
+                else
+                {
+                    val dataType: KType = this::class.createType()
+                    if (modifyListeners.containsKey(dataType)) {
+                        for (listener in modifyListeners[dataType]!!) {
+                            listener(this,DatabaseEventType.MODIFIED)
+                        }
+                    }
+                }
+            }
+            databaseRef.collection("UserOrders").addSnapshotListener { value, error ->
+                // TODO Handle adding userorders to delivery
             }
         }
     }

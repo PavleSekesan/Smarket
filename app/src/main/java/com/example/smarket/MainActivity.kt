@@ -163,14 +163,16 @@ class MainActivity : BaseActivity() {
         UserData.getAllUserOrders().addOnSuccessListener { res1->
             userOrders = res1 as List<UserOrder>
             UserData.getAllDeliveries().addOnSuccessListener { res2 ->
-                val deliveries = res2 as List<Delivery>
+
+                var deliveries = res2 as List<Delivery>
+                val userOrderColors = mutableMapOf<String,Int>()
+                val userOrderDeliveryDates = mutableMapOf<String,LocalDate>()
+
                 var currentMonth = LocalDate.now().month
                 allOrdersInMonth = expandUserOrders(userOrders,
                     LocalDate.now().minusMonths(11),
                     LocalDate.now().plusMonths(11))
                 dayColors = resources.getIntArray(R.array.different_32_colors).toMutableList()
-                val userOrderColors = mutableMapOf<String,Int>()
-                val userOrderDeliveryDates = mutableMapOf<String,LocalDate>()
 
                 // Logic for showing calendar cells (days)
                 calendarView.dayBinder = object : DayBinder<DayViewContainer> {
@@ -187,20 +189,45 @@ class MainActivity : BaseActivity() {
                         }
                         setupCalendarDayCell(container,day,deliveries,userOrderColors,userOrderDeliveryDates)
                         UserData.addOnUserOrderModifyListener { userOrder, databaseEventType ->
-                            if (userOrder != null && userOrder.date.databaseValue.toLocalDate() == day.date)
+                            // Check if the order has not yet been added or removed
+                            if (userOrder != null)
                             {
-                                if(databaseEventType == UserData.DatabaseEventType.ADDED)
+                                if(databaseEventType == UserData.DatabaseEventType.ADDED && userOrders.none { ord-> ord.id == userOrder.id })
                                 {
                                     userOrders = userOrders.plus(userOrder)
                                 }
-                                else if(databaseEventType == UserData.DatabaseEventType.REMOVED)
+                                else if(databaseEventType == UserData.DatabaseEventType.REMOVED && userOrders.any { ord-> ord.id == userOrder.id })
                                 {
                                     userOrders = userOrders.filter { order-> order.id !=  userOrder.id}
                                 }
+
+                                // Reset the available colors and recompute all expanded orders
+                                dayColors = resources.getIntArray(R.array.different_32_colors).toMutableList()
+                                allOrdersInMonth = expandUserOrders(userOrders,
+                                    LocalDate.now().minusMonths(11),
+                                    LocalDate.now().plusMonths(11))
                             }
-                            allOrdersInMonth = expandUserOrders(userOrders,
-                                LocalDate.now().minusMonths(11),
-                                LocalDate.now().plusMonths(11))
+                            setupCalendarDayCell(container,day,deliveries,userOrderColors,userOrderDeliveryDates)
+                        }
+
+                        UserData.addOnDeliveryModifyListener { delivery, databaseEventType ->
+                            if(delivery != null)
+                            {
+                                if(databaseEventType == UserData.DatabaseEventType.ADDED && deliveries.none { d -> d.id == delivery.id })
+                                {
+                                    deliveries = deliveries.plus(delivery)
+                                }
+                                else if(databaseEventType == UserData.DatabaseEventType.REMOVED && deliveries.any { d -> d.id == delivery.id })
+                                {
+                                    for(userOrder in delivery.userOrders)
+                                    {
+                                        userOrderColors.remove(userOrder.id)
+                                        userOrderDeliveryDates.remove(userOrder.id)
+                                    }
+                                    deliveries = deliveries.filter { d -> d.id != delivery.id }
+                                }
+                                dayColors = resources.getIntArray(R.array.different_32_colors).toMutableList()
+                            }
                             setupCalendarDayCell(container,day,deliveries,userOrderColors,userOrderDeliveryDates)
                         }
                     }
