@@ -75,6 +75,9 @@
     <!-- Edit order activity -->
     <string name="edit_order_activity_recurring">Ponavlja se</string>
     <string name="edit_order_activity_not_recurring">Ne ponavlja se</string>
+    <string name="edit_order_activity_pick_date">Odaberite datum</string>
+    <string name="edit_order_activity_pick_recurring">Odaberite koliko često se narudžbina ponavlja</string>
+    <string name="edit_order_activity_recurring_description">Ponavlja se na svakih %1$d dana</string>
 
     <!-- View Selected Calendar Day activity -->
     <plurals name="view_selected_day_has_delivery">

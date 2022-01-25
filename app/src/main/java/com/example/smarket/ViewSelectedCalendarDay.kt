@@ -27,13 +27,11 @@ import java.time.temporal.WeekFields
 import java.util.*
 import androidx.recyclerview.widget.DefaultItemAnimator
 
-
-
-
-class ViewSelectedCalendarDay : AppCompatActivity() {
+class ViewSelectedCalendarDay : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_selected_calendar_day)
+        super.bindListenersToTopBar()
 
         // Get data from intent
         val selectedDay = intent.getSerializableExtra("selectedDay") as CalendarDay
@@ -43,8 +41,6 @@ class ViewSelectedCalendarDay : AppCompatActivity() {
         // Format date for the selected day
         val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
         findViewById<TextView>(R.id.viewSelectedDayText).text = selectedDay.date.format(formatter)
-
-        val deliveryTag = findViewById<View>(R.id.viewSelectedDayDeliveryTag)
 
         // Setup recycler view
         val recycler = findViewById<RecyclerView>(R.id.viewSelectedDayRecycler)

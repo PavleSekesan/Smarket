@@ -33,25 +33,23 @@ fun daysOfWeekFromLocale(): Array<DayOfWeek> {
 }
 
 // Computes all recurring dates to fill the month given by the date parameter and returns the map of dates to UserOrder ids
-fun expandUserOrders(userOrders: List<UserOrder>, date: LocalDate) : Map<LocalDate, MutableList<String>> {
-    val monthStart = date.withDayOfMonth(1)
-    val monthEnd = date.withDayOfMonth(date.lengthOfMonth())
+fun expandUserOrders(userOrders: List<UserOrder>, startDate: LocalDate, endDate: LocalDate) : Map<LocalDate, MutableList<String>> {
     val ordersOnDate: MutableMap<LocalDate, MutableList<String>> = mutableMapOf()
     for (order in userOrders) {
         val orderDate = order.date.databaseValue.toLocalDate()
-        if (orderDate.isAfter(monthEnd)) {
+        if (orderDate.isAfter(endDate)) {
             continue
         }
         if (order.recurring.databaseValue) {
             val minRepeats =
-                max(0, ChronoUnit.DAYS.between(orderDate, monthStart)) / order.daysToRepeat.databaseValue
+                max(0, ChronoUnit.DAYS.between(orderDate, startDate)) / order.daysToRepeat.databaseValue
             val maxRepeats = ceil(
-                ChronoUnit.DAYS.between(orderDate, monthEnd).toDouble() / order.daysToRepeat.databaseValue
+                ChronoUnit.DAYS.between(orderDate, endDate).toDouble() / order.daysToRepeat.databaseValue
             ).toLong() + 1
 
             for (k in minRepeats..maxRepeats) {
                 val currentDate = orderDate.plusDays(k * order.daysToRepeat.databaseValue)
-                if (currentDate.isAfter(monthEnd) || currentDate.isBefore(monthStart)) {
+                if (currentDate.isAfter(endDate) || currentDate.isBefore(startDate)) {
                     break
                 }
                 if (ordersOnDate.containsKey(currentDate)) {
@@ -60,7 +58,7 @@ fun expandUserOrders(userOrders: List<UserOrder>, date: LocalDate) : Map<LocalDa
                     ordersOnDate[currentDate] = mutableListOf(order.id)
                 }
             }
-        } else if (!orderDate.isBefore(monthStart)) {
+        } else if (!orderDate.isBefore(startDate)) {
             val currentDate = orderDate
             if (ordersOnDate.containsKey(currentDate)) {
                 ordersOnDate[currentDate]!!.add(order.id)
@@ -116,11 +114,11 @@ fun displayBundlesInTextFields(bundlesOnCurrentDay: List<UserData.ShoppingBundle
         {
             textFields[i].text = bundlesOnCurrentDay[i].name.databaseValue
             textFields[i].visibility = View.VISIBLE
-            textFields[i].setTextColor(bundleColor)
+//            textFields[i].setTextColor(bundleColor)
         }
         textFields.last().text = "..."
         textFields.last().visibility = View.VISIBLE
-        textFields.last().setTextColor(bundleColor)
+//        textFields.last().setTextColor(bundleColor)
     }
     else
     {
@@ -128,7 +126,7 @@ fun displayBundlesInTextFields(bundlesOnCurrentDay: List<UserData.ShoppingBundle
         {
             textFields[i].text = bundlesOnCurrentDay[i].name.databaseValue
             textFields[i].visibility = View.VISIBLE
-            textFields[i].setTextColor(bundleColor)
+//            textFields[i].setTextColor(bundleColor)
         }
     }
 }

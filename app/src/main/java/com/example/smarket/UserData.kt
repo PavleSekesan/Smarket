@@ -678,7 +678,18 @@ object UserData {
         protected fun notifyFieldListeners(fieldChanged: DatabaseField<Any>, eventType: DatabaseField.DatabaseFieldEventType)
         {
             if(eventType == DatabaseField.DatabaseFieldEventType.UPLOAD) {
-                databaseRef.update(fieldChanged.dbName, fieldChanged.databaseValue)
+                val valueToSetInDb: Any
+                if(fieldChanged.databaseValue is LocalDateTime)
+                {
+                    val dateTime = fieldChanged.databaseValue as LocalDateTime
+                    val zonedDateTime = dateTime.atZone(ZoneId.systemDefault())
+                    valueToSetInDb = Timestamp(Date.from(zonedDateTime.toInstant()))
+                }
+                else
+                {
+                    valueToSetInDb = fieldChanged.databaseValue
+                }
+                databaseRef.update(fieldChanged.dbName, valueToSetInDb)
                     .addOnSuccessListener {
                         for (listener in onFieldChangeListeners) {
                             listener(fieldChanged)

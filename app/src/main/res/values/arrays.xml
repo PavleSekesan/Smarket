@@ -30,6 +30,24 @@
         <item>19:00 – 21:00</item>
     </string-array>
 
+    <string-array name="recurring_times">
+        <item>Ne ponavlja se</item>
+        <item>Na svakih 5 dana</item>
+        <item>Na svakih 7 dana</item>
+        <item>Na svakih 14 dana</item>
+        <item>Na svakih mesec dana</item>
+        <item>Drugo…</item>
+    </string-array>
+
+    <integer-array name="recurring_times_values">
+        <item>-1</item>
+        <item>5</item>
+        <item>7</item>
+        <item>14</item>
+        <item>30</item>
+        <item>-2</item>
+    </integer-array>
+
     <array name="kelly_colors">
         <item>@color/kelly_vivid_yellow</item>
         <item>@color/kelly_strong_purple</item>
