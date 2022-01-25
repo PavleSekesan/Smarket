@@ -72,6 +72,65 @@ class MainActivity : BaseActivity() {
         resources.updateConfiguration(config, resources.getDisplayMetrics())
     }
 
+    fun setupCalendarDayCell(container: DayViewContainer, day: CalendarDay, deliveries: List<Delivery>, userOrderColors: MutableMap<String,Int>,
+                             userOrderDeliveryDates: MutableMap<String,LocalDate>)
+    {
+        container.textView.text = day.date.dayOfMonth.toString()
+        container.deliveryTag.setBackgroundColor(Color.TRANSPARENT)
+        container.deliveryTag.setTextColor(ContextCompat.getColor(container.textView.context, R.color.md_theme_light_inverseSurface))
+
+        var dayColor: Int
+        for(delivery in deliveries)
+        {
+            if (delivery.date.databaseValue.toLocalDate() == day.date)
+            {
+                dayColor = dayColors.first()
+                dayColors.removeFirst()
+                container.deliveryTag.setBackgroundColor(dayColor)
+                container.deliveryTag.setTextColor(ContextCompat.getColor(container.textView.context, R.color.md_theme_light_onPrimary))
+
+                for(userOrder in delivery.userOrders)
+                {
+                    userOrderColors[userOrder.id] = dayColor
+                    userOrderDeliveryDates[userOrder.id] = delivery.date.databaseValue.toLocalDate()
+                }
+            }
+        }
+
+        val ordersOnCurrentDay = allOrdersInMonth[day.date]
+        val bundlesOnDay = mutableListOf<ShoppingBundle>()
+        if (ordersOnCurrentDay != null) {
+            for (userOrderId in ordersOnCurrentDay) {
+                val order = userOrders.filter { it.id == userOrderId }[0]
+
+                container.dayColor = if(userOrderColors.containsKey(order.id)) userOrderColors[order.id]!! else Color.GRAY
+                container.deliveryDay = if(userOrderDeliveryDates.containsKey(order.id)) userOrderDeliveryDates[order.id]!! else null
+                for(bundle in order.bundles)
+                {
+                    bundlesOnDay.add(bundle)
+                }
+                order.addOnSubitemChangeListener { databaseItem, databaseEventType ->
+                    val bundleChanged = databaseItem as ShoppingBundle
+                    if(databaseEventType == UserData.DatabaseEventType.ADDED)
+                    {
+                        bundlesOnDay.add(bundleChanged)
+                    }
+                    else if (databaseEventType == UserData.DatabaseEventType.REMOVED)
+                    {
+                        bundlesOnDay.removeIf { bundle-> bundle.id == bundleChanged.id}
+                    }
+                    else
+                    {
+                    }
+                    val textFields = listOf(container.text1, container.text2, container.text3)
+                    displayBundlesInMaterialButtons(bundlesOnDay,container.dayColor,textFields)
+                }
+            }
+        }
+        val textFields = listOf(container.text1, container.text2, container.text3)
+        displayBundlesInMaterialButtons(bundlesOnDay,container.dayColor,textFields)
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,7 +165,9 @@ class MainActivity : BaseActivity() {
             UserData.getAllDeliveries().addOnSuccessListener { res2 ->
                 val deliveries = res2 as List<Delivery>
                 var currentMonth = LocalDate.now().month
-                allOrdersInMonth = expandUserOrders(userOrders,LocalDate.now())
+                allOrdersInMonth = expandUserOrders(userOrders,
+                    LocalDate.now().minusMonths(11),
+                    LocalDate.now().plusMonths(11))
                 dayColors = resources.getIntArray(R.array.different_32_colors).toMutableList()
                 val userOrderColors = mutableMapOf<String,Int>()
                 val userOrderDeliveryDates = mutableMapOf<String,LocalDate>()
@@ -122,63 +183,26 @@ class MainActivity : BaseActivity() {
                         if(day.date.month != currentMonth)
                         {
                             currentMonth = day.date.month
-                            allOrdersInMonth = expandUserOrders(userOrders, day.date)
                             dayColors = resources.getIntArray(R.array.different_32_colors).toMutableList()
                         }
-                        container.textView.text = day.date.dayOfMonth.toString()
-                        container.deliveryTag.setBackgroundColor(Color.TRANSPARENT)
-                        container.deliveryTag.setTextColor(ContextCompat.getColor(container.textView.context, R.color.md_theme_light_inverseSurface))
-
-                        var dayColor: Int
-                        for(delivery in deliveries)
-                        {
-                            if (delivery.date.databaseValue.toLocalDate() == day.date)
+                        setupCalendarDayCell(container,day,deliveries,userOrderColors,userOrderDeliveryDates)
+                        UserData.addOnUserOrderModifyListener { userOrder, databaseEventType ->
+                            if (userOrder != null && userOrder.date.databaseValue.toLocalDate() == day.date)
                             {
-                                dayColor = dayColors.first()
-                                dayColors.removeFirst()
-                                container.deliveryTag.setBackgroundColor(dayColor)
-                                container.deliveryTag.setTextColor(ContextCompat.getColor(container.textView.context, R.color.md_theme_light_onPrimary))
-
-                                for(userOrder in delivery.userOrders)
+                                if(databaseEventType == UserData.DatabaseEventType.ADDED)
                                 {
-                                    userOrderColors[userOrder.id] = dayColor
-                                    userOrderDeliveryDates[userOrder.id] = delivery.date.databaseValue.toLocalDate()
+                                    userOrders = userOrders.plus(userOrder)
+                                }
+                                else if(databaseEventType == UserData.DatabaseEventType.REMOVED)
+                                {
+                                    userOrders = userOrders.filter { order-> order.id !=  userOrder.id}
                                 }
                             }
+                            allOrdersInMonth = expandUserOrders(userOrders,
+                                LocalDate.now().minusMonths(11),
+                                LocalDate.now().plusMonths(11))
+                            setupCalendarDayCell(container,day,deliveries,userOrderColors,userOrderDeliveryDates)
                         }
-
-                        val ordersOnCurrentDay = allOrdersInMonth[day.date]
-                        val bundlesOnDay = mutableListOf<ShoppingBundle>()
-                        if (ordersOnCurrentDay != null) {
-                            for (userOrderId in ordersOnCurrentDay) {
-                                val order = userOrders.filter { it.id == userOrderId }[0]
-
-                                container.dayColor = if(userOrderColors.containsKey(order.id)) userOrderColors[order.id]!! else Color.GRAY
-                                container.deliveryDay = if(userOrderDeliveryDates.containsKey(order.id)) userOrderDeliveryDates[order.id]!! else null
-                                for(bundle in order.bundles)
-                                {
-                                    bundlesOnDay.add(bundle)
-                                }
-                                order.addOnSubitemChangeListener { databaseItem, databaseEventType ->
-                                    val bundleChanged = databaseItem as ShoppingBundle
-                                    if(databaseEventType == UserData.DatabaseEventType.ADDED)
-                                    {
-                                        bundlesOnDay.add(bundleChanged)
-                                    }
-                                    else if (databaseEventType == UserData.DatabaseEventType.REMOVED)
-                                    {
-                                        bundlesOnDay.removeIf { bundle-> bundle.id == bundleChanged.id}
-                                    }
-                                    else
-                                    {
-                                    }
-                                    val textFields = listOf(container.text1, container.text2, container.text3)
-                                    displayBundlesInMaterialButtons(bundlesOnDay,container.dayColor,textFields)
-                                }
-                            }
-                        }
-                        val textFields = listOf(container.text1, container.text2, container.text3)
-                        displayBundlesInMaterialButtons(bundlesOnDay,container.dayColor,textFields)
                     }
                 }
 
@@ -239,7 +263,6 @@ class MainActivity : BaseActivity() {
         init {
             wrapper.setOnClickListener {
                 val orders = mutableListOf<UserOrder>()
-                allOrdersInMonth = expandUserOrders(userOrders, day.date)
                 val idsOnSelectedDay = allOrdersInMonth[day.date]
                 if (idsOnSelectedDay != null) {
                     for (userOrderId in idsOnSelectedDay) {
