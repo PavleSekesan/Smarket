@@ -27,7 +27,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/calendarDayText">
+            app:layout_constraintTop_toBottomOf="@+id/calendarDayTextMonth">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/calendarDayText1"
@@ -75,7 +75,7 @@
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/calendarDayText"
+            android:id="@+id/calendarDayTextMonth"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_marginTop="8dp"

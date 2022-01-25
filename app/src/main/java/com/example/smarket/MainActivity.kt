@@ -6,7 +6,6 @@ import UserData
 import UserData.UserOrder
 import UserData.removeUserOrder
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.View
@@ -38,6 +37,10 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.navigation.*
 import java.time.LocalDateTime
 import android.app.Activity
+import android.content.res.Resources
+import android.util.DisplayMetrics
+import androidx.core.view.updateLayoutParams
+
 
 class MonthViewContainer(view: View) : ViewContainer(view) {
     val legendLayout = view.findViewById<LinearLayout>(R.id.legendLayout)
@@ -72,12 +75,19 @@ class MainActivity : BaseActivity() {
         resources.updateConfiguration(config, resources.getDisplayMetrics())
     }
 
-    fun setupCalendarDayCell(container: DayViewContainer, day: CalendarDay, deliveries: List<Delivery>, userOrderColors: MutableMap<String,Int>,
+    fun setupCalendarDayCell(container: DayViewContainerLarge, day: CalendarDay, deliveries: List<Delivery>, userOrderColors: MutableMap<String,Int>,
                              userOrderDeliveryDates: MutableMap<String,LocalDate>)
     {
-        container.textView.text = day.date.dayOfMonth.toString()
-        container.deliveryTag.setBackgroundColor(Color.TRANSPARENT)
-        container.deliveryTag.setTextColor(ContextCompat.getColor(container.textView.context, R.color.md_theme_light_inverseSurface))
+        val dateFormatter = DateTimeFormatter.ofPattern("dd")
+        val dayFormatter = DateTimeFormatter.ofPattern("EEEE")
+        val monthFormatter = DateTimeFormatter.ofPattern("MMMM")
+
+        container.textViewDate.text = day.date.format(dateFormatter)
+        container.textViewMonth.text = day.date.format(monthFormatter)
+        container.textViewWeekday.text = day.date.format(dayFormatter)
+
+        //container.deliveryTag.setBackgroundColor(Color.TRANSPARENT)
+        container.deliveryTag.setTextColor(Color.WHITE)
 
         var dayColor: Int
         for(delivery in deliveries)
@@ -86,8 +96,8 @@ class MainActivity : BaseActivity() {
             {
                 dayColor = dayColors.first()
                 dayColors.removeFirst()
-                container.deliveryTag.setBackgroundColor(dayColor)
-                container.deliveryTag.setTextColor(ContextCompat.getColor(container.textView.context, R.color.md_theme_light_onPrimary))
+                //container.deliveryTag.setBackgroundColor(dayColor)
+                container.deliveryTag.setTextColor(dayColor)
 
                 for(userOrder in delivery.userOrders)
                 {
@@ -159,6 +169,11 @@ class MainActivity : BaseActivity() {
         }
 
         val calendarView = findViewById<CalendarView>(R.id.calendarView)
+        if (calendarView.maxRowCount == 1)
+        {
+            val calendarHeader = findViewById<LinearLayout>(R.id.calendarHeader)
+            calendarHeader.visibility = View.GONE
+        }
 
         UserData.getAllUserOrders().addOnSuccessListener { res1->
             userOrders = res1 as List<UserOrder>
@@ -175,12 +190,12 @@ class MainActivity : BaseActivity() {
                 dayColors = resources.getIntArray(R.array.different_32_colors).toMutableList()
 
                 // Logic for showing calendar cells (days)
-                calendarView.dayBinder = object : DayBinder<DayViewContainer> {
+                calendarView.dayBinder = object : DayBinder<DayViewContainerLarge> {
                     // Called only when a new container is needed.
-                    override fun create(view: View) = DayViewContainer(view)
+                    override fun create(view: View) = DayViewContainerLarge(view)
 
                     // Called every time we need to reuse a container.
-                    override fun bind(container: DayViewContainer, day: CalendarDay) {
+                    override fun bind(container: DayViewContainerLarge, day: CalendarDay) {
                         container.day = day
                         if(day.date.month != currentMonth)
                         {
@@ -235,34 +250,41 @@ class MainActivity : BaseActivity() {
 
                 val daysOfWeek = daysOfWeekFromLocale()
 
-                // Logic for showing the month header (MON, TUE, WED ... )
-                calendarView.monthHeaderBinder = object :
-                    MonthHeaderFooterBinder<MonthViewContainer> {
-                    override fun create(view: View) = MonthViewContainer(view)
-                    override fun bind(container: MonthViewContainer, month: CalendarMonth) {
-                        // Setup each header day text if we have not done that already.
-                        if (container.legendLayout.tag == null) {
-                            container.legendLayout.tag = month.yearMonth
-                            container.legendLayout.children.map { it as TextView }.forEachIndexed { index, tv ->
-                                tv.text = daysOfWeek[index].getDisplayName(TextStyle.SHORT, Locale.ENGLISH)
-                                    .toUpperCase(Locale.ENGLISH)
-                                tv.setTextColorRes(R.color.kelly_medium_gray)
-                                tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-                            }
-                            month.yearMonth
-                        }}
+                if (calendarView.maxRowCount != -1)
+                {
+                    // Logic for showing the month header (MON, TUE, WED ... )
+                    calendarView.monthHeaderBinder = object :
+                        MonthHeaderFooterBinder<MonthViewContainer> {
+                        override fun create(view: View) = MonthViewContainer(view)
+                        override fun bind(container: MonthViewContainer, month: CalendarMonth) {
+                            // Setup each header day text if we have not done that already.
+                            if (container.legendLayout.tag == null) {
+                                container.legendLayout.tag = month.yearMonth
+                                container.legendLayout.children.map { it as TextView }.forEachIndexed { index, tv ->
+                                    tv.text = daysOfWeek[index].getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                                        .toUpperCase(Locale.ENGLISH)
+                                    tv.setTextColorRes(R.color.kelly_medium_gray)
+                                    tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+                                }
+                                month.yearMonth
+                            }}
+                    }
+                    // Logic for showing the large month and year header
+                    calendarView.monthScrollListener = {
+                        findViewById<TextView>(R.id.calendarYearText).text =
+                            it.yearMonth.year.toString()
+                        val monthTitleFormatter = DateTimeFormatter.ofPattern("MMMM")
+                        findViewById<TextView>(R.id.calendarMonthText).text =
+                            monthTitleFormatter.format(it.yearMonth)
+                    }
                 }
 
-                // Logic for showing the large month and year header
-                calendarView.monthScrollListener = {
-                        findViewById<TextView>(R.id.calendarYearText).text = it.yearMonth.year.toString()
-                        val monthTitleFormatter = DateTimeFormatter.ofPattern("MMMM")
-                        findViewById<TextView>(R.id.calendarMonthText).text = monthTitleFormatter.format(it.yearMonth)
-                    }
+                val screenWidth = Resources.getSystem().displayMetrics.widthPixels
+                val screenHeight = Resources.getSystem().displayMetrics.heightPixels
 
                 // Change cell size so cells are longer
                 val daySize = calendarView.daySize
-                calendarView.daySize = Size(daySize.width,280)
+                calendarView.daySize = Size(resources.getDimensionPixelSize(R.dimen.day_size_large),screenHeight)
 
                 // Setup and show calendar
                 val currentMonthCalendar = YearMonth.now()
@@ -271,14 +293,50 @@ class MainActivity : BaseActivity() {
                 val firstDayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek
 
                 calendarView.setup(firstMonth, lastMonth, firstDayOfWeek)
-                calendarView.scrollToMonth(currentMonthCalendar)
+                //calendarView.scrollToMonth(currentMonthCalendar)
+                calendarView.scrollToDate(LocalDate.now())
             }
         }
     }
 
-    class DayViewContainer(view: View) : ViewContainer(view) {
-        val textView = view.findViewById<TextView>(R.id.calendarDayText)
-        val deliveryTag = view.findViewById<MaterialButton>(R.id.calendarDayText)
+    class DayViewContainerSmall(view: View) : ViewContainer(view) {
+        val textView = view.findViewById<TextView>(R.id.calendarDayTextMonth)
+        val deliveryTag = view.findViewById<MaterialButton>(R.id.calendarDayTextMonth)
+
+        val text1 = view.findViewById<MaterialButton>(R.id.calendarDayText1)
+        val text2 = view.findViewById<MaterialButton>(R.id.calendarDayText2)
+        val text3 = view.findViewById<MaterialButton>(R.id.calendarDayText3)
+        val wrapper = view.findViewById<ConstraintLayout>(R.id.calendarDayWrapper)
+        lateinit var day: CalendarDay
+        var deliveryDay: LocalDate? = null
+        var dayColor = -1
+        init {
+            wrapper.setOnClickListener {
+                val orders = mutableListOf<UserOrder>()
+                val idsOnSelectedDay = allOrdersInMonth[day.date]
+                if (idsOnSelectedDay != null) {
+                    for (userOrderId in idsOnSelectedDay) {
+                        val order = userOrders.filter { it.id == userOrderId }[0]
+                        orders.add(order)
+                    }
+                }
+
+                userOrdersOnSelectedDay = orders
+                val intent = Intent(view.context,ViewSelectedCalendarDay::class.java)
+                intent.putExtra("selectedDay", day)
+                intent.putExtra("deliveryDay",deliveryDay)
+                intent.putExtra("dayColor",dayColor)
+
+                view.context.startActivity(intent)
+            }
+        }
+    }
+
+    class DayViewContainerLarge(view: View) : ViewContainer(view) {
+        val textViewMonth = view.findViewById<TextView>(R.id.calendarDayTextMonth)
+        val textViewDate = view.findViewById<TextView>(R.id.calendarDayTextDate)
+        val textViewWeekday = view.findViewById<TextView>(R.id.calendarDayTextWeekday)
+        val deliveryTag = textViewDate
 
         val text1 = view.findViewById<MaterialButton>(R.id.calendarDayText1)
         val text2 = view.findViewById<MaterialButton>(R.id.calendarDayText2)

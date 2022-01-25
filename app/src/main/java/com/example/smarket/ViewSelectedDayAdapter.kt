@@ -57,9 +57,8 @@ class ViewSelectedDayAdapter(private var dataSet: MutableList<UserOrder>) :
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
         val context = viewHolder.itemView.context
-        val dateStr = dataSet[position].date.databaseValue.format(formatter).toString()
+        val dateStr = formatDateSerbianLocale(dataSet[position].date.databaseValue.toLocalDate())
         viewHolder.textView.text =
             if(dataSet[position].recurring.databaseValue)
                 context.getString(R.string.view_selected_day_order_recurring, dataSet[position].daysToRepeat.databaseValue, dateStr)

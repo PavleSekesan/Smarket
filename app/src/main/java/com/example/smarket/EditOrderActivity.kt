@@ -68,12 +68,11 @@ class EditOrderActivity : BaseActivity() {
         getAllUserOrders().addOnSuccessListener { ret1->
             val allUserOrders = ret1 as List<UserData.UserOrder>
             selectedOrder = allUserOrders.filter { order-> order.id == selectedOrderId }[0]
-            val formatter = DateTimeFormatter.ofPattern("E, d MMMM yyyy")
 
             // Selected day text
-            findViewById<TextView>(R.id.editOrderSelectedDate).text = selectedOrder.date.databaseValue.toLocalDate().format(formatter)
+            findViewById<TextView>(R.id.editOrderSelectedDate).text = formatDateSerbianLocale(selectedOrder.date.databaseValue.toLocalDate())
             selectedOrder.date.addOnChangeListener { localDateTime, databaseFieldEventType ->
-                findViewById<TextView>(R.id.editOrderSelectedDate).text = localDateTime.toLocalDate().format(formatter)
+                findViewById<TextView>(R.id.editOrderSelectedDate).text = formatDateSerbianLocale(localDateTime.toLocalDate())
             }
 
             // Recurring order text

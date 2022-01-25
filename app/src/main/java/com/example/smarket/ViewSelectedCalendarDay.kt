@@ -26,8 +26,10 @@ import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.*
 import androidx.recyclerview.widget.DefaultItemAnimator
+import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities
 
 class ViewSelectedCalendarDay : BaseActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_selected_calendar_day)
@@ -39,8 +41,7 @@ class ViewSelectedCalendarDay : BaseActivity() {
         val dayColor = intent.getIntExtra("dayColor",-1)
 
         // Format date for the selected day
-        val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
-        findViewById<TextView>(R.id.viewSelectedDayText).text = selectedDay.date.format(formatter)
+        findViewById<TextView>(R.id.viewSelectedDayText).text = formatDateSerbianLocale(selectedDay.date)
 
         // Setup recycler view
         val recycler = findViewById<RecyclerView>(R.id.viewSelectedDayRecycler)
@@ -69,7 +70,7 @@ class ViewSelectedCalendarDay : BaseActivity() {
         // Set description for the selected day
         if (deliveryDay != null)
         {
-            val dateString = deliveryDay.format(formatter)
+            val dateString = formatDateSerbianLocale(deliveryDay)
             findViewById<TextView>(R.id.viewSelectedDayDescription).text =
                 resources.getQuantityString(R.plurals.view_selected_day_has_delivery, ordersOnCurrentDay.size,ordersOnCurrentDay.size,dateString)
         }

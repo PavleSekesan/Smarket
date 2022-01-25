@@ -10,6 +10,7 @@ import com.google.android.material.button.MaterialButton
 import java.lang.Long.max
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
 import java.time.temporal.WeekFields
 import java.util.*
@@ -129,4 +130,14 @@ fun displayBundlesInTextFields(bundlesOnCurrentDay: List<UserData.ShoppingBundle
 //            textFields[i].setTextColor(bundleColor)
         }
     }
+}
+
+fun formatDateSerbianLocale(date: LocalDate) : String
+{
+    val serbianLocale = Locale("sr")
+    val weekday = date.dayOfWeek.getDisplayName(TextStyle.FULL, serbianLocale)
+    val dayOfMonth = date.dayOfMonth.toString()
+    val month = date.month.getDisplayName(TextStyle.FULL, serbianLocale)
+    val year = date.year.toString()
+    return "$weekday, $dayOfMonth $month $year"
 }
