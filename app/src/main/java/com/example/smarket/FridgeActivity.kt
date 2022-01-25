@@ -9,6 +9,7 @@ import android.widget.Button
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.android.synthetic.main.activity_fridge.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -39,6 +40,11 @@ class FridgeActivity : BaseActivity() {
             //searchView.setOnQueryChangeListener { oldQuery, newQuery -> adapter.displaySearchedItems(newQuery) }
         }
 
+        findViewById<FloatingActionButton>(R.id.removeBarcodeFab).setOnClickListener {
+            val intent = Intent(this, BarcodeScannerActivity::class.java)
+            intent.putExtra("adding",false)
+            startActivity(intent)
+        }
 
         fridgeAddProductButton.setOnClickListener {
             val intent = Intent(this, AddItemActivity::class.java)

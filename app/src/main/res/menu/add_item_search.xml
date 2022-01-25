@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/scan_barcode"
-        android:icon="@drawable/ic_qr_code_scanner_24"
+        android:icon="@drawable/ic_scan_barcode_36"
         android:title="@string/search"
         app:showAsAction="ifRoom|collapseActionView" />
 </menu>

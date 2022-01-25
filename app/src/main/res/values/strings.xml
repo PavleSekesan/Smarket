@@ -43,6 +43,8 @@
 
     <!-- Add item strings -->
     <string name="action_scan_barcode">Skenirajte bar-kod</string>
+    <string name="removed_item_snackbar_text">Uklonjeno: %1$s</string>
+    <string name="removed_item_fail_snackbar_text">Artikal: %1$s nije pronađen u frižideru</string>
     <string name="action_quick_add">Quick add?</string>
     <string name="prompt_scan_barcode">Skenirajte bar-kod</string>
     <string name="found_item">Pronađeni artikal: </string>

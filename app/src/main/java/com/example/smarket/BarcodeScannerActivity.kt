@@ -1,11 +1,7 @@
 package com.example.smarket
 
-import UserData.BundleItem
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.Manifest
-import android.app.LauncherActivity
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
 import android.view.View
@@ -21,6 +17,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -68,6 +65,7 @@ class BarcodeScannerActivity : BaseActivity() {
 
     private lateinit var cameraExecutor: ExecutorService
     private var barcodeCountMap = mutableMapOf<String,Int>()
+    private var ignoreBarcodesSet = mutableSetOf<String>()
     private val minimumBarcodeCount = 5
     private var waitingForResponse = false
     private lateinit var chosenBarcode: String
@@ -79,6 +77,8 @@ class BarcodeScannerActivity : BaseActivity() {
     {
         barcodeCountMap.clear()
         waitingForResponse = false
+        clearScanPrompt()
+        ignoreBarcodesSet.add(chosenBarcode)
 
         if (addingItemToFridge)
         {
@@ -86,7 +86,14 @@ class BarcodeScannerActivity : BaseActivity() {
         }
         else
         {
-
+            val contextView = findViewById<View>(R.id.barcodeCameraViewFinder)
+            UserData.removeFridgeItemByProduct(chosenProduct).addOnSuccessListener {
+                val itemRemovedText = getString(R.string.removed_item_snackbar_text, chosenProduct.name.databaseValue)
+                Snackbar.make(contextView, itemRemovedText, Snackbar.LENGTH_SHORT).show()
+            }.addOnFailureListener {
+                val itemRemovedText = getString(R.string.removed_item_fail_snackbar_text, chosenProduct.name.databaseValue)
+                Snackbar.make(contextView, itemRemovedText, Snackbar.LENGTH_SHORT).show()
+            }
         }
     }
     private fun scanDeclined()
@@ -99,11 +106,13 @@ class BarcodeScannerActivity : BaseActivity() {
     {
         findViewById<ConstraintLayout>(R.id.barcodeScannerItemFoundWrapper).visibility = View.VISIBLE
         findViewById<ConstraintLayout>(R.id.barcodeScannerButtonWrapper).visibility = View.VISIBLE
+        findViewById<TextView>(R.id.barcodeScannerPromptText).visibility = View.GONE
     }
     private fun clearScanPrompt()
     {
         findViewById<ConstraintLayout>(R.id.barcodeScannerItemFoundWrapper).visibility = View.GONE
         findViewById<ConstraintLayout>(R.id.barcodeScannerButtonWrapper).visibility = View.GONE
+        findViewById<TextView>(R.id.barcodeScannerPromptText).visibility = View.VISIBLE
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -117,10 +126,11 @@ class BarcodeScannerActivity : BaseActivity() {
         }
 
         addingItemToFridge = intent.getBooleanExtra("adding", true)
-        val addedItemsRecycler = findViewById<RecyclerView>(R.id.addedItemsRecyclerBarcode)
-        addedItemsRecycler.adapter = AddItemActivity.addedItemsAdapter
-        addedItemsRecycler.layoutManager = LinearLayoutManager(this)
-
+        if (addingItemToFridge) {
+            val addedItemsRecycler = findViewById<RecyclerView>(R.id.addedItemsRecyclerBarcode)
+            addedItemsRecycler.adapter = AddItemActivity.addedItemsAdapter
+            addedItemsRecycler.layoutManager = LinearLayoutManager(this)
+        }
         // Request camera permissions
         if (allPermissionsGranted()) {
             startCamera()
@@ -168,7 +178,7 @@ class BarcodeScannerActivity : BaseActivity() {
             val preview = Preview.Builder()
                 .build()
                 .also {
-                    it.setSurfaceProvider(viewFinder.surfaceProvider)
+                    it.setSurfaceProvider(barcodeCameraViewFinder.surfaceProvider)
                 }
 
             val imageAnalyzer = ImageAnalysis.Builder()
@@ -176,7 +186,9 @@ class BarcodeScannerActivity : BaseActivity() {
                 .also {
                     it.setAnalyzer(cameraExecutor, BarCodeAnalyzer { barcode ->
                         Log.d(TAG, "Found barcode: $barcode")
-                        onFoundBarcode(barcode)
+                        if (!ignoreBarcodesSet.contains(barcode)) {
+                            onFoundBarcode(barcode)
+                        }
                     })
                 }
 
@@ -211,7 +223,6 @@ class BarcodeScannerActivity : BaseActivity() {
 
     private fun onFoundBarcode(barcode: String)
     {
-        promptScan()
         val oldValue = barcodeCountMap[barcode] ?: 0
         barcodeCountMap[barcode] = oldValue+1
         if (barcodeCountMap[barcode]!! >= minimumBarcodeCount && !waitingForResponse)

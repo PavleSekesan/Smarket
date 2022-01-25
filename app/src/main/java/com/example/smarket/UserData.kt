@@ -220,19 +220,30 @@ object UserData {
 
     private fun fridgeItemFromDocument(doc: DocumentSnapshot): DatabaseItemTask
     {
-        val id = doc.id
-        val data: Map<String, Any> = doc.data!!
-        val measuringUnit = data["measuring_unit"] as String
-        val ref = data["product"] as DocumentReference
-        val quantity = data["quantity"] as Long
         val fridgeItemTask = DatabaseItemTask()
-        ref.get().addOnSuccessListener { productDoc->
-            val product = productFromDoc(productDoc)
-            fridgeItemTask.finishTask(FridgeItem(id,
-                DatabaseField("measuring_unit",measuringUnit),
-                product,
-                DatabaseField("quantity",quantity.toInt()),
-                doc.reference))
+        val id = doc.id
+        if(doc.data != null) {
+            val data: Map<String, Any> = doc.data!!
+            val measuringUnit = data["measuring_unit"] as String
+            val ref = data["product"] as DocumentReference
+            val quantity = data["quantity"] as Long
+
+            ref.get().addOnSuccessListener { productDoc ->
+                val product = productFromDoc(productDoc)
+                fridgeItemTask.finishTask(
+                    FridgeItem(
+                        id,
+                        DatabaseField("measuring_unit", measuringUnit),
+                        product,
+                        DatabaseField("quantity", quantity.toInt()),
+                        doc.reference
+                    )
+                )
+            }
+        }
+        else
+        {
+            fridgeItemTask.finishTask(Exception("Document data is null"))
         }
         return fridgeItemTask
     }
@@ -417,10 +428,27 @@ object UserData {
         return fridgeItemTask
     }
 
-    fun removeFridgeItemByProduct(product: Product)
+    fun removeFridgeItemByProduct(product: Product) : DatabaseItemTask
     {
+        val removeFridgeItemTask = DatabaseItemTask()
         val docRef = db.collection("UserData").document(auth.uid.toString()).collection("Fridge").document(product.id)
-        docRef.delete()
+        docRef.get().addOnSuccessListener {
+            fridgeItemFromDocument(it).addOnSuccessListener { dbItem->
+                docRef.delete().addOnSuccessListener {
+                    val fridgeItem = dbItem as FridgeItem
+                    val dataType: KType = fridgeItem::class.createType()
+                    if (modifyListeners.containsKey(dataType)) {
+                        for (listener in modifyListeners[dataType]!!) {
+                            listener(fridgeItem,DatabaseEventType.REMOVED)
+                        }
+                    }
+                    removeFridgeItemTask.finishTask(fridgeItem)
+                }
+            }.addOnFailureListener { ex->
+                removeFridgeItemTask.finishTask(ex)
+            }
+        }
+        return removeFridgeItemTask
     }
 
     fun removeBundle(bundleToRemove: ShoppingBundle) : DatabaseItemTask
@@ -1091,8 +1119,10 @@ object UserData {
     {
         private var completedTask = false
         private var successTask = false
+        private var currentException: Exception? = null
         private lateinit var taskResult: DatabaseItem
         private val onSuccessListeners: MutableList<OnSuccessListener<in DatabaseItem>> = mutableListOf()
+        private val onFailListeners: MutableList<OnFailureListener> = mutableListOf()
         override fun isComplete(): Boolean {
             return completedTask
         }
@@ -1119,6 +1149,10 @@ object UserData {
 
         override fun addOnSuccessListener(p0: OnSuccessListener<in DatabaseItem>): Task<DatabaseItem> {
             onSuccessListeners.add(p0)
+            if(completedTask && successTask)
+            {
+                p0.onSuccess(result)
+            }
             return this
         }
 
@@ -1137,7 +1171,12 @@ object UserData {
         }
 
         override fun addOnFailureListener(p0: OnFailureListener): Task<DatabaseItem> {
-            TODO("Not yet implemented")
+            onFailListeners.add(p0)
+            if (completedTask && !successTask)
+            {
+                p0.onFailure(currentException)
+            }
+            return this
         }
 
         override fun addOnFailureListener(p0: Executor, p1: OnFailureListener): Task<DatabaseItem> {
@@ -1150,23 +1189,41 @@ object UserData {
 
         private fun onTaskSuccess()
         {
-            successTask = true
             for(listener in onSuccessListeners)
             {
                 listener.onSuccess(taskResult)
             }
         }
 
+        private fun onTaskFail()
+        {
+            for (listener in onFailListeners)
+            {
+                listener.onFailure(currentException)
+            }
+        }
+
         private fun onTaskCompleted()
         {
             completedTask = true
-            // if successful
-            onTaskSuccess()
+            if (successTask) {
+                onTaskSuccess()
+            } else {
+                onTaskFail()
+            }
         }
 
         fun finishTask(dbItem: DatabaseItem)
         {
             taskResult = dbItem
+            successTask = true
+            onTaskCompleted()
+        }
+
+        fun finishTask(exception: Exception)
+        {
+            successTask = false
+            currentException = exception
             onTaskCompleted()
         }
 

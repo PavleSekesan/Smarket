@@ -6,13 +6,25 @@
     android:layout_height="match_parent"
     tools:context=".FridgeActivity">
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/removeBarcodeFab"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:clickable="true"
+        android:scaleType="center"
+        app:layout_constraintBottom_toTopOf="@+id/fridgeAddProductButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:maxImageSize="36dp"
+        app:srcCompat="@drawable/ic_scan_remove_barcode_24" />
+
     <include
         android:id="@+id/appBarLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         layout="@layout/top_app_bar" />
-
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/fridgeItemsRecyclerView"

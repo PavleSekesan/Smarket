@@ -31,7 +31,7 @@ abstract class QuantityItemsListAdapter :
 //    }
 //
     fun removeItem(item : QuantityItem) {
-        val removePos = items.indexOf(items.find { it == item })
+        val removePos = items.indexOf(items.find { it.id == item.id })
         if(removePos != -1)
         {
             items = items.filter { it.id !=  item.id}
