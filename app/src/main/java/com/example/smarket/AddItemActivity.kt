@@ -42,10 +42,10 @@ class AddItemActivity : BaseActivity() {
         search.setOnQueryChangeListener { oldQuery, newQuery ->
             if (search.isSearchBarFocused) {
 
-//                UserData.getAlgoliaProductSearch(newQuery).addOnSuccessListener { res->
-//                    val
-//                    search.swapSuggestions(newSuggestions)
-//                }
+                UserData.getAlgoliaProductSearch(newQuery).addOnSuccessListener { res->
+                    val newSuggestions = res as List<UserData.Product>
+                    search.swapSuggestions(newSuggestions)
+                }
 
 
 //                val db = FirebaseFirestore.getInstance()
