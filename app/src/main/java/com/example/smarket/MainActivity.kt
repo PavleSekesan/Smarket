@@ -369,24 +369,6 @@ class MainActivity : BaseActivity() {
         var deliveryDay: LocalDate? = null
         var dayColor = -1
         init {
-            wrapper.setOnClickListener {
-                val orders = mutableListOf<UserOrder>()
-                val idsOnSelectedDay = allOrdersInMonth[day.date]
-                if (idsOnSelectedDay != null) {
-                    for (userOrderId in idsOnSelectedDay) {
-                        val order = userOrders.filter { it.id == userOrderId }[0]
-                        orders.add(order)
-                    }
-                }
-
-                userOrdersOnSelectedDay = orders
-                val intent = Intent(view.context,ViewSelectedCalendarDay::class.java)
-                intent.putExtra("selectedDay", day)
-                intent.putExtra("deliveryDay",deliveryDay)
-                intent.putExtra("dayColor",dayColor)
-
-                view.context.startActivity(intent)
-            }
         }
     }
 }

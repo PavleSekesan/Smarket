@@ -41,32 +41,10 @@ class AddItemActivity : BaseActivity() {
         
         search.setOnQueryChangeListener { oldQuery, newQuery ->
             if (search.isSearchBarFocused) {
-
                 UserData.getAlgoliaProductSearch(newQuery).addOnSuccessListener { res->
                     val newSuggestions = res as List<UserData.Product>
                     search.swapSuggestions(newSuggestions)
-
                 }
-
-
-//                val db = FirebaseFirestore.getInstance()
-//                val docRef = db.collection("Products")
-//                    .whereGreaterThanOrEqualTo("name", newQuery)
-//                    .whereLessThanOrEqualTo("name", newQuery + "\uf8ff")
-//                    .limit(8)
-//
-//                docRef.get()
-//                    .addOnSuccessListener { documents ->
-//                        val suggestions = mutableListOf<UserData.Product>()
-//                        for (document in documents) {
-//                            val prod = UserData.productFromDoc(document)
-//                            suggestions.add(prod)
-//                        }
-//                        search.swapSuggestions(suggestions)
-//                    }
-//                    .addOnFailureListener { exception ->
-//                        Log.d("Kurac", "Crko")
-//                    }
             }
         }
 

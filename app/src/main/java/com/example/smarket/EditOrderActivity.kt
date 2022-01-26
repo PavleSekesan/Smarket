@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.w3c.dom.Text
@@ -41,9 +43,16 @@ class EditOrderActivity : BaseActivity() {
         super.bindListenersToTopBar()
         super.setTitle(getString(R.string.edit_order_activity_title))
 
+        // Set date constraint: [tomorrow, inf)
+        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        val constraintsBuilder =
+            CalendarConstraints.Builder()
+                .setValidator(DateValidatorPointForward.from(calendar.timeInMillis))
+
         val datePicker =
             MaterialDatePicker.Builder.datePicker()
                 .setTitleText(getString(R.string.edit_order_activity_pick_date)).setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                .setCalendarConstraints(constraintsBuilder.build())
                 .build()
 
         val recurringPickerItems = resources.getStringArray(R.array.recurring_times)
