@@ -17,6 +17,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class AddItemActivity : BaseActivity() {
 
@@ -39,24 +41,31 @@ class AddItemActivity : BaseActivity() {
         
         search.setOnQueryChangeListener { oldQuery, newQuery ->
             if (search.isSearchBarFocused) {
-                val db = FirebaseFirestore.getInstance()
-                val docRef = db.collection("Products")
-                    .whereGreaterThanOrEqualTo("name", newQuery)
-                    .whereLessThanOrEqualTo("name", newQuery + "\uf8ff")
-                    .limit(8)
 
-                docRef.get()
-                    .addOnSuccessListener { documents ->
-                        val suggestions = mutableListOf<UserData.Product>()
-                        for (document in documents) {
-                            val prod = UserData.productFromDoc(document)
-                            suggestions.add(prod)
-                        }
-                        search.swapSuggestions(suggestions)
-                    }
-                    .addOnFailureListener { exception ->
-                        Log.d("Kurac", "Crko")
-                    }
+//                UserData.getAlgoliaProductSearch(newQuery).addOnSuccessListener { res->
+//                    val
+//                    search.swapSuggestions(newSuggestions)
+//                }
+
+
+//                val db = FirebaseFirestore.getInstance()
+//                val docRef = db.collection("Products")
+//                    .whereGreaterThanOrEqualTo("name", newQuery)
+//                    .whereLessThanOrEqualTo("name", newQuery + "\uf8ff")
+//                    .limit(8)
+//
+//                docRef.get()
+//                    .addOnSuccessListener { documents ->
+//                        val suggestions = mutableListOf<UserData.Product>()
+//                        for (document in documents) {
+//                            val prod = UserData.productFromDoc(document)
+//                            suggestions.add(prod)
+//                        }
+//                        search.swapSuggestions(suggestions)
+//                    }
+//                    .addOnFailureListener { exception ->
+//                        Log.d("Kurac", "Crko")
+//                    }
             }
         }
 

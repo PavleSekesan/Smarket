@@ -9,6 +9,12 @@ android {
     compileSdkVersion 32
     buildToolsVersion '32.0.0'
 
+    packagingOptions {
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/io.netty.versions.properties'
+    }
+
     defaultConfig {
         applicationId "com.example.smarket"
         minSdkVersion defaultMinSdkVersion
@@ -40,6 +46,14 @@ android {
 }
 
 dependencies {
+    // Algolia
+
+    implementation "io.ktor:ktor-server-core:1.6.7"
+    implementation "io.ktor:ktor-server-netty:1.6.7"
+    implementation "ch.qos.logback:logback-classic:1.2.5"
+
+    implementation "com.algolia:algoliasearch-client-kotlin:1.12.0"
+    implementation "io.ktor:ktor-client-apache:1.6.7"
 
     implementation 'com.google.code.gson:gson:2.8.6'
 

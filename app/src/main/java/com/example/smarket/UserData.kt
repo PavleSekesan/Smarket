@@ -25,6 +25,14 @@ import kotlin.reflect.full.createType
 
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
+import com.algolia.search.client.ClientSearch
+import com.algolia.search.client.Index
+import com.algolia.search.dsl.attributesToRetrieve
+import com.algolia.search.model.APIKey
+import com.algolia.search.model.ApplicationID
+import com.algolia.search.model.IndexName
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
 
@@ -34,12 +42,21 @@ object UserData {
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = Firebase.auth
+    private val algoliaProductsIndex: Index
 
 
     // Listeners called when an item is modified (added or removed)
     private val modifyListeners: MutableMap<KType, MutableList<(DatabaseItem?, DatabaseEventType) -> (Unit)>> = mutableMapOf()
 
     init {
+        val client = ClientSearch(
+            applicationID = ApplicationID("HNV15SZ7ZV"),
+            apiKey = APIKey("885cf7402b268ce00fcdc53a74232a37")
+        )
+        val indexName = IndexName("ProductName")
+        algoliaProductsIndex = client.initIndex(indexName)
+
+
         val collectionsToListen = listOf("Bundles", "Fridge", "Orders")
         for (collection in collectionsToListen)
         {
@@ -298,6 +315,39 @@ object UserData {
             }
         }
         return deliveryTask
+    }
+
+    fun getAlgoliaProductSearch(textToSearch: String) : DatabaseItemListTask
+    {
+        val productsTask = DatabaseItemListTask()
+        val searchQuery = com.algolia.search.dsl.query {
+            query = textToSearch
+            hitsPerPage = 10
+            attributesToRetrieve {
+                +"name"
+                +"id"
+            }
+        }
+        GlobalScope.launch {
+            val result = algoliaProductsIndex.search(searchQuery)
+            val products = mutableListOf<Product>()
+            for(hit in result.hits)
+            {
+                val docId = hit["id"].toString()
+                val productName = hit["name"].toString()
+                val dbRef = db.collection("Products").document(docId)
+                Log.d(TAG, "Search returned doc id $docId")
+
+                products.add(Product(docId,
+                    DatabaseField("name",productName),
+                    DatabaseField("price",0.0),
+                    DatabaseField("id", "0"),
+                    DatabaseField("barcode", "0"),
+                    dbRef))
+            }
+            productsTask.finishTask(products)
+        }
+        return productsTask
     }
     //endregion
 

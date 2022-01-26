@@ -29,8 +29,8 @@ class SignInActivity : AppCompatActivity() {
     {
         val auth = Firebase.auth
 
-        val email = findViewById<EditText>(R.id.email_edit_text).text.toString()
-        val password = findViewById<EditText>(R.id.password_edit_text).text.toString()
+        val email = findViewById<EditText>(R.id.sign_in_email_edit_text).text.toString()
+        val password = findViewById<EditText>(R.id.sign_in_password_edit_text).text.toString()
 
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->

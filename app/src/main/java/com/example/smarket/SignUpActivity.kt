@@ -66,8 +66,8 @@ class SignUpActivity : AppCompatActivity() {
     private fun signUpUser()
     {
         val auth = Firebase.auth
-        val email = findViewById<EditText>(R.id.email_edit_text).text.toString()
-        val password = findViewById<EditText>(R.id.password_edit_text).text.toString()
+        val email = findViewById<EditText>(R.id.sign_up_email_edit_text).text.toString()
+        val password = findViewById<EditText>(R.id.sign_up_password_edit_text).text.toString()
         val userData = collectUserData()
         if(checkData(userData))
         {

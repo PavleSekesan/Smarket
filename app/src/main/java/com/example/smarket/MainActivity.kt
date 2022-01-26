@@ -40,6 +40,14 @@ import android.app.Activity
 import android.content.res.Resources
 import android.util.DisplayMetrics
 import androidx.core.view.updateLayoutParams
+import com.algolia.search.client.ClientSearch
+import com.algolia.search.dsl.attributesToRetrieve
+import com.algolia.search.dsl.query
+import com.algolia.search.model.APIKey
+import com.algolia.search.model.ApplicationID
+import com.algolia.search.model.IndexName
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 class MonthViewContainer(view: View) : ViewContainer(view) {
@@ -142,6 +150,28 @@ class MainActivity : BaseActivity() {
     }
 
 
+    fun setupCalendarDayCellWrapperListener(container: DayViewContainerLarge)
+    {
+        container.wrapper.setOnClickListener {
+            val orders = mutableListOf<UserOrder>()
+            val idsOnSelectedDay = allOrdersInMonth[container.day.date]
+            if (idsOnSelectedDay != null) {
+                for (userOrderId in idsOnSelectedDay) {
+                    val order = userOrders.filter { it.id == userOrderId }[0]
+                    orders.add(order)
+                }
+            }
+
+            userOrdersOnSelectedDay = orders
+            val intent = Intent(container.wrapper.context,ViewSelectedCalendarDay::class.java)
+            intent.putExtra("selectedDay", container.day)
+            intent.putExtra("deliveryDay", container.deliveryDay)
+            intent.putExtra("dayColor", container.dayColor)
+
+            container.wrapper.context.startActivity(intent)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -169,7 +199,7 @@ class MainActivity : BaseActivity() {
         }
 
         val calendarView = findViewById<CalendarView>(R.id.calendarView)
-        if (calendarView.maxRowCount == 1)
+        if (calendarView.maxRowCount == 1 || true)
         {
             val calendarHeader = findViewById<LinearLayout>(R.id.calendarHeader)
             calendarHeader.visibility = View.GONE
@@ -197,6 +227,16 @@ class MainActivity : BaseActivity() {
                     // Called every time we need to reuse a container.
                     override fun bind(container: DayViewContainerLarge, day: CalendarDay) {
                         container.day = day
+
+                        if (day.date.isAfter(LocalDate.now()))
+                        {
+                            setupCalendarDayCellWrapperListener(container)
+                        }
+                        else
+                        {
+                            container.wrapper.setBackgroundColor(Color.GRAY)
+                        }
+
                         if(day.date.month != currentMonth)
                         {
                             currentMonth = day.date.month
@@ -250,7 +290,7 @@ class MainActivity : BaseActivity() {
 
                 val daysOfWeek = daysOfWeekFromLocale()
 
-                if (calendarView.maxRowCount != -1)
+                if (calendarView.maxRowCount != 1 && false)
                 {
                     // Logic for showing the month header (MON, TUE, WED ... )
                     calendarView.monthHeaderBinder = object :
@@ -311,24 +351,7 @@ class MainActivity : BaseActivity() {
         var deliveryDay: LocalDate? = null
         var dayColor = -1
         init {
-            wrapper.setOnClickListener {
-                val orders = mutableListOf<UserOrder>()
-                val idsOnSelectedDay = allOrdersInMonth[day.date]
-                if (idsOnSelectedDay != null) {
-                    for (userOrderId in idsOnSelectedDay) {
-                        val order = userOrders.filter { it.id == userOrderId }[0]
-                        orders.add(order)
-                    }
-                }
 
-                userOrdersOnSelectedDay = orders
-                val intent = Intent(view.context,ViewSelectedCalendarDay::class.java)
-                intent.putExtra("selectedDay", day)
-                intent.putExtra("deliveryDay",deliveryDay)
-                intent.putExtra("dayColor",dayColor)
-
-                view.context.startActivity(intent)
-            }
         }
     }
 

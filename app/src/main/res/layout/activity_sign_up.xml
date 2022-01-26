@@ -105,7 +105,7 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/email_edit_text"
+                android:id="@+id/sign_up_email_edit_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
@@ -118,13 +118,32 @@
             android:layout_marginBottom="16dp"
             android:hint="@string/prompt_confirm_email"
             android:minWidth="250dp"
+            app:layout_constraintBottom_toTopOf="@+id/signInTextField7"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/sign_up_confirm_email_edit_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/signInTextField7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="@string/prompt_password"
+            android:minWidth="250dp"
             app:layout_constraintBottom_toTopOf="@+id/sign_in_link"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/confirm_email_edit_text"
+                android:id="@+id/sign_up_password_edit_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
