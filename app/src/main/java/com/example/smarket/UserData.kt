@@ -10,10 +10,6 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.DocumentChange
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 import java.lang.Exception
@@ -24,6 +20,8 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.createType
 
 import android.content.SharedPreferences
+import android.os.Handler
+import android.os.Looper
 import androidx.preference.PreferenceManager
 import com.algolia.search.client.ClientSearch
 import com.algolia.search.client.Index
@@ -31,8 +29,10 @@ import com.algolia.search.dsl.attributesToRetrieve
 import com.algolia.search.model.APIKey
 import com.algolia.search.model.ApplicationID
 import com.algolia.search.model.IndexName
+import com.google.firebase.firestore.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.apache.commons.codec.binary.StringUtils
 import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
 
@@ -333,8 +333,8 @@ object UserData {
             val products = mutableListOf<Product>()
             for(hit in result.hits)
             {
-                val docId = hit["id"].toString()
-                val productName = hit["name"].toString()
+                val docId = hit["objectID"].toString().replace("\"","")
+                val productName = hit["name"].toString().replace("\"","")
                 val dbRef = db.collection("Products").document(docId)
                 Log.d(TAG, "Search returned doc id $docId")
 
@@ -345,7 +345,10 @@ object UserData {
                     DatabaseField("barcode", "0"),
                     dbRef))
             }
-            productsTask.finishTask(products)
+
+            Handler(Looper.getMainLooper()).post {
+                productsTask.finishTask(products)
+            }
         }
         return productsTask
     }
@@ -696,7 +699,10 @@ object UserData {
 
     fun updateDeliveryInfo(key: String, newValues: HashSet<String>): Task<Void> {
         val valuesArray = newValues.toList()
-        return db.collection("UserData").document(auth.uid.toString()).collection("Settings").document("delivery_info").update(key,valuesArray)
+        val data = hashMapOf(
+            key to valuesArray
+        )
+        return db.collection("UserData").document(auth.uid.toString()).collection("Settings").document("delivery_info").set(data,SetOptions.merge())
     }
 
     //endregion

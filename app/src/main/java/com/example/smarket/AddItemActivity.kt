@@ -45,6 +45,7 @@ class AddItemActivity : BaseActivity() {
                 UserData.getAlgoliaProductSearch(newQuery).addOnSuccessListener { res->
                     val newSuggestions = res as List<UserData.Product>
                     search.swapSuggestions(newSuggestions)
+
                 }
 
 

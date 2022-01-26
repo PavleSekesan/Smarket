@@ -176,7 +176,7 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         super.bindListenersToTopBar()
-        setLocale(this,"sr")
+        setLocale(this,"sr_Latn_RS")
         UserData.loadPreferencesFromFirebase(this)
 
         val newOrderFab = findViewById<FloatingActionButton>(R.id.fabAddNewOrder)

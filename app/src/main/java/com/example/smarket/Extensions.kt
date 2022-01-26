@@ -134,7 +134,7 @@ fun displayBundlesInTextFields(bundlesOnCurrentDay: List<UserData.ShoppingBundle
 
 fun formatDateSerbianLocale(date: LocalDate) : String
 {
-    val serbianLocale = Locale("sr")
+    val serbianLocale = Locale("sr_Latn_RS")
     val weekday = date.dayOfWeek.getDisplayName(TextStyle.FULL, serbianLocale)
     val dayOfMonth = date.dayOfMonth.toString()
     val month = date.month.getDisplayName(TextStyle.FULL, serbianLocale)
