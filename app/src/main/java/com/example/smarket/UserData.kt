@@ -118,7 +118,7 @@ object UserData {
         val data = doc.data
         val storeGivenId = data!!["id"] as String
         val name = data["name"] as String
-        val price = data["price"] as Double
+        val price = (data["price"] as Number).toDouble()
         val barcode = if(data.containsKey("barcode")) data["barcode"] as String else ""
         return Product(id,
             DatabaseField("name",name),
