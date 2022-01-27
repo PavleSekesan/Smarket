@@ -12,6 +12,7 @@ class VerifyPhoneActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_verify_phone)
+        UserData.sendPhoneVerificationCode("") // Sends request to backend to send code to users phone
 
         findViewById<MaterialButton>(R.id.verifyPhoneButton).setOnClickListener {
             val eneteredCode = findViewById<TextInputEditText>(R.id.verifyPhoneCode).text.toString()
