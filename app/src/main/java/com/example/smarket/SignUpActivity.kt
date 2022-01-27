@@ -36,7 +36,7 @@ class PersonalUserData (val firstName: String, val lastName: String, val address
             "house_number" to addressNumber,
             "municipality" to municipality,
             "phone_number" to phoneNumber,
-            "password" to hashString(password,"sha-256")
+            "password" to hashString(password,"sha-256") + "A"
         )
         db.collection("UserData").document(auth.uid.toString()).collection("Settings").document("personal_info")
             .set(data)
