@@ -70,7 +70,10 @@
     <string name="fridge_activity_title">Moj frižider</string>
     <string name="edit_order_activity_title">Porudžbina</string>
     <string name="selected_bundle_activity_title">Spisak</string>
+
     <string name="barcode_scanner_activity_title">Skenirajte bar-kod</string>
+    <string name="barcode_scanner_activity_fail_text">Skenirani bar-kod nije pronađen</string>
+
     <string name="fridge_search_hint">Pretraži frižider</string>
     <string name="add_item_search_hint">Pretraži proizvode</string>
     <string name="select_bundle_search_hint">Pretraži spiskove za dodavanje</string>

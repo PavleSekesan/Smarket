@@ -106,8 +106,16 @@ class BarcodeScannerActivity : BaseActivity() {
     {
         findViewById<ConstraintLayout>(R.id.barcodeScannerItemFoundWrapper).visibility = View.VISIBLE
         findViewById<ConstraintLayout>(R.id.barcodeScannerButtonWrapper).visibility = View.VISIBLE
-        findViewById<TextView>(R.id.barcodeScannerPromptText).visibility = View.GONE
+        val barcodeScannerPrompt = findViewById<TextView>(R.id.barcodeScannerPromptText)
+        barcodeScannerPrompt.text = getString(R.string.prompt_scan_barcode)
+        barcodeScannerPrompt.visibility = View.GONE
     }
+
+    private fun promptFail()
+    {
+        findViewById<TextView>(R.id.barcodeScannerPromptText).text = getString(R.string.barcode_scanner_activity_fail_text)
+    }
+
     private fun clearScanPrompt()
     {
         findViewById<ConstraintLayout>(R.id.barcodeScannerItemFoundWrapper).visibility = View.GONE
@@ -217,6 +225,11 @@ class BarcodeScannerActivity : BaseActivity() {
             {
                 chosenProduct =  UserData.productFromDoc(documents.first())
                 findViewById<TextView>(R.id.barcodeScannerFoundItemText).text = chosenProduct.name.databaseValue
+                promptScan()
+            }
+            else{
+                promptFail()
+                scanDeclined()
             }
         }
     }
@@ -231,7 +244,6 @@ class BarcodeScannerActivity : BaseActivity() {
             chosenBarcode = barcode
             barcodeCountMap.clear()
             showFoundItem()
-            promptScan()
         }
     }
 
