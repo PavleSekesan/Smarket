@@ -56,7 +56,8 @@
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/activity_selected_bundle.xml" value="0.290625" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/activity_settings.xml" value="0.276268115942029" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/activity_sign_in.xml" value="0.34954829742876997" />
-        <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/activity_sign_up.xml" value="0.5" />
+        <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/activity_sign_up.xml" value="0.41092636579572445" />
+        <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/activity_verify_phone.xml" value="0.2598958333333333" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/activity_view_selected_calendar_day.xml" value="0.7643835616438356" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/bundle.xml" value="0.290625" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/bundle_item.xml" value="0.67" />
@@ -67,6 +68,7 @@
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/calendar_header.xml" value="0.26766304347826086" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/custom_preference_layout.xml" value="0.290625" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/fridge_item.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/municipality_list_item.xml" value="0.26979166666666665" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/navigation.xml" value="0.2911458333333333" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/top_app_bar.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Ognjen/StudioProjects/Smarket/app/src/main/res/layout/user_order_item_layout.xml" value="0.67" />

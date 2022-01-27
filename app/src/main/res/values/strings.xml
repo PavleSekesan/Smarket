@@ -1,91 +1,4 @@
 <resources>
-    <string name="app_name">Smarket</string>
-    <string name="title_activity_settings">Podešavanja</string>
-
-    <!-- Bundles -->
-    <string name="new_bundle_name">Novi spisak</string>
-
-    <!-- Preference Titles -->
-    <string name="delivery_header">Podešavanja dostave</string>
-    <string name="personal_data_header">Lični Podaci</string>
-
-    <!-- Personal Data Preferences -->
-    <string name="first_name">Ime</string>
-    <string name="last_name">Prezime</string>
-    <string name="address">Adresa</string>
-    <string name="phone_number">Broj telefona</string>
-
-    <!-- Delivery preferences -->
-    <string name="monday_delivery_time">Vreme dostave (ponedeljak)</string>
-    <string name="tuesday_delivery_time">Vreme dostave (utorak)</string>
-    <string name="wednesday_delivery_time">Vreme dostave (sreda)</string>
-    <string name="thursday_delivery_time">Vreme dostave (četvrtak)</string>
-    <string name="friday_delivery_time">Vreme dostave (petak)</string>
-    <string name="saturday_delivery_time">Vreme dostave (subota)</string>
-    <string name="sunday_delivery_time">Vreme dostave (nedelja)</string>
-
-    <!-- Login screen strings -->
-    <string name="prompt_email">Email</string>
-    <string name="prompt_confirm_email">Potvrdite email</string>
-    <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Prijavite se</string>
-    <string name="action_sign_in_alt">Već imate nalog? Prijavite se.</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="action_sign_up">Napravite nalog</string>
-    <string name="hint_first_name">Ime</string>
-    <string name="hint_last_name">Prezime</string>
-    <string name="hint_address">Adresa</string>
-    <string name="hint_phone_number">Broj telefona</string>
-    <string name="welcome">"Welcome !"</string>
-    <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
-
-    <!-- Add item strings -->
-    <string name="action_scan_barcode">Skenirajte bar-kod</string>
-    <string name="removed_item_snackbar_text">Uklonjeno: %1$s</string>
-    <string name="removed_item_fail_snackbar_text">Artikal: %1$s nije pronađen u frižideru</string>
-    <string name="action_quick_add">Quick add?</string>
-    <string name="prompt_scan_barcode">Skenirajte bar-kod</string>
-    <string name="found_item">Pronađeni artikal: </string>
-    <string name="action_accept_scan">Prihvati</string>
-    <string name="action_decline_scan">Odbaci</string>
-    <string name="action_finish_adding">Kraj</string>
-
-    <!-- Errors -->
-    <string name="error_generic">Došlo je do greške</string>
-    <string name="error_personal_info">Greška, proverite lične podatke</string>
-
-    <!-- Other -->
-    <string name="fridge">Frižider</string>
-    <string name="calendar">Kalendar</string>
-    <string name="bundles">Spiskovi</string>
-    <string name="search">Pretraži</string>
-    <string name="calendar_page_title">Kalendar porudžbina</string>
-    <string name="logout">Izloguj se</string>
-    <string name="add_item_activity_title">Dodavanje proizvoda</string>
-    <string name="bundles_list_activity_title">Moji spiskovi</string>
-    <string name="edit_bundle_activity_title">Izmena spiska</string>
-    <string name="edit_bundle_name_hint">Novi spisak</string>
-    <string name="fridge_activity_title">Moj frižider</string>
-    <string name="edit_order_activity_title">Porudžbina</string>
-    <string name="selected_bundle_activity_title">Spisak</string>
-
-    <string name="barcode_scanner_activity_title">Skenirajte bar-kod</string>
-    <string name="barcode_scanner_activity_fail_text">Skenirani bar-kod nije pronađen</string>
-
-    <string name="fridge_search_hint">Pretraži frižider</string>
-    <string name="add_item_search_hint">Pretraži proizvode</string>
-    <string name="select_bundle_search_hint">Pretraži spiskove za dodavanje</string>
-    <string name="selected_bundles_label">Izabrani spiskovi</string>
-    <!-- Edit order activity -->
-    <string name="edit_order_activity_recurring">Ponavlja se</string>
-    <string name="edit_order_activity_not_recurring">Ne ponavlja se</string>
-    <string name="edit_order_activity_pick_date">Odaberite datum</string>
-    <string name="edit_order_activity_pick_recurring">Odaberite koliko često se narudžbina ponavlja</string>
-    <string name="edit_order_activity_recurring_description">Ponavlja se na svakih %1$d dana</string>
-
-    <!-- View Selected Calendar Day activity -->
     <plurals name="view_selected_day_has_delivery">
         <item quantity="zero">Za ovaj dan nije postavljena ni jedna porudžbina.</item>
         <item quantity="one">Za ovaj dan postavljena je %1$d porudžbina, koja će biti dostavljena u %2$s</item>
@@ -100,6 +13,101 @@
         <item quantity="many">Za ovaj dan postavljeno je %1$d porudžbina, za koje još uvek nije određen datum dostave.</item>
         <item quantity="other">Za ovaj dan postavljeno je %1$d porudžbina, za koje još uvek nije određen datum dostave.</item>
     </plurals>
+
+    <!-- Bundles -->
+    <string name="app_name">Smarket</string>
+
+    <!-- Preference Titles -->
+    <string name="title_activity_settings">Podešavanja</string>
+    <string name="new_bundle_name">Novi spisak</string>
+
+    <!-- Personal Data Preferences -->
+    <string name="delivery_header">Podešavanja dostave</string>
+    <string name="personal_data_header">Lični Podaci</string>
+    <string name="first_name">Ime</string>
+    <string name="last_name">Prezime</string>
+
+    <!-- Delivery preferences -->
+    <string name="address">Adresa</string>
+    <string name="phone_number">Broj telefona</string>
+    <string name="monday_delivery_time">Vreme dostave (ponedeljak)</string>
+    <string name="tuesday_delivery_time">Vreme dostave (utorak)</string>
+    <string name="wednesday_delivery_time">Vreme dostave (sreda)</string>
+    <string name="thursday_delivery_time">Vreme dostave (četvrtak)</string>
+    <string name="friday_delivery_time">Vreme dostave (petak)</string>
+
+    <!-- Login screen strings -->
+    <string name="saturday_delivery_time">Vreme dostave (subota)</string>
+    <string name="sunday_delivery_time">Vreme dostave (nedelja)</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_confirm_email">Potvrdite email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Prijavite se</string>
+    <string name="action_sign_in_alt">Već imate nalog? Prijavite se.</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="action_sign_up">Napravite nalog</string>
+    <string name="hint_first_name">Ime</string>
+    <string name="hint_last_name">Prezime</string>
+    <string name="hint_address">Adresa</string>
+    <string name="hint_phone_number">Broj telefona</string>
+    <string name="hint_municipality">Opština</string>
+    <string name="hint_house_number">Broj</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+
+    <!-- Signup screen strings -->
+    <string name="prompt_confirm_phone">Kod za verifikaciju je poslat na vaš broj telefona</string>
+    <string name="hint_confirm_phone">Unesite kod</string>
+    <string name="action_submit_phone_code">Potvrdi</string>
+    <string name="bad_phone_code">Uneli ste pogrešan kod, pokušajte ponovo</string>
+
+    <!-- Add item strings -->
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="action_scan_barcode">Skenirajte bar-kod</string>
+    <string name="removed_item_snackbar_text">Uklonjeno: %1$s</string>
+    <string name="removed_item_fail_snackbar_text">Artikal: %1$s nije pronađen u frižideru</string>
+    <string name="action_quick_add">Quick add?</string>
+    <string name="prompt_scan_barcode">Skenirajte bar-kod</string>
+    <string name="found_item">Pronađeni artikal: </string>
+    <string name="action_accept_scan">Prihvati</string>
+
+    <!-- Errors -->
+    <string name="action_decline_scan">Odbaci</string>
+    <string name="action_finish_adding">Kraj</string>
+
+    <!-- Other -->
+    <string name="error_generic">Došlo je do greške</string>
+    <string name="error_personal_info">Greška, proverite lične podatke</string>
+    <string name="fridge">Frižider</string>
+    <string name="calendar">Kalendar</string>
+    <string name="bundles">Spiskovi</string>
+    <string name="search">Pretraži</string>
+    <string name="calendar_page_title">Kalendar porudžbina</string>
+    <string name="logout">Izloguj se</string>
+    <string name="add_item_activity_title">Dodavanje proizvoda</string>
+    <string name="bundles_list_activity_title">Moji spiskovi</string>
+    <string name="edit_bundle_activity_title">Izmena spiska</string>
+    <string name="edit_bundle_name_hint">Novi spisak</string>
+    <string name="fridge_activity_title">Moj frižider</string>
+
+    <string name="edit_order_activity_title">Porudžbina</string>
+    <string name="selected_bundle_activity_title">Spisak</string>
+
+    <string name="barcode_scanner_activity_title">Skenirajte bar-kod</string>
+    <string name="barcode_scanner_activity_fail_text">Skenirani bar-kod nije pronađen</string>
+    <string name="fridge_search_hint">Pretraži frižider</string>
+    <string name="add_item_search_hint">Pretraži proizvode</string>
+    <!-- Edit order activity -->
+    <string name="select_bundle_search_hint">Pretraži spiskove za dodavanje</string>
+    <string name="selected_bundles_label">Izabrani spiskovi</string>
+    <string name="edit_order_activity_recurring">Ponavlja se</string>
+    <string name="edit_order_activity_not_recurring">Ne ponavlja se</string>
+    <string name="edit_order_activity_pick_date">Odaberite datum</string>
+
+    <!-- View Selected Calendar Day activity -->
+    <string name="edit_order_activity_pick_recurring">Odaberite koliko često se narudžbina ponavlja</string>
+    <string name="edit_order_activity_recurring_description">Ponavlja se na svakih %1$d dana</string>
 
     <string name="view_selected_day_order_recurring">Porudžbina koja se ponavlja na svakih %1$d dana, postavljena %2$s</string>
     <string name="view_selected_day_order_not_recurring">Porudžbina koja se ne ponavlja, postavljena %1$s</string>

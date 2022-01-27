@@ -21,6 +21,11 @@
         <item name="android:textColor">?attr/colorSecondary</item>
     </style>
 
+    <style name="Widget.Smarket.TextViewError" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textColor">?attr/colorError</item>
+    </style>
+
+
     <style name="Widget.Smarket.TextViewPrimaryBackground" parent="Widget.MaterialComponents.TextView">
         <item name="android:textColor">?attr/colorOnPrimary</item>
         <item name="android:background">?attr/colorPrimary</item>

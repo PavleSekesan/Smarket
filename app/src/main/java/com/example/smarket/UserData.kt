@@ -195,8 +195,8 @@ object UserData {
         val date = LocalDateTime.ofInstant(Instant.ofEpochMilli(javaDate.time), ZoneId.systemDefault())
 
         val recurring = data["recurring"] as Boolean
-        val daysToRepeat: Int
-        daysToRepeat = if(recurring) (data["days_to_repeat"] as Long).toInt() else 0
+        val daysToRepeat: Int = if(recurring) (data["days_to_repeat"] as Number).toInt() else 0
+        val status = data["status"] as String
 
         val userOrderTask = DatabaseItemTask()
         val bundles = mutableListOf<ShoppingBundle>()
@@ -209,6 +209,7 @@ object UserData {
                     DatabaseField("date",date),
                     DatabaseField("days_to_repeat",daysToRepeat),
                     DatabaseField("recurring",recurring),
+                    DatabaseField("status",status),
                     doc.reference))
             }
             for(bundleDocWithRef in bundleDocs)
@@ -226,6 +227,7 @@ object UserData {
                                 DatabaseField("date",date),
                                 DatabaseField("days_to_repeat",daysToRepeat),
                                 DatabaseField("recurring",recurring),
+                                DatabaseField("status",status),
                                 doc.reference))
                         }
                     }
@@ -553,7 +555,9 @@ object UserData {
             val newUserOrder = UserOrder(id, emptyList(),
                 DatabaseField("date",date),
                 DatabaseField("days_to_repeat",daysToRepeat),
-                DatabaseField("recurring",recurring), it)
+                DatabaseField("recurring",recurring),
+                DatabaseField("status","not processed"),
+                it)
 
             val dataType: KType = newUserOrder::class.createType()
             if (modifyListeners.containsKey(dataType)) {
@@ -579,6 +583,34 @@ object UserData {
             removeOrderTask.finishTask(orderToRemove)
         }
         return removeOrderTask
+    }
+
+    fun sendPhoneVerificationCode(code: String)
+    {
+        val data = hashMapOf(
+            "code" to code,
+            "status" to 0
+        )
+        db.collection("VerificationCodes").document(auth.uid.toString()).set(data)
+    }
+
+    fun setOnPhoneVerificationStatusChangeListener(listener: (status:Int)->Unit)
+    {
+        db.collection("VerificationCodes").document(auth.uid.toString()).addSnapshotListener { doc, error ->
+            if (error != null) {
+                Log.w(TAG, "Listen failed.", error)
+                return@addSnapshotListener
+            }
+            var newStatus = doc?.data?.get("status")
+            if (newStatus != null && newStatus is Number)
+            {
+                listener(newStatus.toInt())
+            }
+            else
+            {
+                listener(0)
+            }
+        }
     }
 
     //endregion
@@ -1011,7 +1043,7 @@ object UserData {
         }
     }
 
-    class UserOrder(id: String, shoppingBundles: List<ShoppingBundle>, val date: DatabaseField<LocalDateTime>, val daysToRepeat: DatabaseField<Int>, val recurring: DatabaseField<Boolean>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
+    class UserOrder(id: String, shoppingBundles: List<ShoppingBundle>, val date: DatabaseField<LocalDateTime>, val daysToRepeat: DatabaseField<Int>, val recurring: DatabaseField<Boolean>, val status: DatabaseField<String>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
     {
         var bundles: List<ShoppingBundle> = shoppingBundles
             private set

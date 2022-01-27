@@ -47,6 +47,82 @@
         <item>30</item>
         <item>-2</item>
     </integer-array>
+    
+    <string-array name="municipalities">
+        <item>Barajevo</item>
+        <item>Grocka</item>
+        <item>Lazarevac</item>
+        <item>Mladenovac</item>
+        <item>Novi Beograd – Bežanija</item>
+        <item>Novi Beograd – Blokovi ( od pruge, svi blokovi)</item>
+        <item>Novi Beograd – centar (do pruge)</item>
+        <item>Novi Beograd – Ledine do grand kafe</item>
+        <item>Novi Beograd – Ledine posle grand kafe do skretanja za aerodroma</item>
+        <item>Obrenovac</item>
+        <item>Palilula - Borča</item>
+        <item>Ovča</item>
+        <item>Palilula - Centar</item>
+        <item>Palilula - Karaburma</item>
+        <item>Palilula - Kovilovo</item>
+        <item>Padinska skela</item>
+        <item>Palilula - Krnjača</item>
+        <item>Kotež</item>
+        <item>Palilula - Slanci</item>
+        <item>Veliko selo</item>
+        <item>Palilula - Višnjička banja i Višnjica</item>
+        <item>Palilula-Bogoslovija</item>
+        <item>Rakovica -  Vidikovac</item>
+        <item>Rakovica - Jajinci - do spomen parka</item>
+        <item>Rakovica - Miljakovac</item>
+        <item>Rakovica - Petlovo Brdo</item>
+        <item>Kneževac</item>
+        <item>Rakovica - Rakovica Selo</item>
+        <item>Rakovica - Resnik</item>
+        <item>Rakovica-Kanarevo brdo</item>
+        <item>Rakovica-Kijevo.Kneževac</item>
+        <item>Rakovica-Lisiciji potok</item>
+        <item>Savski venac</item>
+        <item>Sopot</item>
+        <item>Stari grad</item>
+        <item>Surčin</item>
+        <item>Voždovac  Banjica</item>
+        <item>Voždovac - Braće Jerković</item>
+        <item>Voždovac - Jajinci - do spomen parka</item>
+        <item>Voždovac - Kumodraž</item>
+        <item>Voždovac - Rušanj</item>
+        <item>Pinosava</item>
+        <item>Beli potok</item>
+        <item>Zuce</item>
+        <item>Voždovac-Šumice</item>
+        <item>Vračar</item>
+        <item>Zemun -  Galenika</item>
+        <item>Altina</item>
+        <item>Zemun polje</item>
+        <item>Zemun - Batajnica do Busija</item>
+        <item>Zemun - Batajnica preko pruge ka Busijama</item>
+        <item>Zemun - Centar</item>
+        <item>Zemun - Novi Grad</item>
+        <item>Gornji Grad</item>
+        <item>Zemun - Radiofar</item>
+        <item>Zemun - Ugrinovci</item>
+        <item>Busije</item>
+        <item>Zvezdara - Kaluđerica</item>
+        <item>Zvezdara - Konjarnik</item>
+        <item>Zvezdara - Leštane</item>
+        <item>Vinča</item>
+        <item>Zvezdara - Mirijevo</item>
+        <item>Zvezdara - Veliki mokri lug</item>
+        <item>Mali mokri lug</item>
+        <item>Zvezdara-Gradska bolnica</item>
+        <item>Zvezdara-Vukov spomenik do Cvetkove pijace</item>
+        <item>Čukarica - Banovo Brdo</item>
+        <item>Čukarica - Cerak vinogradi</item>
+        <item>Čukarica - Julino Brdo</item>
+        <item>Čukarica - Sremčica</item>
+        <item>Čukarica - Žarkovo i Bele vode</item>
+        <item>Čukarica - Železnik</item>
+        <item>Čukarica-Čukarička padina</item>
+    </string-array>
 
     <array name="kelly_colors">
         <item>@color/kelly_vivid_yellow</item>

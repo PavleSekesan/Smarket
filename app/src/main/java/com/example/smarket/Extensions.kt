@@ -41,7 +41,7 @@ fun expandUserOrders(userOrders: List<UserOrder>, startDate: LocalDate, endDate:
         if (orderDate.isAfter(endDate)) {
             continue
         }
-        if (order.recurring.databaseValue) {
+        if (order.recurring.databaseValue && order.status.databaseValue == "not processed") {
             val minRepeats =
                 max(0, ChronoUnit.DAYS.between(orderDate, startDate)) / order.daysToRepeat.databaseValue
             val maxRepeats = ceil(
