@@ -2,7 +2,6 @@ import android.app.Activity
 import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
-import android.provider.ContactsContract
 import android.util.Log
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion
 import com.google.android.gms.tasks.OnFailureListener
@@ -11,7 +10,6 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.tasks.await
 import java.lang.Exception
 import java.time.*
 import java.util.*
@@ -32,7 +30,6 @@ import com.algolia.search.model.IndexName
 import com.google.firebase.firestore.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.apache.commons.codec.binary.StringUtils
 import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
 
@@ -112,8 +109,12 @@ object UserData {
     }
 
     //region Methods that get objects from the database
-    fun productFromDoc(doc: DocumentSnapshot): Product
+    fun productFromDoc(doc: DocumentSnapshot): Product?
     {
+        if (!documentSafeToParse(Product::class.createType(),doc))
+        {
+            return null
+        }
         val id = doc.id
         val data = doc.data
         val storeGivenId = data!!["id"] as String
@@ -129,37 +130,55 @@ object UserData {
     }
 
     private fun bundleItemFromDocument(doc: DocumentSnapshot): DatabaseItemTask {
+
+        val newBundleItemTask = DatabaseItemTask()
+        if (!documentSafeToParse(BundleItem::class.createType(),doc))
+        {
+            newBundleItemTask.finishTask(Exception("Document ${doc.id} does not contain all required fields"))
+            return newBundleItemTask
+        }
         val productData = doc.data!!
         val itemId = doc.id
         val measuringUnit = productData["measuring_unit"] as String
         val quantity = (productData["quantity"] as Long).toInt()
         val productRef = productData["product"] as DocumentReference
 
-        val newBundelItemTask = DatabaseItemTask()
         productRef.get().addOnSuccessListener { productDoc->
-            val newBundleItem = BundleItem(
-                itemId,
-                DatabaseField("measuring_unit",measuringUnit),
-                productFromDoc(productDoc),
-                DatabaseField("quantity",quantity),
-                doc.reference
-            )
-            newBundelItemTask.finishTask(newBundleItem)
+            val product = productFromDoc(productDoc)
+            if (product == null)
+            {
+                newBundleItemTask.finishTask(Exception("Product returned null in bundleItemFromDocument for document ${doc.id}"))
+            }
+            else {
+                val newBundleItem = BundleItem(
+                    itemId,
+                    DatabaseField("measuring_unit", measuringUnit),
+                    product,
+                    DatabaseField("quantity", quantity),
+                    doc.reference
+                )
+                newBundleItemTask.finishTask(newBundleItem)
+            }
         }
 
         //updateDatabaseMapThreadSafe(itemId, newBundleItem)
-        return newBundelItemTask
+        return newBundleItemTask
     }
 
     private fun bundleFromDocument(doc: DocumentSnapshot): DatabaseItemTask
     {
+        val bundleTask = DatabaseItemTask()
+        if (!documentSafeToParse(ShoppingBundle::class.createType(),doc))
+        {
+            bundleTask.finishTask(Exception("Document ${doc.id} does not contain all required fields"))
+            return bundleTask
+        }
         val id = doc.id
         val data = doc.data
         val bundleName = data!!["name"].toString()
 
         val itemsInBundle = mutableListOf<BundleItem>()
 
-        val bundleTask = DatabaseItemTask()
         Log.d("bundleFromDocument", "Started get for bundle ${id}")
         doc.reference.collection("Products").get().addOnSuccessListener { itemDocuments->
             Log.d(TAG, "$id: ${itemDocuments.count()}")
@@ -186,6 +205,12 @@ object UserData {
 
     private fun userOrderFromDocument(doc: DocumentSnapshot): DatabaseItemTask
     {
+        val userOrderTask = DatabaseItemTask()
+        if (!documentSafeToParse(UserOrder::class.createType(),doc))
+        {
+            userOrderTask.finishTask(Exception("Document ${doc.id} does not contain all required fields"))
+            return userOrderTask
+        }
         val id = doc.id
         val data = doc.data ?: throw Exception("Error getting user order from document")
 
@@ -198,7 +223,6 @@ object UserData {
         val daysToRepeat: Int = if(recurring) (data["days_to_repeat"] as Number).toInt() else 0
         val status = data["status"] as String
 
-        val userOrderTask = DatabaseItemTask()
         val bundles = mutableListOf<ShoppingBundle>()
 
         doc.reference.collection("Bundles").get().addOnSuccessListener { bundleDocs ->
@@ -240,6 +264,12 @@ object UserData {
     private fun fridgeItemFromDocument(doc: DocumentSnapshot): DatabaseItemTask
     {
         val fridgeItemTask = DatabaseItemTask()
+        if (!documentSafeToParse(FridgeItem::class.createType(),doc))
+        {
+            fridgeItemTask.finishTask(Exception("Document ${doc.id} does not contain all required fields"))
+            return fridgeItemTask
+        }
+
         val id = doc.id
         if(doc.data != null) {
             val data: Map<String, Any> = doc.data!!
@@ -249,15 +279,21 @@ object UserData {
 
             ref.get().addOnSuccessListener { productDoc ->
                 val product = productFromDoc(productDoc)
-                fridgeItemTask.finishTask(
-                    FridgeItem(
-                        id,
-                        DatabaseField("measuring_unit", measuringUnit),
-                        product,
-                        DatabaseField("quantity", quantity.toInt()),
-                        doc.reference
+                if (product == null)
+                {
+                    fridgeItemTask.finishTask(Exception("Product returned null in fridgeItemFromDocument ${doc.id}"))
+                }
+                else {
+                    fridgeItemTask.finishTask(
+                        FridgeItem(
+                            id,
+                            DatabaseField("measuring_unit", measuringUnit),
+                            product,
+                            DatabaseField("quantity", quantity.toInt()),
+                            doc.reference
+                        )
                     )
-                )
+                }
             }
         }
         else
@@ -269,6 +305,12 @@ object UserData {
 
     private fun deliveryFromDocument(doc: DocumentSnapshot): DatabaseItemTask
     {
+        val deliveryTask = DatabaseItemTask()
+        if (!documentSafeToParse(Delivery::class.createType(),doc))
+        {
+            deliveryTask.finishTask(Exception("Document ${doc.id} does not contain all required fields"))
+            return deliveryTask
+        }
         val id = doc.id
         val data = doc.data!!
 
@@ -283,7 +325,6 @@ object UserData {
         val endDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(javaDate.time), ZoneId.systemDefault())
 
         val status = data["status"] as String
-        val deliveryTask = DatabaseItemTask()
         doc.reference.collection("UserOrders").get().addOnSuccessListener { userOrdersDocs->
 
             val userOrders = mutableListOf<UserOrder>()
@@ -547,6 +588,7 @@ object UserData {
         val data = hashMapOf(
             "recurring" to recurring,
             "days_to_repeat" to daysToRepeat,
+            "status" to "not processed",
             "date" to Timestamp(date.toEpochSecond(ZoneOffset.UTC),0)
         )
         val newUserOrderTask = DatabaseItemTask()
@@ -745,6 +787,49 @@ object UserData {
         REMOVED
     }
 
+    private fun documentSafeToParse(objType: KType, doc: DocumentSnapshot) : Boolean
+    {
+        if (doc.data == null)
+        {
+            return false
+        }
+        var dbNames: List<String> = emptyList()
+        when(objType)
+        {
+            Product::class.createType() -> {
+                dbNames = listOf("name", "price", "id", "barcode")
+            }
+            QuantityItem::class.createType() -> {
+                dbNames = listOf("measuring_unit","quantity","product")
+            }
+            FridgeItem::class.createType() -> {
+                dbNames = listOf("measuring_unit","quantity","product")
+            }
+            BundleItem::class.createType() -> {
+                dbNames = listOf("measuring_unit","quantity","product")
+            }
+            ShoppingBundle::class.createType() -> {
+                dbNames = listOf("name")
+            }
+            UserOrder::class.createType() -> {
+                dbNames = listOf("date", "days_to_repeat", "recurring", "status")
+            }
+            Delivery::class.createType() -> {
+                dbNames = listOf("date", "end_date", "status",)
+            }
+            else -> {
+                return false}
+        }
+        for (name in dbNames)
+        {
+            if (!doc.data!!.containsKey(name))
+            {
+                return false
+            }
+        }
+        return true
+    }
+
     class DatabaseField<T>(val dbName: String, private var dbVal: T)
     {
         enum class DatabaseFieldEventType
@@ -824,6 +909,7 @@ object UserData {
         private val onFieldChangeListeners: MutableList<(DatabaseField<Any>)->Unit> = mutableListOf()
         private val onSubitemChangeListeners: MutableList<(DatabaseItem, DatabaseEventType)->Unit> = mutableListOf()
 
+
         protected fun parseAndNotifyGroupListeners(eventType: DatabaseEventType)
         {
             val dataType: KType = this::class.createType()
@@ -887,7 +973,7 @@ object UserData {
     class Product(id: String, val name: DatabaseField<String>, val price: DatabaseField<Double>, val storeGivenId: DatabaseField<String>, val barcode: DatabaseField<String>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef), SearchSuggestion
     {
         constructor(parcel: Parcel) : this(
-            "69",
+            "1",
             DatabaseField<String>("name",parcel.readString()!!),
             DatabaseField<Double>("",-1.0),
             DatabaseField<String>("","-1"),

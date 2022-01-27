@@ -223,9 +223,12 @@ class BarcodeScannerActivity : BaseActivity() {
         db.collection("Products").whereEqualTo("barcode",chosenBarcode).get().addOnSuccessListener { documents->
             if (!documents.isEmpty)
             {
-                chosenProduct =  UserData.productFromDoc(documents.first())
-                findViewById<TextView>(R.id.barcodeScannerFoundItemText).text = chosenProduct.name.databaseValue
-                promptScan()
+                val product = UserData.productFromDoc(documents.first())
+                if (product != null) {
+                    chosenProduct = product
+                    findViewById<TextView>(R.id.barcodeScannerFoundItemText).text = chosenProduct.name.databaseValue
+                    promptScan()
+                }
             }
             else{
                 promptFail()

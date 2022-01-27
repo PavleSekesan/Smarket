@@ -1,4 +1,4 @@
-package com.example.smarket
+package com.example.smarket.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,14 +7,14 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import UserData.UserOrder
 import android.content.Intent
-import android.content.res.Resources
 import android.widget.ImageButton
-import androidx.core.content.ContextCompat.startActivity
+import com.example.smarket.EditOrderActivity
+import com.example.smarket.R
+import com.example.smarket.displayBundlesInTextFields
+import com.example.smarket.formatDateSerbianLocale
 import com.google.android.material.card.MaterialCardView
-import com.google.firebase.firestore.auth.User
-import java.time.format.DateTimeFormatter
 
-class ViewSelectedDayAdapter(private var dataSet: MutableList<UserOrder>) :
+class ViewSelectedDayAdapter(private var dataSet: MutableList<UserOrder>, private val editable: Boolean) :
     RecyclerView.Adapter<ViewSelectedDayAdapter.ViewHolder>()  {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -55,8 +55,10 @@ class ViewSelectedDayAdapter(private var dataSet: MutableList<UserOrder>) :
     fun removeItem(orderToRemove: UserOrder)
     {
         val indexToRemove = dataSet.indexOfFirst { order -> order.id == orderToRemove.id }
-        dataSet.removeAt(indexToRemove)
-        super.notifyItemRemoved(indexToRemove)
+        if (indexToRemove != -1) {
+            dataSet.removeAt(indexToRemove)
+            super.notifyItemRemoved(indexToRemove)
+        }
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
@@ -75,12 +77,14 @@ class ViewSelectedDayAdapter(private var dataSet: MutableList<UserOrder>) :
             else
                 context.getString(R.string.view_selected_day_order_not_recurring, dateStr)
 
-        viewHolder.card.setOnClickListener {
-            val intent = Intent(viewHolder.textView.context, EditOrderActivity::class.java)
-            intent.putExtra("selected_order_id", dataSet[position].id)
-            viewHolder.textView.context.startActivity(intent)
+        if (editable) {
+            viewHolder.card.setOnClickListener {
+                val intent = Intent(viewHolder.textView.context, EditOrderActivity::class.java)
+                intent.putExtra("selected_order_id", dataSet[position].id)
+                viewHolder.textView.context.startActivity(intent)
+            }
         }
-        displayBundlesInTextFields(dataSet[position].bundles,R.color.kelly_medium_gray,viewHolder.bundlesTexts)
+        displayBundlesInTextFields(dataSet[position].bundles, R.color.kelly_medium_gray,viewHolder.bundlesTexts)
         for(i in viewHolder.bundlesTexts.indices)
         {
             viewHolder.bundleIcons[i].visibility = viewHolder.bundlesTexts[i].visibility

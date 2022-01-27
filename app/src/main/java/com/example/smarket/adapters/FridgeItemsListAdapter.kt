@@ -1,12 +1,12 @@
-package com.example.smarket
+package com.example.smarket.adapters
 
 import UserData.FridgeItem
-import UserData.QuantityItem
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import com.example.smarket.R
 
 class FridgeItemsListAdapter(fridgeItems: List<FridgeItem>, displayPrevious : Boolean = true) : QuantityItemsListAdapter() {
     var hiddenItems : List<FridgeItem> = listOf()

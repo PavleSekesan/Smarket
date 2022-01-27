@@ -3,23 +3,20 @@ package com.example.smarket
 import UserData.ShoppingBundle
 import UserData.getAllBundles
 import UserData.getAllUserOrders
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.smarket.adapters.BundleSelectionAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.w3c.dom.Text
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import com.google.type.DateTime
+import java.time.*
 import java.util.*
 
 class EditOrderActivity : BaseActivity() {
@@ -48,11 +45,13 @@ class EditOrderActivity : BaseActivity() {
         val constraintsBuilder =
             CalendarConstraints.Builder()
                 .setValidator(DateValidatorPointForward.from(calendar.timeInMillis))
+        val tommorrowInMilis = LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli()
 
         val datePicker =
             MaterialDatePicker.Builder.datePicker()
-                .setTitleText(getString(R.string.edit_order_activity_pick_date)).setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                .setTitleText(getString(R.string.edit_order_activity_pick_date))
                 .setCalendarConstraints(constraintsBuilder.build())
+                .setSelection(tommorrowInMilis)
                 .build()
 
         val recurringPickerItems = resources.getStringArray(R.array.recurring_times)

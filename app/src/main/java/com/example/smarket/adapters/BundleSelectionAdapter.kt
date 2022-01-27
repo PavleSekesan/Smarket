@@ -1,12 +1,13 @@
-package com.example.smarket
+package com.example.smarket.adapters
 
 import UserData.ShoppingBundle
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.smarket.R
+import com.example.smarket.TotalSumUpdater
 
 class BundleSelectionAdapter(
     val bundles: MutableList<ShoppingBundle>, val unselected : Boolean,

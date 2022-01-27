@@ -1,14 +1,14 @@
-package com.example.smarket
+package com.example.smarket.adapters
 
 import UserData.DatabaseEventType
 import UserData.BundleItem
 import UserData.ShoppingBundle
-import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import com.example.smarket.R
 
 class BundleItemsListAdapter(bundle: ShoppingBundle, private val editable: Boolean, displayPrevious : Boolean = true) : QuantityItemsListAdapter() {
     init {

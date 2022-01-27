@@ -1,6 +1,5 @@
 package com.example.smarket
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -8,6 +7,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import UserData.ShoppingBundle
 import UserData.getAllBundles
 import android.content.Intent
+import com.example.smarket.adapters.BundlesListAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class BundlesListActivity : BaseActivity() {

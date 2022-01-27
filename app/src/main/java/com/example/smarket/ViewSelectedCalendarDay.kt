@@ -1,32 +1,13 @@
 package com.example.smarket
 
-import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.util.TypedValue
-import android.view.View
 import android.widget.TextView
-import androidx.core.view.children
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.firestore.FirebaseFirestore
 import com.kizitonwose.calendarview.model.CalendarDay
-import com.kizitonwose.calendarview.model.CalendarMonth
-import com.kizitonwose.calendarview.ui.DayBinder
-import com.kizitonwose.calendarview.ui.MonthHeaderFooterBinder
-import com.kizitonwose.calendarview.utils.Size
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
-import java.time.temporal.WeekFields
-import java.util.*
-import androidx.recyclerview.widget.DefaultItemAnimator
-import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities
+import com.example.smarket.adapters.ViewSelectedDayAdapter
+import java.time.temporal.ChronoUnit
 
 class ViewSelectedCalendarDay : BaseActivity() {
 
@@ -39,6 +20,7 @@ class ViewSelectedCalendarDay : BaseActivity() {
         val selectedDay = intent.getSerializableExtra("selectedDay") as CalendarDay
         val deliveryDay = intent.getSerializableExtra("deliveryDay") as LocalDate?
         val dayColor = intent.getIntExtra("dayColor",-1)
+        val editable = selectedDay.date.isAfter(LocalDate.now())
 
         // Format date for the selected day
         findViewById<TextView>(R.id.viewSelectedDayText).text = formatDateSerbianLocale(selectedDay.date)
@@ -46,7 +28,7 @@ class ViewSelectedCalendarDay : BaseActivity() {
         // Setup recycler view
         val recycler = findViewById<RecyclerView>(R.id.viewSelectedDayRecycler)
         recycler.layoutManager = LinearLayoutManager(this)
-        val adapter = ViewSelectedDayAdapter(mutableListOf())
+        val adapter = ViewSelectedDayAdapter(mutableListOf(), editable)
         recycler.adapter = adapter
 
 
@@ -62,6 +44,27 @@ class ViewSelectedCalendarDay : BaseActivity() {
                 if (userOrder != null)
                 {
                     adapter.removeItem(userOrder)
+                }
+            }
+            else if(databaseEventType == UserData.DatabaseEventType.MODIFIED)
+            {
+                if (userOrder != null)
+                {
+                    if (userOrder.recurring.databaseValue)
+                    {
+                        val dayDifference = ChronoUnit.DAYS.between(selectedDay.date, userOrder.date.databaseValue)
+                        if (dayDifference > 0 || dayDifference % userOrder.daysToRepeat.databaseValue != 0L)
+                        {
+                            adapter.removeItem(userOrder)
+                        }
+                    }
+                    else
+                    {
+                        if (userOrder.date.databaseValue.toLocalDate() != selectedDay.date)
+                        {
+                            adapter.removeItem(userOrder)
+                        }
+                    }
                 }
             }
         }

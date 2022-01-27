@@ -3,22 +3,15 @@ package com.example.smarket
 import UserData.ShoppingBundle
 import UserData.getAllBundles
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Parcel
-import android.util.Log
-import android.widget.Button
-import android.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arlib.floatingsearchview.FloatingSearchView
-import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion
+import com.example.smarket.adapters.BundleItemsListAdapter
+import com.example.smarket.adapters.FridgeItemsListAdapter
+import com.example.smarket.adapters.QuantityItemsListAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.gson.Gson
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 class AddItemActivity : BaseActivity() {
 

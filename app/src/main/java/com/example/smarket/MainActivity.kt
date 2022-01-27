@@ -39,13 +39,19 @@ import java.time.LocalDateTime
 import android.app.Activity
 import android.content.res.Resources
 import android.util.DisplayMetrics
+import androidx.core.view.size
 import androidx.core.view.updateLayoutParams
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.algolia.search.client.ClientSearch
 import com.algolia.search.dsl.attributesToRetrieve
 import com.algolia.search.dsl.query
 import com.algolia.search.model.APIKey
 import com.algolia.search.model.ApplicationID
 import com.algolia.search.model.IndexName
+import com.example.smarket.adapters.BundlesListAdapter
+import com.example.smarket.adapters.CalendarDayBundlesAdapter
+import kotlinx.android.synthetic.main.calendar_day_layout_large.view.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -56,10 +62,10 @@ class MonthViewContainer(view: View) : ViewContainer(view) {
 
 class MainActivity : BaseActivity() {
     companion object {
-        lateinit var userOrdersOnSelectedDay: List<UserOrder>
-        lateinit var allOrdersInMonth: Map<LocalDate, MutableList<String>>
-        lateinit var dayColors: MutableList<Int>
-        lateinit var userOrders: List<UserOrder>
+        var userOrdersOnSelectedDay: List<UserOrder> = emptyList()
+        var allOrdersInMonth: Map<LocalDate, MutableList<String>> = emptyMap()
+        var dayColors: MutableList<Int> = mutableListOf()
+        var userOrders: List<UserOrder> = emptyList()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -74,12 +80,12 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    fun setLocale(activity: Activity, languageCode: String?) {
-        val locale = Locale(languageCode)
-        Locale.setDefault(locale)
+    fun setLocale(activity: Activity) {
+        val serbianLocale = Locale.Builder().setLanguage("sr").setRegion("RS").setScript("Latn").build()
+        Locale.setDefault(serbianLocale)
         val resources = activity.resources
         val config = resources.getConfiguration()
-        config.setLocale(locale)
+        config.setLocale(serbianLocale)
         resources.updateConfiguration(config, resources.getDisplayMetrics())
     }
 
@@ -115,8 +121,15 @@ class MainActivity : BaseActivity() {
             }
         }
 
+        // Setup recyclerview
+        val adapter = CalendarDayBundlesAdapter(emptyList())
+        adapter.container = container
+        adapter.onClickFunc = {x-> startViewSelectedDayActivity(x) }
+        container.recycler.adapter = adapter
+        container.recycler.layoutManager = LinearLayoutManager(this)
+        container.recycler.visibility = View.GONE
+
         val ordersOnCurrentDay = allOrdersInMonth[day.date]
-        val bundlesOnDay = mutableListOf<ShoppingBundle>()
         if (ordersOnCurrentDay != null) {
             for (userOrderId in ordersOnCurrentDay) {
                 val order = userOrders.filter { it.id == userOrderId }[0]
@@ -125,50 +138,62 @@ class MainActivity : BaseActivity() {
                 container.deliveryDay = if(userOrderDeliveryDates.containsKey(order.id)) userOrderDeliveryDates[order.id]!! else null
                 for(bundle in order.bundles)
                 {
-                    bundlesOnDay.add(bundle)
+                    container.recycler.visibility = View.VISIBLE
+                    adapter.addItem(bundle)
                 }
+
                 order.addOnSubitemChangeListener { databaseItem, databaseEventType ->
                     val bundleChanged = databaseItem as ShoppingBundle
                     if(databaseEventType == UserData.DatabaseEventType.ADDED)
                     {
-                        bundlesOnDay.add(bundleChanged)
+                        container.recycler.visibility = View.VISIBLE
+                        adapter.addItem(bundleChanged)
                     }
                     else if (databaseEventType == UserData.DatabaseEventType.REMOVED)
                     {
-                        bundlesOnDay.removeIf { bundle-> bundle.id == bundleChanged.id}
+                        adapter.removeItem(bundleChanged)
+                        if (adapter.itemCount == 0)
+                        {
+                            container.recycler.visibility = View.GONE
+                        }
                     }
                     else
                     {
                     }
-                    val textFields = listOf(container.text1, container.text2, container.text3)
-                    displayBundlesInMaterialButtons(bundlesOnDay,container.dayColor,textFields)
                 }
             }
         }
-        val textFields = listOf(container.text1, container.text2, container.text3)
-        displayBundlesInMaterialButtons(bundlesOnDay,container.dayColor,textFields)
     }
 
+    fun startViewSelectedDayActivity(container: DayViewContainerLarge?)
+    {
+        if (container == null)
+            return
+        val orders = mutableListOf<UserOrder>()
+        val idsOnSelectedDay = allOrdersInMonth[container.day.date]
+        if (idsOnSelectedDay != null) {
+            for (userOrderId in idsOnSelectedDay) {
+                val order = userOrders.filter { it.id == userOrderId }[0]
+                orders.add(order)
+            }
+        }
+
+        userOrdersOnSelectedDay = orders
+        val intent = Intent(container.wrapper.context,ViewSelectedCalendarDay::class.java)
+        intent.putExtra("selectedDay", container.day)
+        intent.putExtra("deliveryDay", container.deliveryDay)
+        intent.putExtra("dayColor", container.dayColor)
+
+        container.wrapper.context.startActivity(intent)
+    }
 
     fun setupCalendarDayCellWrapperListener(container: DayViewContainerLarge)
     {
         container.wrapper.setOnClickListener {
-            val orders = mutableListOf<UserOrder>()
-            val idsOnSelectedDay = allOrdersInMonth[container.day.date]
-            if (idsOnSelectedDay != null) {
-                for (userOrderId in idsOnSelectedDay) {
-                    val order = userOrders.filter { it.id == userOrderId }[0]
-                    orders.add(order)
-                }
-            }
-
-            userOrdersOnSelectedDay = orders
-            val intent = Intent(container.wrapper.context,ViewSelectedCalendarDay::class.java)
-            intent.putExtra("selectedDay", container.day)
-            intent.putExtra("deliveryDay", container.deliveryDay)
-            intent.putExtra("dayColor", container.dayColor)
-
-            container.wrapper.context.startActivity(intent)
+            startViewSelectedDayActivity(container)
+        }
+        container.recycler.setOnClickListener {
+            startViewSelectedDayActivity(container)
         }
     }
 
@@ -176,12 +201,12 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         super.bindListenersToTopBar()
-        setLocale(this,"sr_Latn_RS")
+        setLocale(this)
         UserData.loadPreferencesFromFirebase(this)
 
         val newOrderFab = findViewById<FloatingActionButton>(R.id.fabAddNewOrder)
         newOrderFab.setOnClickListener {
-            UserData.addNewUserOrder(LocalDateTime.now(),false,-1).addOnSuccessListener {
+            UserData.addNewUserOrder(LocalDateTime.now().plusDays(1),false,-1).addOnSuccessListener {
                 val intent = Intent(this, EditOrderActivity::class.java)
                 intent.putExtra("selected_order_id",it.id)
                 startActivityForResult(intent,0)
@@ -227,15 +252,7 @@ class MainActivity : BaseActivity() {
                     // Called every time we need to reuse a container.
                     override fun bind(container: DayViewContainerLarge, day: CalendarDay) {
                         container.day = day
-
-                        if (day.date.isAfter(LocalDate.now()))
-                        {
-                            setupCalendarDayCellWrapperListener(container)
-                        }
-                        else
-                        {
-                            container.wrapper.setBackgroundColor(Color.GRAY)
-                        }
+                        setupCalendarDayCellWrapperListener(container)
 
                         if(day.date.month != currentMonth)
                         {
@@ -324,7 +341,8 @@ class MainActivity : BaseActivity() {
 
                 // Change cell size so cells are longer
                 val daySize = calendarView.daySize
-                calendarView.daySize = Size(resources.getDimensionPixelSize(R.dimen.day_size_large),screenHeight)
+
+                calendarView.daySize = Size(resources.getDimensionPixelSize(R.dimen.day_size_large), calendarView.height)
 
                 // Setup and show calendar
                 val currentMonthCalendar = YearMonth.now()
@@ -339,26 +357,11 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    class DayViewContainerSmall(view: View) : ViewContainer(view) {
-        val textView = view.findViewById<TextView>(R.id.calendarDayTextMonth)
-        val deliveryTag = view.findViewById<MaterialButton>(R.id.calendarDayTextMonth)
-
-        val text1 = view.findViewById<MaterialButton>(R.id.calendarDayText1)
-        val text2 = view.findViewById<MaterialButton>(R.id.calendarDayText2)
-        val text3 = view.findViewById<MaterialButton>(R.id.calendarDayText3)
-        val wrapper = view.findViewById<ConstraintLayout>(R.id.calendarDayWrapper)
-        lateinit var day: CalendarDay
-        var deliveryDay: LocalDate? = null
-        var dayColor = -1
-        init {
-
-        }
-    }
-
     class DayViewContainerLarge(view: View) : ViewContainer(view) {
         val textViewMonth = view.findViewById<TextView>(R.id.calendarDayTextMonth)
         val textViewDate = view.findViewById<TextView>(R.id.calendarDayTextDate)
         val textViewWeekday = view.findViewById<TextView>(R.id.calendarDayTextWeekday)
+        val recycler = view.findViewById<RecyclerView>(R.id.calendarDayBundlesRecycler)
         val deliveryTag = textViewDate
 
         val text1 = view.findViewById<MaterialButton>(R.id.calendarDayText1)

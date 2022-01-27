@@ -1,8 +1,7 @@
-package com.example.smarket
+package com.example.smarket.adapters
 
 import UserData.ShoppingBundle
 import UserData.DatabaseEventType
-import UserData.getAllBundles
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +9,8 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.smarket.R
+import com.example.smarket.SelectedBundleActivity
 
 class BundlesListAdapter(private var bundles : List<ShoppingBundle>) :
     RecyclerView.Adapter<BundlesListAdapter.ViewHolder>()  {

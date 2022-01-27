@@ -124,6 +124,31 @@
         <item>Čukarica-Čukarička padina</item>
     </string-array>
 
+    <string-array name="days_of_week">
+        <item>Ponedeljak</item>
+        <item>Utorak</item>
+        <item>Sreda</item>
+        <item>Četvrtak</item>
+        <item>Petak</item>
+        <item>Subota</item>
+        <item>Nedelja</item>
+    </string-array>
+
+    <string-array name="months_of_year">
+        <item>Januar</item>
+        <item>Februar</item>
+        <item>Mart</item>
+        <item>April</item>
+        <item>Maj</item>
+        <item>Jun</item>
+        <item>Jul</item>
+        <item>Avgust</item>
+        <item>Septembar</item>
+        <item>Oktobar</item>
+        <item>Novembar</item>
+        <item>Decembar</item>
+    </string-array>
+
     <array name="kelly_colors">
         <item>@color/kelly_vivid_yellow</item>
         <item>@color/kelly_strong_purple</item>

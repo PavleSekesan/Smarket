@@ -8,7 +8,7 @@
     </plurals>
     <plurals name="view_selected_day_no_delivery">
         <item quantity="zero">Za ovaj dan nije postavljena ni jedna porudžbina.</item>
-        <item quantity="one">Za ovaj dan postavljena je %1$d porudžbina, za koje još uvek nije određen datum dostave.</item>
+        <item quantity="one">Za ovaj dan postavljena je %1$d porudžbina, za koju još uvek nije određen datum dostave.</item>
         <item quantity="few">Za ovaj dan postavljene su %1$d porudžbine, za koje još uvek nije određen datum dostave.</item>
         <item quantity="many">Za ovaj dan postavljeno je %1$d porudžbina, za koje još uvek nije određen datum dostave.</item>
         <item quantity="other">Za ovaj dan postavljeno je %1$d porudžbina, za koje još uvek nije određen datum dostave.</item>
