@@ -114,4 +114,7 @@
     <string name="deliveries_activity_title">Dostave</string>
     <string name="log_delivery_activity_title">Evidentiraj dostavu</string>
 
+    <!-- Log deliveries activity -->
+    <string name="action_log_delivery">Evidentiraj</string>
+
 </resources>

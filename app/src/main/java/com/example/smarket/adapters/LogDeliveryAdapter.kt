@@ -8,7 +8,7 @@ import android.widget.TextView
 import com.example.smarket.R
 import UserData.QuantityItem
 
-class LogDeliveryAdapter(private val products : List<QuantityItem>, val onFinish : () -> Unit) : QuantityItemsListAdapter() {
+class LogDeliveryAdapter(private val products : List<UserData.DeliveryItem>, val onFinish : () -> Unit) : QuantityItemsListAdapter() {
 
     var pos = 0
     init {

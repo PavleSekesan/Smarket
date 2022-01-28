@@ -22,7 +22,7 @@ class LogDeliveryActivity : BaseActivity() {
 
         UserData.getAllDeliveries().addOnSuccessListener { allDeliveries ->
             val delivery = allDeliveries.find { it.id == intent.getStringExtra("delivery_id") }!! as UserData.Delivery
-            val items = delivery.orderedItems as List<UserData.QuantityItem>
+            val items = delivery.deliveryItems as List<UserData.DeliveryItem>
             val adapter = LogDeliveryAdapter(items) {
                 // TODO Set delivery status to completed
                 finish()
