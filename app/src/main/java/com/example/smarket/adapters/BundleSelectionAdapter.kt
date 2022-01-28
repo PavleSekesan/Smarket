@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.smarket.R
 import com.example.smarket.TotalSumUpdater
+import kotlin.math.round
 
 class BundleSelectionAdapter(
     val bundles: MutableList<ShoppingBundle>, val unselected : Boolean,
@@ -15,7 +16,16 @@ class BundleSelectionAdapter(
 ) :
     RecyclerView.Adapter<BundleSelectionAdapter.ViewHolder>()  {
 
+    var totalPrice : Double = 0.0
     lateinit var recyclerView : RecyclerView
+
+    init {
+        for (bundle in bundles) {
+            for (item in bundle.items) {
+                totalPrice += item.quantity.databaseValue * item.product.price.databaseValue
+            }
+        }
+    }
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         this.recyclerView = recyclerView
@@ -52,6 +62,9 @@ class BundleSelectionAdapter(
     fun addBundle(newBundle: ShoppingBundle)
     {
         bundles.add(newBundle)
+        for (item in newBundle.items) {
+            totalPrice += item.quantity.databaseValue * item.product.price.databaseValue
+        }
         super.notifyItemInserted(bundles.size)
         recyclerView.layoutManager?.scrollToPosition(bundles.size - 1)
     }
@@ -62,6 +75,9 @@ class BundleSelectionAdapter(
         if (indexToRemove != -1)
         {
             bundles.removeAt(indexToRemove)
+            for (item in bundleToRemove.items) {
+                totalPrice -= item.quantity.databaseValue * item.product.price.databaseValue
+            }
             super.notifyItemRemoved(indexToRemove)
         }
     }
