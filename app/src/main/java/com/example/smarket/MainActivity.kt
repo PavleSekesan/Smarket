@@ -111,7 +111,7 @@ class MainActivity : BaseActivity() {
                 dayColor = dayColors.first()
                 dayColors.removeFirst()
                 //container.deliveryTag.setBackgroundColor(dayColor)
-                container.deliveryTag.setTextColor(dayColor)
+                //container.deliveryTag.setTextColor(dayColor)
 
                 for(userOrder in delivery.userOrders)
                 {

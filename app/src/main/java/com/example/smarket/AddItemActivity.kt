@@ -12,6 +12,7 @@ import com.example.smarket.adapters.FridgeItemsListAdapter
 import com.example.smarket.adapters.QuantityItemsListAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 
 class AddItemActivity : BaseActivity() {
 
@@ -28,6 +29,7 @@ class AddItemActivity : BaseActivity() {
 
         search.setOnMenuItemClickListener {
             val intent = Intent(this, BarcodeScannerActivity::class.java)
+            intent.putExtra("fridge",true)
             intent.putExtra("adding",true)
             startActivity(intent)
         }
@@ -59,10 +61,25 @@ class AddItemActivity : BaseActivity() {
 
             search.setOnBindSuggestionCallback { suggestionView, leftIcon, textView, item, itemPosition ->
                 suggestionView.setOnClickListener {
+                    val product = item as UserData.Product
                     if (!isFridge) {
-                        bundle!!.addBundleItem("kom", item as UserData.Product, 1)
+                        if (bundle!!.items.any { item -> item.product.id == product.id})
+                        {
+                            Snackbar.make(bottomNavigation, R.string.bundle_item_already_exists, Snackbar.LENGTH_SHORT).show()
+                        }
+                        else {
+                            bundle.addBundleItem("kom", product, 1)
+                        }
                     } else {
-                        UserData.addNewFridgeItem("kom", item as UserData.Product, 1)
+                        UserData.fridgeItemFromProduct(product).addOnSuccessListener { ret->
+                            val existingQuantity = (ret as UserData.FridgeItem).quantity.databaseValue
+                            Snackbar.make(bottomNavigation, R.string.fridge_item_already_exists, Snackbar.LENGTH_SHORT).show()
+                            UserData.removeFridgeItemByProduct(product).addOnSuccessListener {
+                                UserData.addNewFridgeItem("kom", product, existingQuantity)
+                            }
+                        }.addOnFailureListener {
+                            UserData.addNewFridgeItem("kom", item as UserData.Product, 1)
+                        }
                     }
                     search.clearSearchFocus()
                     search.clearQuery()

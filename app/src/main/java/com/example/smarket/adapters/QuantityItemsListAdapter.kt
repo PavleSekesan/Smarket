@@ -7,7 +7,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-abstract class QuantityItemsListAdapter :
+abstract class QuantityItemsListAdapter(private val editable: Boolean = true) :
     RecyclerView.Adapter<QuantityItemsListAdapter.QuantityViewHolder>()  {
     /**
      * Provide a reference to the type of views that you are using
@@ -70,8 +70,10 @@ abstract class QuantityItemsListAdapter :
         item.product.name.addOnChangeListener {it,_ -> viewHolder.itemName.text = it }
         item.quantity.addOnChangeListener {it,_ -> viewHolder.quantity.text = it.toString() }
         item.measuringUnit.addOnChangeListener {it,_ -> viewHolder.measuringUnit.text = it }
-        viewHolder.add.setOnClickListener { item.quantity.databaseValue++ }
-        viewHolder.subtract.setOnClickListener { item.quantity.databaseValue-- }
+        if (editable) {
+            viewHolder.add.setOnClickListener { item.quantity.databaseValue++ }
+            viewHolder.subtract.setOnClickListener { item.quantity.databaseValue-- }
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)

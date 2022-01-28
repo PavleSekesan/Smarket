@@ -1,6 +1,5 @@
 package com.example.smarket.adapters
 
-import UserData
 import UserData.Delivery
 import android.content.Intent
 import android.view.LayoutInflater
@@ -30,6 +29,22 @@ class DeliveriesAdapter(private var deliveries : List<Delivery>, val nonconfirme
         }
     }
 
+    fun addDelivery(delivery: Delivery)
+    {
+        deliveries = deliveries.plus(delivery)
+        super.notifyItemInserted(deliveries.size)
+    }
+
+    fun removeDelivery(delivery: Delivery)
+    {
+        val removePos = deliveries.indexOf(deliveries.find { it.id == delivery.id })
+        if(removePos != -1)
+        {
+            deliveries = deliveries.filter { it.id !=  delivery.id}
+            super.notifyItemRemoved(removePos)
+        }
+    }
+
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         // Create a new view, which defines the UI of the list item
@@ -53,16 +68,9 @@ class DeliveriesAdapter(private var deliveries : List<Delivery>, val nonconfirme
         val date = formatDateSerbianLocale(delivery.date.databaseValue.toLocalDate())
         viewHolder.dateTextView.text = date + " " + first_time + " - " + second_time
         viewHolder.deliveryActionButton.setOnClickListener {
-            if (nonconfirmed) {
-                val intent = Intent(context, LogDeliveryActivity::class.java)
-                intent.putExtra("delivery_id", delivery.id)
-                context.startActivity(intent)
-            }
-            else {
-                val intent = Intent(context, ReviewDeliveryActivity::class.java)
-                intent.putExtra("delivery_id", delivery.id)
-                context.startActivity(intent)
-            }
+            val intent = Intent(context, ReviewDeliveryActivity::class.java)
+            intent.putExtra("delivery_id", delivery.id)
+            context.startActivity(intent)
         }
     }
 

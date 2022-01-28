@@ -71,6 +71,7 @@ class BarcodeScannerActivity : BaseActivity() {
     private lateinit var chosenBarcode: String
     private lateinit var chosenProduct: UserData.Product
     private var db = FirebaseFirestore.getInstance()
+    private var interactingWithFridge: Boolean = true
     private var addingItemToFridge: Boolean = true
 
     private fun scanConfirmed()
@@ -82,7 +83,17 @@ class BarcodeScannerActivity : BaseActivity() {
 
         if (addingItemToFridge)
         {
-            UserData.addNewFridgeItem("kom",chosenProduct,1)
+            val product = chosenProduct
+            val contextView = findViewById<View>(R.id.barcodeCameraViewFinder)
+            UserData.fridgeItemFromProduct(product).addOnSuccessListener { ret->
+                val existingQuantity = (ret as UserData.FridgeItem).quantity.databaseValue
+                Snackbar.make(contextView, R.string.fridge_item_already_exists, Snackbar.LENGTH_SHORT).show()
+                UserData.removeFridgeItemByProduct(product).addOnSuccessListener {
+                    UserData.addNewFridgeItem("kom", product, existingQuantity)
+                }
+            }.addOnFailureListener {
+                UserData.addNewFridgeItem("kom", chosenProduct, 1)
+            }
         }
         else
         {
@@ -133,7 +144,9 @@ class BarcodeScannerActivity : BaseActivity() {
             finish()
         }
 
+        interactingWithFridge = intent.getBooleanExtra("fridge", true)
         addingItemToFridge = intent.getBooleanExtra("adding", true)
+
         if (addingItemToFridge) {
             val addedItemsRecycler = findViewById<RecyclerView>(R.id.addedItemsRecyclerBarcode)
             addedItemsRecycler.adapter = AddItemActivity.addedItemsAdapter

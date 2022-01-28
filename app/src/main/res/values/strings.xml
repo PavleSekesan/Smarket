@@ -117,4 +117,8 @@
     <!-- Log deliveries activity -->
     <string name="action_log_delivery">Evidentiraj</string>
 
+    <string name="fridge_item_already_exists">Ovaj proizvod se već nalazi u frižideru</string>
+    <string name="bundle_item_already_exists">Ovaj proizvod se već nalazi u ovom spisku</string>
+    <string name="action_item_already_exists_ok">OK</string>
+
 </resources>

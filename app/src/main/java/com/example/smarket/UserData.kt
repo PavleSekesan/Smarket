@@ -20,6 +20,7 @@ import kotlin.reflect.full.createType
 import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
+import android.provider.ContactsContract
 import androidx.preference.PreferenceManager
 import com.algolia.search.client.ClientSearch
 import com.algolia.search.client.Index
@@ -299,6 +300,22 @@ object UserData {
         else
         {
             fridgeItemTask.finishTask(Exception("Document data is null"))
+        }
+        return fridgeItemTask
+    }
+
+    fun fridgeItemFromProduct(product: Product) : DatabaseItemTask
+    {
+        val fridgeItemTask = DatabaseItemTask()
+        val id = product.id
+        db.collection("UserData").document(auth.uid.toString()).collection("Fridge").document(id).get().addOnSuccessListener { doc->
+            fridgeItemFromDocument(doc).addOnSuccessListener { ret1->
+                fridgeItemTask.finishTask(ret1 as FridgeItem)
+            }.addOnFailureListener { ex->
+                fridgeItemTask.finishTask(ex)
+            }
+        }.addOnFailureListener { ex->
+            fridgeItemTask.finishTask(ex)
         }
         return fridgeItemTask
     }
@@ -590,6 +607,11 @@ object UserData {
             "quantity" to quantity
         )
         val fridgeItemTask = DatabaseItemTask()
+        if (quantity <= 0)
+        {
+            fridgeItemTask.finishTask(Exception("Fridge item quantity can't be <= 0"))
+            return fridgeItemTask
+        }
         val newDocReference = db.collection("UserData").document(auth.uid.toString()).collection("Fridge").document(product.id)
         newDocReference.set(data).addOnSuccessListener {
             val newFridgeItem = FridgeItem(product.id,
@@ -1394,8 +1416,11 @@ object UserData {
                         DocumentChange.Type.ADDED -> {
                             deliveryItemFromDocument(dc.document).addOnSuccessListener { ret1->
                                 val deliveryItem = ret1 as DeliveryItem
-                                this.deliveryItems = this.deliveryItems.plus(deliveryItem)
-                                notifySubitemListeners(deliveryItem, DatabaseEventType.ADDED)
+                                if (this.deliveryItems.none{x->x.id == deliveryItem.id})
+                                {
+                                    this.deliveryItems = this.deliveryItems.plus(deliveryItem)
+                                    notifySubitemListeners(deliveryItem, DatabaseEventType.ADDED)
+                                }
                             }
                         }
                         DocumentChange.Type.MODIFIED -> {}
@@ -1517,6 +1542,7 @@ object UserData {
 
         fun finishTask(exception: Exception)
         {
+            Log.w(TAG, exception.toString())
             successTask = false
             currentException = exception
             onTaskCompleted()

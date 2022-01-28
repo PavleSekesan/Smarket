@@ -13,9 +13,6 @@
             android:name=".ReviewDeliveryActivity"
             android:exported="false" />
         <activity
-            android:name=".LogDeliveryActivity"
-            android:exported="false" />
-        <activity
             android:name=".DeliveriesActivity"
             android:exported="false" />
         <activity

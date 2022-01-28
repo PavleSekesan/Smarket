@@ -25,7 +25,7 @@ class CalendarDayBundlesAdapter(private var bundles : List<ShoppingBundle>) :
     }
 
     fun removeItem(bundle : ShoppingBundle) {
-        val removePos = bundles.indexOf(bundles.find { it == bundle })
+        val removePos = bundles.indexOf(bundles.find { it.id == bundle.id })
         if(removePos != -1)
         {
             bundles = bundles.filter { it.id !=  bundle.id}
