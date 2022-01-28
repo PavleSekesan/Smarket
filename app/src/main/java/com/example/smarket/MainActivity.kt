@@ -101,7 +101,7 @@ class MainActivity : BaseActivity() {
         container.textViewWeekday.text = day.date.format(dayFormatter)
 
         //container.deliveryTag.setBackgroundColor(Color.TRANSPARENT)
-        container.deliveryTag.setTextColor(Color.WHITE)
+//        container.deliveryTag.setTextColor(Color.WHITE)
 
         var dayColor: Int
         for(delivery in deliveries)
@@ -200,6 +200,7 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         super.bindListenersToTopBar()
         setLocale(this)
         UserData.loadPreferencesFromFirebase(this)

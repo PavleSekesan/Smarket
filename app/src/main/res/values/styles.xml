@@ -8,14 +8,14 @@
             <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
         </style>
 
-    <style name="Theme.Smarket.NoActionBar">
-        <item name="windowNoTitle">true</item>
-        <item name="windowActionBar">false</item>
-    </style>
+<!--    <style name="Theme.Smarket.NoActionBar">-->
+<!--        <item name="windowNoTitle">true</item>-->
+<!--        <item name="windowActionBar">false</item>-->
+<!--    </style>-->
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+<!--    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />-->
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
+<!--    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />-->
 
     <style name="Widget.Smarket.TextView" parent="Widget.MaterialComponents.TextView">
         <item name="android:textColor">?attr/colorSecondary</item>
@@ -25,6 +25,12 @@
         <item name="android:textColor">?attr/colorError</item>
     </style>
 
+    <style name="Widget.Smarket.CardSecondaryBackground" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">?attr/colorSecondaryContainer</item>
+    </style>
+    <style name="Widget.Smarket.TextOnSecondary" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textColor">?attr/colorOnSecondaryContainer</item>
+    </style>
 
     <style name="Widget.Smarket.TextViewPrimaryBackground" parent="Widget.MaterialComponents.TextView">
         <item name="android:textColor">?attr/colorOnPrimary</item>

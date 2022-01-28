@@ -6,6 +6,7 @@
     android:layout_height="wrap_content">
 
     <androidx.cardview.widget.CardView
+        style="@style/Widget.Smarket.CardSecondaryBackground"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -17,8 +18,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:cardBackgroundColor="@color/md_theme_light_secondaryContainer">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -27,6 +27,7 @@
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/bundleNameTextView"
+                style="@style/Widget.Smarket.TextOnSecondary"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -39,6 +40,7 @@
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/priceTextView"
+                style="@style/Widget.Smarket.TextOnSecondary"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
