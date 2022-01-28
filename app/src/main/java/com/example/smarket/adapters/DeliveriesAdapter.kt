@@ -9,10 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.smarket.LogDeliveryActivity
-import com.example.smarket.R
-import com.example.smarket.ReviewDeliveryActivity
-import com.example.smarket.SelectedBundleActivity
+import com.example.smarket.*
 import java.time.format.DateTimeFormatter
 
 class DeliveriesAdapter(private var deliveries : List<Delivery>, val nonconfirmed : Boolean) :
@@ -48,13 +45,12 @@ class DeliveriesAdapter(private var deliveries : List<Delivery>, val nonconfirme
         // contents of the view with that element
         val context = viewHolder.itemView.context
         if (nonconfirmed)
-            viewHolder.deliveryActionButton.text = "Evidentiraj"
+            viewHolder.deliveryActionButton.text = context.resources.getString(R.string.action_log_delivery)
         val delivery = deliveries[position]
         val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-        val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d L YYYY")
         val first_time = delivery.date.databaseValue.format(timeFormatter)
         val second_time = delivery.endDate.databaseValue.format(timeFormatter)
-        val date = delivery.date.databaseValue.format(dateFormatter)
+        val date = formatDateSerbianLocale(delivery.date.databaseValue.toLocalDate())
         viewHolder.dateTextView.text = date + " " + first_time + " - " + second_time
         viewHolder.deliveryActionButton.setOnClickListener {
             if (nonconfirmed) {

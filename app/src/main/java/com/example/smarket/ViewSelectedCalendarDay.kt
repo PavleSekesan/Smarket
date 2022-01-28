@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.kizitonwose.calendarview.model.CalendarDay
 import java.time.LocalDate
 import com.example.smarket.adapters.ViewSelectedDayAdapter
+import com.typesafe.config.ConfigException
 import java.time.temporal.ChronoUnit
 
 class ViewSelectedCalendarDay : BaseActivity() {
@@ -20,7 +21,7 @@ class ViewSelectedCalendarDay : BaseActivity() {
         val selectedDay = intent.getSerializableExtra("selectedDay") as CalendarDay
         val deliveryDay = intent.getSerializableExtra("deliveryDay") as LocalDate?
         val dayColor = intent.getIntExtra("dayColor",-1)
-        val editable = selectedDay.date.isAfter(LocalDate.now())
+        val editable = selectedDay.date.isAfter(LocalDate.now()) || deliveryDay == null
 
         // Format date for the selected day
         findViewById<TextView>(R.id.viewSelectedDayText).text = formatDateSerbianLocale(selectedDay.date)

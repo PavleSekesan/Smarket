@@ -303,6 +303,48 @@ object UserData {
         return fridgeItemTask
     }
 
+    private fun deliveryItemFromDocument(doc: DocumentSnapshot): DatabaseItemTask
+    {
+        val deliveryItemTask = DatabaseItemTask()
+        if (!documentSafeToParse(DeliveryItem::class.createType(),doc))
+        {
+            deliveryItemTask.finishTask(Exception("Document ${doc.id} does not contain all required fields"))
+            return deliveryItemTask
+        }
+
+        val id = doc.id
+        if(doc.data != null) {
+            val data: Map<String, Any> = doc.data!!
+            val measuringUnit = data["measuring_unit"] as String
+            val ref = data["product"] as DocumentReference
+            val quantity = (data["quantity"] as Number).toLong()
+
+            ref.get().addOnSuccessListener { productDoc ->
+                val product = productFromDoc(productDoc)
+                if (product == null)
+                {
+                    deliveryItemTask.finishTask(Exception("Product returned null in fridgeItemFromDocument ${doc.id}"))
+                }
+                else {
+                    deliveryItemTask.finishTask(
+                        DeliveryItem(
+                            id,
+                            DatabaseField("measuring_unit", measuringUnit),
+                            product,
+                            DatabaseField("quantity", quantity.toInt()),
+                            doc.reference
+                        )
+                    )
+                }
+            }
+        }
+        else
+        {
+            deliveryItemTask.finishTask(Exception("Document data is null"))
+        }
+        return deliveryItemTask
+    }
+
     private fun deliveryFromDocument(doc: DocumentSnapshot): DatabaseItemTask
     {
         val deliveryTask = DatabaseItemTask()
@@ -325,31 +367,41 @@ object UserData {
         val endDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(javaDate.time), ZoneId.systemDefault())
 
         val status = data["status"] as String
-        doc.reference.collection("UserOrders").get().addOnSuccessListener { userOrdersDocs->
 
-            val userOrders = mutableListOf<UserOrder>()
-            var remainingToFinish = userOrdersDocs.size()
-            if (remainingToFinish == 0)
+        val userOrders = mutableListOf<UserOrder>()
+        val deliveryItems = mutableListOf<DeliveryItem>()
+        var remainingUserOrdersToFinish = -1
+        var remainingDeliveryItemsToFinish = -1
+
+        doc.reference.collection("UserOrders").get().addOnSuccessListener { userOrdersDocs->
+            remainingUserOrdersToFinish = userOrdersDocs.size()
+            if (remainingUserOrdersToFinish == 0 && remainingDeliveryItemsToFinish == 0)
             {
                 deliveryTask.finishTask(Delivery(id,
                     DatabaseField("date",date),
                     DatabaseField("end_date", endDate),
                     userOrders,
+                    deliveryItems,
                     DatabaseField("status",status),
                     doc.reference))
             }
             for(userOrdersDoc in userOrdersDocs)
             {
+                if (!userOrdersDoc.data.containsKey("order")) {
+                    Log.e(TAG, "Failed to parse user order doc ${userOrdersDoc.id}")
+                    continue
+                }
                 (userOrdersDoc.data["order"] as DocumentReference).get().addOnSuccessListener { userOrderDoc->
                     userOrderFromDocument(userOrderDoc).addOnSuccessListener { userOrder->
                         userOrders.add(userOrder as UserOrder)
-                        remainingToFinish--
-                        if (remainingToFinish == 0)
+                        remainingUserOrdersToFinish--
+                        if (remainingUserOrdersToFinish == 0 && remainingDeliveryItemsToFinish == 0)
                         {
                             deliveryTask.finishTask(Delivery(id,
                                 DatabaseField("date",date),
                                 DatabaseField("end_date", endDate),
                                 userOrders,
+                                deliveryItems,
                                 DatabaseField("status",status),
                                 doc.reference))
                         }
@@ -357,6 +409,38 @@ object UserData {
                 }
             }
         }
+
+        doc.reference.collection("DeliveryItems").get().addOnSuccessListener { delievryItemsDocs ->
+            remainingDeliveryItemsToFinish = delievryItemsDocs.size()
+            if (remainingUserOrdersToFinish == 0 && remainingDeliveryItemsToFinish == 0)
+            {
+                deliveryTask.finishTask(Delivery(id,
+                    DatabaseField("date",date),
+                    DatabaseField("end_date", endDate),
+                    userOrders,
+                    deliveryItems,
+                    DatabaseField("status",status),
+                    doc.reference))
+            }
+            for(deliveryItemDoc in delievryItemsDocs)
+            {
+                deliveryItemFromDocument(deliveryItemDoc).addOnSuccessListener { deliveryItem->
+                    deliveryItems.add(deliveryItem as DeliveryItem)
+                    remainingDeliveryItemsToFinish--
+                    if (remainingUserOrdersToFinish == 0 && remainingDeliveryItemsToFinish == 0)
+                    {
+                        deliveryTask.finishTask(Delivery(id,
+                            DatabaseField("date",date),
+                            DatabaseField("end_date", endDate),
+                            userOrders,
+                            deliveryItems,
+                            DatabaseField("status",status),
+                            doc.reference))
+                    }
+                }
+            }
+        }
+
         return deliveryTask
     }
 
@@ -808,6 +892,9 @@ object UserData {
             BundleItem::class.createType() -> {
                 dbNames = listOf("measuring_unit","quantity","product")
             }
+            DeliveryItem::class.createType() -> {
+                dbNames = listOf("measuring_unit","quantity","product")
+            }
             ShoppingBundle::class.createType() -> {
                 dbNames = listOf("name")
             }
@@ -1050,6 +1137,8 @@ object UserData {
 
     class BundleItem(id: String, measuringUnit: DatabaseField<String>, product: Product, quantity: DatabaseField<Int>, databaseRef: DocumentReference) : QuantityItem(id, measuringUnit, product, quantity, databaseRef)
 
+    class DeliveryItem(id: String, measuringUnit: DatabaseField<String>, product: Product, quantity: DatabaseField<Int>, databaseRef: DocumentReference) : QuantityItem(id, measuringUnit, product, quantity, databaseRef)
+
     class ShoppingBundle(id: String, val name: DatabaseField<String>, bundleItems: List<BundleItem>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
     {
         var items: List<BundleItem> = bundleItems
@@ -1240,9 +1329,11 @@ object UserData {
         }
     }
 
-    class Delivery(id: String, val date: DatabaseField<LocalDateTime>, val endDate: DatabaseField<LocalDateTime>, userOrders: List<UserOrder>, val status: DatabaseField<String>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
+    class Delivery(id: String, val date: DatabaseField<LocalDateTime>, val endDate: DatabaseField<LocalDateTime>, userOrders: List<UserOrder>, deliveryItems:List<DeliveryItem>, val status: DatabaseField<String>, databaseRef: DocumentReference) : DatabaseItem(id, databaseRef)
     {
         var userOrders: List<UserOrder> = userOrders
+            private set
+        var deliveryItems: List<DeliveryItem> = deliveryItems
             private set
         init {
             date.addOnChangeListener {v, t -> notifyFieldListeners(date.eraseType(),t) }
@@ -1251,10 +1342,17 @@ object UserData {
             endDate.bindToDatabaseListner(databaseRef)
             status.addOnChangeListener {v, t -> notifyFieldListeners(status.eraseType(),t) }
             status.bindToDatabaseListner(databaseRef)
+
             for(userOrder in userOrders)
             {
                 userOrder.addOnFieldChangeListener { notifySubitemListeners(userOrder, DatabaseEventType.MODIFIED) }
                 userOrder.addOnSubitemChangeListener {v,t -> notifySubitemListeners(userOrder, DatabaseEventType.MODIFIED) }
+            }
+
+            for (deliveryItem in deliveryItems)
+            {
+                deliveryItem.addOnFieldChangeListener { notifySubitemListeners(deliveryItem, DatabaseEventType.MODIFIED) }
+                deliveryItem.addOnSubitemChangeListener { v,t ->  notifySubitemListeners(deliveryItem, DatabaseEventType.MODIFIED)}
             }
 
             // Bind to database listener and listen if removed or changed
@@ -1283,6 +1381,29 @@ object UserData {
                     }
                 }
             }
+
+            databaseRef.collection("DeliveryItems").addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Log.w(TAG, "listen:error", e)
+                    return@addSnapshotListener
+                }
+                for(dc in snapshots!!.documentChanges)
+                {
+                    when(dc.type)
+                    {
+                        DocumentChange.Type.ADDED -> {
+                            deliveryItemFromDocument(dc.document).addOnSuccessListener { ret1->
+                                val deliveryItem = ret1 as DeliveryItem
+                                this.deliveryItems = this.deliveryItems.plus(deliveryItem)
+                                notifySubitemListeners(deliveryItem, DatabaseEventType.ADDED)
+                            }
+                        }
+                        DocumentChange.Type.MODIFIED -> {}
+                        DocumentChange.Type.REMOVED -> {}
+                    }
+                }
+            }
+
             databaseRef.collection("UserOrders").addSnapshotListener { value, error ->
                 // TODO Handle adding userorders to delivery
             }
