@@ -30,6 +30,9 @@ class BottomNavigator(private val context : Context, bottomNavigationView : Bott
                 R.id.bundles -> {
                     BundlesListActivity::class.java
                 }
+                R.id.deliveries -> {
+                    DeliveriesActivity::class.java
+                }
                 else -> { throw IllegalStateException("This activity doesn't exist")}
             }
             if (clickedActivity != currentGroup)

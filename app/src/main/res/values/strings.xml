@@ -111,5 +111,7 @@
 
     <string name="view_selected_day_order_recurring">Porudžbina koja se ponavlja na svakih %1$d dana, postavljena %2$s</string>
     <string name="view_selected_day_order_not_recurring">Porudžbina koja se ne ponavlja, postavljena %1$s</string>
+    <string name="deliveries_activity_title">Dostave</string>
+    <string name="log_delivery_activity_title">Evidentiraj dostavu</string>
 
 </resources>
