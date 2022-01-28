@@ -18,6 +18,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.type.DateTime
 import java.time.*
 import java.util.*
+import kotlin.math.round
 
 class EditOrderActivity : BaseActivity() {
     companion object{
@@ -39,6 +40,8 @@ class EditOrderActivity : BaseActivity() {
         setContentView(R.layout.activity_edit_order)
         super.bindListenersToTopBar()
         super.setTitle(getString(R.string.edit_order_activity_title))
+
+        val totalPriceLabel = findViewById<TextView>(R.id.priceTotalLabel)
 
         // Set date constraint: [tomorrow, inf)
         val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
@@ -132,11 +135,13 @@ class EditOrderActivity : BaseActivity() {
                     {
                         selectedBundlesAdapter.addBundle(bundleChanged)
                         unselectedBundlesAdapter.removeBundle(bundleChanged)
+                        totalPriceLabel.text = String.format("%.2f", round(selectedBundlesAdapter.totalPrice * 100) / 100) + " RSD"
                     }
                     else if(databaseEventType == UserData.DatabaseEventType.REMOVED)
                     {
                         selectedBundlesAdapter.removeBundle(bundleChanged)
                         unselectedBundlesAdapter.addBundle(bundleChanged)
+                        totalPriceLabel.text = String.format("%.2f", round(selectedBundlesAdapter.totalPrice * 100) / 100) + " RSD"
                     }
                 }
 
