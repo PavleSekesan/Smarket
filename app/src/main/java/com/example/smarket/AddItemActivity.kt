@@ -24,13 +24,19 @@ class AddItemActivity : BaseActivity() {
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         val search = findViewById<FloatingSearchView>(R.id.floating_search_view)
         val confirmFab = findViewById<FloatingActionButton>(R.id.confirmFab)
+        var isFridge = true
+        var chosenBundleId: String? = null
 
         confirmFab.setOnClickListener { finish() }
 
         search.setOnMenuItemClickListener {
             val intent = Intent(this, BarcodeScannerActivity::class.java)
-            intent.putExtra("fridge",true)
+            intent.putExtra("fridge",isFridge)
             intent.putExtra("adding",true)
+            if (!isFridge)
+            {
+                intent.putExtra("bundle_id",chosenBundleId)
+            }
             startActivity(intent)
         }
         
@@ -50,7 +56,8 @@ class AddItemActivity : BaseActivity() {
 
         getAllBundles().addOnSuccessListener { allBundles ->
             val bundle = allBundles.find { it.id == intent.getStringExtra("bundle_id") } as ShoppingBundle?
-            val isFridge = bundle == null
+            isFridge = bundle == null
+            chosenBundleId = bundle?.id
 
             bottomNavigation.selectedItemId = if (isFridge) R.id.fridge else R.id.bundles
             BottomNavigator(this, bottomNavigation)

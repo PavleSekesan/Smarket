@@ -72,19 +72,19 @@ class BarcodeScannerActivity : BaseActivity() {
     private lateinit var chosenProduct: UserData.Product
     private var db = FirebaseFirestore.getInstance()
     private var interactingWithFridge: Boolean = true
-    private var addingItemToFridge: Boolean = true
+    private var addingItem: Boolean = true
 
     private fun scanConfirmed()
     {
         barcodeCountMap.clear()
         waitingForResponse = false
         clearScanPrompt()
-        ignoreBarcodesSet.add(chosenBarcode)
 
-        if (addingItemToFridge)
+        val contextView = findViewById<View>(R.id.barcodeCameraViewFinder)
+        if (addingItem && interactingWithFridge)
         {
+            ignoreBarcodesSet.add(chosenBarcode)
             val product = chosenProduct
-            val contextView = findViewById<View>(R.id.barcodeCameraViewFinder)
             UserData.fridgeItemFromProduct(product).addOnSuccessListener { ret->
                 val existingQuantity = (ret as UserData.FridgeItem).quantity.databaseValue
                 Snackbar.make(contextView, R.string.fridge_item_already_exists, Snackbar.LENGTH_SHORT).show()
@@ -95,15 +95,33 @@ class BarcodeScannerActivity : BaseActivity() {
                 UserData.addNewFridgeItem("kom", chosenProduct, 1)
             }
         }
-        else
+        else if(!addingItem && interactingWithFridge)
         {
-            val contextView = findViewById<View>(R.id.barcodeCameraViewFinder)
-            UserData.removeFridgeItemByProduct(chosenProduct).addOnSuccessListener {
-                val itemRemovedText = getString(R.string.removed_item_snackbar_text, chosenProduct.name.databaseValue)
+            UserData.fridgeItemFromProduct(chosenProduct).addOnSuccessListener { ret->
+                val fridgeItem = ret as UserData.FridgeItem
+                fridgeItem.quantity.databaseValue--
+                val itemRemovedText = getString(R.string.removed_item_snackbar_text, chosenProduct.name.databaseValue, fridgeItem.quantity.databaseValue)
                 Snackbar.make(contextView, itemRemovedText, Snackbar.LENGTH_SHORT).show()
             }.addOnFailureListener {
                 val itemRemovedText = getString(R.string.removed_item_fail_snackbar_text, chosenProduct.name.databaseValue)
                 Snackbar.make(contextView, itemRemovedText, Snackbar.LENGTH_SHORT).show()
+            }
+        }
+        else
+        {
+            ignoreBarcodesSet.add(chosenBarcode)
+            val bundleId = intent.getStringExtra("bundle_id")
+            if (bundleId != null) {
+                UserData.bundleFromId(bundleId).addOnSuccessListener { ret->
+                    val bundle = ret as UserData.ShoppingBundle
+                    if (bundle.items.any{item-> item.product.id == chosenProduct.id})
+                    {
+                        Snackbar.make(contextView, resources.getString(R.string.bundle_item_already_exists), Snackbar.LENGTH_SHORT).show()
+                    }
+                    else{
+                        bundle.addBundleItem("kom",chosenProduct,1)
+                    }
+                }
             }
         }
     }
@@ -145,9 +163,9 @@ class BarcodeScannerActivity : BaseActivity() {
         }
 
         interactingWithFridge = intent.getBooleanExtra("fridge", true)
-        addingItemToFridge = intent.getBooleanExtra("adding", true)
+        addingItem = intent.getBooleanExtra("adding", true)
 
-        if (addingItemToFridge) {
+        if (addingItem) {
             val addedItemsRecycler = findViewById<RecyclerView>(R.id.addedItemsRecyclerBarcode)
             addedItemsRecycler.adapter = AddItemActivity.addedItemsAdapter
             addedItemsRecycler.layoutManager = LinearLayoutManager(this)

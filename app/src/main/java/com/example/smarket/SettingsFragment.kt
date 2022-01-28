@@ -10,9 +10,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
-
         val currentVals = PreferenceManager.getDefaultSharedPreferences(context).all
-        Log.d("vals",currentVals.toString())
 
         val listSelectNames = listOf("time_selection_monday","time_selection_tuesday","time_selection_wednesday",
             "time_selection_thursday","time_selection_friday","time_selection_saturday","time_selection_sunday")

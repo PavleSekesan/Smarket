@@ -65,7 +65,7 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="action_scan_barcode">Skenirajte bar-kod</string>
-    <string name="removed_item_snackbar_text">Uklonjeno: %1$s</string>
+    <string name="removed_item_snackbar_text">Uklonjen jedan komad: %1$s, preostalo: %2$d</string>
     <string name="removed_item_fail_snackbar_text">Artikal: %1$s nije pronađen u frižideru</string>
     <string name="action_quick_add">Quick add?</string>
     <string name="prompt_scan_barcode">Skenirajte bar-kod</string>
@@ -116,9 +116,11 @@
 
     <!-- Log deliveries activity -->
     <string name="action_log_delivery">Evidentiraj</string>
+    <string name="quantity_for_delivery_text">Biće dostavljeno</string>
 
     <string name="fridge_item_already_exists">Ovaj proizvod se već nalazi u frižideru</string>
     <string name="bundle_item_already_exists">Ovaj proizvod se već nalazi u ovom spisku</string>
     <string name="action_item_already_exists_ok">OK</string>
+
 
 </resources>

@@ -27,6 +27,7 @@ class ReviewDeliveryAdapter(private val products : List<UserData.DeliveryItem>, 
         override val subtract: Button = view.findViewById(R.id.subtractButton)
         val quantityInFridge: TextView = view.findViewById(R.id.quantityInFridge)
         val quantityInBundle: TextView = view.findViewById(R.id.quantityInBundle)
+        val quantityTextView: TextView = view.findViewById(R.id.deliveryQuantityText)
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
@@ -73,6 +74,10 @@ class ReviewDeliveryAdapter(private val products : List<UserData.DeliveryItem>, 
         }.addOnFailureListener {
             castViewHolder.quantityInFridge.text = "0"
         }
-
+        if (!editable) {
+            castViewHolder.add.visibility = View.GONE
+            castViewHolder.subtract.visibility = View.GONE
+            castViewHolder.quantityTextView.visibility = View.VISIBLE
+        }
     }
 }

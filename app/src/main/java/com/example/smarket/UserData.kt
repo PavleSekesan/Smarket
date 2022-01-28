@@ -204,6 +204,23 @@ object UserData {
         return bundleTask
     }
 
+    fun bundleFromId(bundleId: String) : DatabaseItemTask
+    {
+        val bundleTask = DatabaseItemTask()
+        db.collection("UserData").document(auth.uid.toString()).collection("Bundles").document(bundleId).get()
+            .addOnSuccessListener { doc->
+                bundleFromDocument(doc).addOnSuccessListener {
+                    bundleTask.finishTask(it)
+                }.addOnFailureListener {
+                    bundleTask.finishTask(it)
+                }
+            }
+            .addOnFailureListener {
+                bundleTask.finishTask(Exception("Bundle with given id doesn't exist"))
+            }
+        return bundleTask
+    }
+
     private fun userOrderFromDocument(doc: DocumentSnapshot): DatabaseItemTask
     {
         val userOrderTask = DatabaseItemTask()
@@ -1492,9 +1509,9 @@ object UserData {
 
         override fun addOnFailureListener(p0: OnFailureListener): Task<DatabaseItem> {
             onFailListeners.add(p0)
-            if (completedTask && !successTask)
+            if (completedTask && !successTask && currentException != null)
             {
-                p0.onFailure(currentException)
+                p0.onFailure(currentException!!)
             }
             return this
         }
@@ -1517,9 +1534,10 @@ object UserData {
 
         private fun onTaskFail()
         {
-            for (listener in onFailListeners)
-            {
-                listener.onFailure(currentException)
+            if (currentException != null) {
+                for (listener in onFailListeners) {
+                    listener.onFailure(currentException!!)
+                }
             }
         }
 

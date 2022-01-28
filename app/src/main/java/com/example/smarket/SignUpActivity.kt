@@ -1,5 +1,6 @@
 package com.example.smarket
 
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -25,7 +26,7 @@ class PersonalUserData (val firstName: String, val lastName: String, val address
             .digest(input.toByteArray())
             .fold("", { str, it -> str + "%02x".format(it) })
     }
-    fun submitToDatabase()
+    fun submitToDatabase(context: Context)
     {
         val db = FirebaseFirestore.getInstance()
         val auth = Firebase.auth
@@ -45,6 +46,8 @@ class PersonalUserData (val firstName: String, val lastName: String, val address
                     e -> Log.w(TAG, "Error writing UserData document", e)
                 TODO("Delete user and report unrecoverable error")
             }
+        val times = context.resources.getStringArray(R.array.delivery_times_sunday).drop(2)
+        UserData.updateDeliveryInfo("time_selection_sunday",times.toHashSet())
     }
 }
 
@@ -86,7 +89,7 @@ class SignUpActivity : AppCompatActivity() {
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
                         Log.d(TAG, "createUserWithEmail:success")
-                        userData.submitToDatabase()
+                        userData.submitToDatabase(this)
                         val user = auth.currentUser
                         updateUI(user)
                     } else {

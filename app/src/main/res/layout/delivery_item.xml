@@ -109,6 +109,17 @@
                 app:layout_constraintStart_toEndOf="@+id/imageView2"
                 app:layout_constraintTop_toTopOf="@id/subtractButton" />
 
+            <TextView
+                android:id="@+id/deliveryQuantityText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/quantity_for_delivery_text"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/quantityForDelivery"
+                app:layout_constraintEnd_toStartOf="@+id/quantityForDelivery"
+                app:layout_constraintStart_toEndOf="@id/quantityInBundle"
+                app:layout_constraintTop_toTopOf="@+id/quantityForDelivery" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/addButton"
                 android:layout_width="48dp"
